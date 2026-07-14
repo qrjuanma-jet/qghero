@@ -288,7 +288,7 @@ async function callGroq(apiKey, prompt, temperature = 0.1) {
         model: 'llama-3.1-8b-instant',
         messages: [{ role: 'user', content: prompt }],
         temperature: temperature,
-        max_tokens: 8000
+        max_tokens: 4500
       })
     });
 
