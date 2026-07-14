@@ -6,6 +6,11 @@
     <title>QGHERO 3.0 - Aprende Guitarra con IA</title>
     <meta name="description" content="Toca canciones en guitarra acústica sin saber nada, estilo Guitar Hero.">
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="QGHERO">
     <meta name="theme-color" content="#0d0d0d">
     <link rel="stylesheet" href="style.css">
     
@@ -37,6 +42,8 @@
             <header>
                 <h2 class="logo-title-small">QG<span class="neon-text">HERO</span></h2>
                 <div class="header-actions">
+                    <button id="install-app-btn" class="btn secondary-btn hidden" style="border-color: var(--neon-cyan);">⬇️ Instalar App</button>
+                    <button id="share-app-btn" class="btn secondary-btn" style="border-color: var(--neon-magenta);">📲 Compartir</button>
                     <button id="logout-btn" class="btn text-btn">Cambiar API Key</button>
                 </div>
             </header>
@@ -170,6 +177,7 @@
                     <p id="tech-effects"></p>
                 </div>
                 <div class="modal-actions">
+                    <button id="expand-game-song-btn" class="btn secondary-btn" style="border-color: var(--neon-cyan); margin-bottom: 1rem; font-size: 1.2rem;">➕ Seguir Aprendiendo (Alargar Canción)</button>
                     <button id="preview-audio-btn" class="btn secondary-btn">🔊 Escuchar Pista Sintetizada</button>
                     <button id="start-game-btn" class="btn primary-btn">▶️ Iniciar Juego</button>
                 </div>

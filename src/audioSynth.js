@@ -42,3 +42,11 @@ export function strumChord(notes, speed = 0.05) {
     synth.triggerAttackRelease(note, "1m", now + (index * speed));
   });
 }
+
+/**
+ * Reproduce una nota individual en un tiempo específico
+ */
+export function playNote(note, timeOffset = 0, duration = "8n") {
+  if (!isLoaded || !synth) return;
+  synth.triggerAttackRelease(note, duration, Tone.now() + timeOffset);
+}

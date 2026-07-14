@@ -1,10 +1,10 @@
 // Estilos cargados en index.html
-import { fetchSongData } from './groqApi.js';
+import { fetchSongData, expandGameSong } from './groqApi.js';
 import { GameEngine } from './gameEngine.js';
 import { initShareButtons } from './share.js';
 import { initPracticeMode } from './practiceMode.js';
 import { initTheoryMode } from './theoryMode.js';
-import { initAudio, strumChord } from './audioSynth.js';
+import { initAudio, strumChord, playNote } from './audioSynth.js';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -31,17 +31,49 @@ const modals = {
   technique: document.getElementById('technique-modal')
 };
 
-function showScreen(screenName) {
+function showScreen(screenName, pushHistory = true) {
   Object.values(screens).forEach(s => {
     s.classList.remove('active');
     s.classList.add('hidden');
   });
   screens[screenName].classList.remove('hidden');
   screens[screenName].classList.add('active');
+  
+  if (pushHistory) {
+    history.pushState({ screen: screenName }, '', `#${screenName}`);
+  }
 }
+
+window.addEventListener('popstate', (e) => {
+  if (e.state && e.state.screen) {
+    showScreen(e.state.screen, false);
+  } else {
+    showScreen('main', false);
+  }
+});
 
 function getApiKey() {
   return groqApiKey;
+}
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('install-app-btn');
+  if (btn) btn.classList.remove('hidden');
+});
+
+function checkSharedUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedUrl = urlParams.get('url') || urlParams.get('text');
+  if (sharedUrl && sharedUrl.includes('youtu')) {
+    showScreen('game', true);
+    document.getElementById('youtube-url').value = sharedUrl;
+    // Quitamos los query params para no re-ejecutar al recargar
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
 }
 
 function initApp() {
@@ -51,9 +83,10 @@ function initApp() {
   initTheoryMode(getApiKey);
   
   if (groqApiKey) {
-    showScreen('main');
+    showScreen('main', false);
+    checkSharedUrl();
   } else {
-    showScreen('login');
+    showScreen('login', false);
   }
   
   // Login
@@ -83,6 +116,42 @@ function initApp() {
     groqApiKey = '';
     showScreen('login');
   });
+
+  setupEventListeners();
+}
+
+function setupEventListeners() {
+  const installBtn = document.getElementById('install-app-btn');
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          deferredPrompt = null;
+          installBtn.classList.add('hidden');
+        }
+      }
+    });
+  }
+
+  const shareBtn = document.getElementById('share-app-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const shareData = {
+        title: 'QGHERO - IA Guitar',
+        text: '¡Aprende a tocar la guitarra con IA al estilo Guitar Hero!',
+        url: window.location.href
+      };
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+        } catch (err) {}
+      } else {
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareData.text + " " + shareData.url)}`);
+      }
+    });
+  }
 
   // Main Menu Routing
   document.getElementById('btn-theory-mode').addEventListener('click', () => {
@@ -177,10 +246,39 @@ function initApp() {
     }
   });
   
+  const expandBtn = document.getElementById('expand-game-song-btn');
+  if (expandBtn) {
+    expandBtn.addEventListener('click', async () => {
+      if (!currentSongData || !currentSongData.notes || currentSongData.notes.length === 0) return;
+      expandBtn.disabled = true;
+      expandBtn.textContent = "⏳ Escuchando siguientes compases...";
+      
+      try {
+        const latestTime = Math.max(...currentSongData.notes.map(n => n.time));
+        const newSongData = await expandGameSong(groqApiKey, currentSongData.title || "Canción", latestTime);
+        
+        if (newSongData.notes && newSongData.notes.length > 0) {
+          currentSongData.notes = currentSongData.notes.concat(newSongData.notes);
+          gameEngine.loadSong(currentSongData);
+          alert(`¡Genial! Se han añadido ${newSongData.notes.length} notas/acordes más a la partitura.`);
+        }
+      } catch (err) {
+        alert("Error ampliando la canción: " + err.message);
+      } finally {
+        expandBtn.disabled = false;
+        expandBtn.textContent = "➕ Seguir Aprendiendo (Alargar Canción)";
+      }
+    });
+  }
+  
   document.getElementById('preview-audio-btn').addEventListener('click', async () => {
     await initAudio();
     if (currentSongData && currentSongData.notes && currentSongData.notes.length > 0) {
-      strumChord(["E3", "A3", "D4"], 0.1); 
+      currentSongData.notes.forEach(n => {
+        const octave = n.string < 4 ? "4" : "3";
+        const pitch = (n.anglo || 'C') + octave;
+        playNote(pitch, n.time, "8n");
+      });
     }
   });
 

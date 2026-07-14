@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Fondo Oscuro -->
+  <rect width="512" height="512" rx="112" fill="#0d0d0d" />
+  
+  <!-- Resplandor Neon Cyan de fondo -->
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#00ffcc" stroke-width="4" opacity="0.3" filter="blur(8px)" />
+  
+  <!-- Cuerdas de guitarra -->
+  <g stroke="#ffffff" stroke-width="3" opacity="0.4">
+    <line x1="200" y1="100" x2="200" y2="412" />
+    <line x1="220" y1="100" x2="220" y2="412" />
+    <line x1="240" y1="100" x2="240" y2="412" />
+    <line x1="260" y1="100" x2="260" y2="412" />
+    <line x1="280" y1="100" x2="280" y2="412" />
+    <line x1="300" y1="100" x2="300" y2="412" />
+  </g>
+  
+  <!-- Púa de guitarra con estilo neón -->
+  <path d="M256,120 C320,120 380,180 360,300 C340,420 256,450 256,450 C256,450 172,420 152,300 C132,180 192,120 256,120 Z" 
+        fill="none" stroke="#ff00ff" stroke-width="16" />
+  <path d="M256,120 C320,120 380,180 360,300 C340,420 256,450 256,450 C256,450 172,420 152,300 C132,180 192,120 256,120 Z" 
+        fill="none" stroke="#ff00ff" stroke-width="24" opacity="0.5" filter="blur(6px)" />
+        
+  <!-- Letras QG en el centro -->
+  <text x="256" y="320" font-family="Arial, sans-serif" font-size="110" font-weight="bold" fill="#00ffcc" text-anchor="middle" letter-spacing="-5">
+    QG
+  </text>
+  <!-- Resplandor del texto -->
+  <text x="256" y="320" font-family="Arial, sans-serif" font-size="110" font-weight="bold" fill="none" stroke="#00ffcc" stroke-width="4" opacity="0.6" text-anchor="middle" letter-spacing="-5" filter="blur(4px)">
+    QG
+  </text>
+</svg>

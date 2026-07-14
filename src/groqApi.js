@@ -22,7 +22,27 @@ Debe tener exactamente esta estructura:
   ]
 }
 
-Genera al menos 15 notas iniciales. Sólo JSON.`;
+Genera al menos 30 notas iniciales (una progresión o intro completa). Sólo JSON.`;
+
+  return callGroq(apiKey, prompt);
+}
+
+export async function expandGameSong(apiKey, songName, lastTime) {
+  if (!apiKey) throw new Error("No API Key provided");
+
+  const prompt = `
+Eres un maestro de guitarra acústica.
+El usuario está tocando la canción "${songName}" y acaba de pulsar "+" para seguir aprendiendo.
+El último tiempo (time) de la última nota generada fue: ${lastTime} segundos.
+Genera un JSON puro con la CONTINUACIÓN de los acordes/notas de la canción (al menos 30 notas más, siguiendo el ritmo y melodía).
+Estructura obligatoria:
+{
+  "notes": [
+    { "time": ${lastTime + 1}, "duration": 1.5, "string": 6, "fret": 3, "finger": 2, "latin": "Sol", "anglo": "G" }
+  ]
+}
+Asegúrate de que el "time" de las nuevas notas sea estrictamente mayor que ${lastTime}, de forma ascendente.
+SÓLO JSON, sin texto, sin etiquetas Markdown.`;
 
   return callGroq(apiKey, prompt);
 }
