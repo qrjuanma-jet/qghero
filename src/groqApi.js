@@ -278,18 +278,23 @@ REGLAS ESTRICTAS PARA EL JSON:
 
 async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500) {
   try {
+    const body = {
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: temperature,
+        max_tokens: maxTokens
+    };
+    if (temperature !== 0.5) {
+        body.response_format = { type: "json_object" };
+    }
+
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: temperature,
-        max_tokens: maxTokens
-      })
+      body: JSON.stringify(body)
     });
 
     if (!response.ok) {
