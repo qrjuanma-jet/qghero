@@ -286,6 +286,8 @@ function setupEventListeners() {
           gameEngine.loadSong(currentSongData);
           alert(`¡Genial! Se han añadido ${newSongData.notes.length} notas/acordes más a la partitura.`);
         }
+        expandBtn.disabled = false;
+        expandBtn.textContent = "➕ Seguir Aprendiendo (Alargar Canción)";
       } catch (err) {
         expandBtn.disabled = false;
         expandBtn.textContent = "➕ Seguir Aprendiendo (Alargar Canción)";

@@ -61,7 +61,7 @@ Genera un JSON puro con la CONTINUACIÓN de los acordes/notas de la canción (al
 Estructura obligatoria:
 {
   "new_schemas": [
-    "Opcional: Si en esta nueva parte de la canción aparecen acordes NUEVOS que no se usaron en la parte anterior, añade aquí sus esquemas ASCII (con el mismo formato de array de strings, poniendo TS en los trastes, etc). Si no hay acordes nuevos, deja el array vacío []."
+    "Si en esta nueva parte aparecen acordes NUEVOS, añade sus esquemas ASCII aquí. Si los acordes simplemente se repiten y no hay ninguno nuevo, DEBES devolver un array con un único string que diga exactamente: 'Se repiten los acordes anteriores.'"
   ],
   "notes": [
     { "time": ${lastTime + 1}, "duration": 1.5, "string": 6, "fret": 3, "finger": 2, "latin": "Sol", "anglo": "G" }
