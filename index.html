@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QGHERO 3.0 - Aprende Guitarra con IA</title>
+    <meta name="description" content="Toca canciones en guitarra acústica sin saber nada, estilo Guitar Hero.">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d0d0d">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- PANTALLA 1: Login API Key -->
+        <section id="login-screen" class="screen active">
+            <div class="glass-panel">
+                <h1 class="logo-title">QG<span class="neon-text">HERO</span></h1>
+                <p>Bienvenido. Ingresa tu API Key de Groq para continuar.</p>
+                <div class="input-group">
+                    <div style="position: relative; width: 100%;">
+                        <input type="password" id="groq-api-key" placeholder="gsk_..." autocomplete="off" style="padding-right: 40px;">
+                        <button id="toggle-key-visibility" class="btn text-btn" style="position: absolute; right: 10px; top: 8px; padding: 5px; font-size: 1.2rem;" title="Mostrar/Ocultar clave">👁️</button>
+                    </div>
+                    <button id="save-key-btn" class="btn primary-btn">Iniciar</button>
+                </div>
+                <p class="small-text">Tu clave se guarda localmente y no se comparte con nadie.<br>¿No tienes una? <a href="https://console.groq.com/keys" target="_blank" style="color: var(--neon-cyan); text-decoration: none;">Consíguela gratis aquí</a>.</p>
+            </div>
+        </section>
+
+        <!-- PANTALLA 2: Menú Principal -->
+        <section id="main-screen" class="screen hidden">
+            <header>
+                <h2 class="logo-title-small">QG<span class="neon-text">HERO</span></h2>
+                <div class="header-actions">
+                    <button id="logout-btn" class="btn text-btn">Cambiar API Key</button>
+                </div>
+            </header>
+            
+            <main class="content-panel">
+                <h3>Elige un Modo</h3>
+                <div class="mode-selection">
+                    <button id="btn-theory-mode" class="btn secondary-btn mode-card" style="border-color: var(--neon-cyan);">
+                        <h4>Modo Teoría</h4>
+                        <p>Aprende la nomenclatura oficial y genera cursos.</p>
+                    </button>
+                    <button id="btn-practice-mode" class="btn secondary-btn mode-card">
+                        <h4>Modo Práctica</h4>
+                        <p>Aprende técnicas y acordes por estilos musicales.</p>
+                    </button>
+                    <button id="btn-game-mode" class="btn primary-btn mode-card">
+                        <h4>Modo Juego</h4>
+                        <p>Aprende cualquier canción con un link de YouTube.</p>
+                    </button>
+                </div>
+            </main>
+        </section>
+
+        <!-- NUEVA PANTALLA: Modo Teoría -->
+        <section id="theory-screen" class="screen hidden">
+            <header>
+                <button id="back-from-theory-btn" class="btn icon-btn">⬅️ Volver</button>
+                <h2 class="logo-title-small">Modo <span class="neon-text" style="color: var(--neon-cyan);">Teoría</span></h2>
+            </header>
+            <div class="practice-container">
+                <main class="style-content" style="width: 100%; max-width: 800px; margin: 0 auto;">
+                    <h3>Nomenclatura Oficial</h3>
+                    <div class="tech-section">
+                        <h4>🖐️ Mano Izquierda (Diapasón)</h4>
+                        <p>Se utilizan números del 1 al 4. El pulgar va detrás del mástil.</p>
+                        <ul>
+                            <li><strong>1:</strong> Dedo índice</li>
+                            <li><strong>2:</strong> Dedo medio (corazón)</li>
+                            <li><strong>3:</strong> Dedo anular</li>
+                            <li><strong>4:</strong> Dedo meñique</li>
+                            <li><strong>T o P:</strong> Pulgar (solo si pisa la 6ª cuerda)</li>
+                        </ul>
+                    </div>
+                    <div class="tech-section">
+                        <h4>🖐️ Mano Derecha (Rasgueo/Arpegio)</h4>
+                        <p>Se usan iniciales en minúscula para no confundir con la mano izquierda.</p>
+                        <ul>
+                            <li><strong>p:</strong> Pulgar (cuerdas graves: 6ª, 5ª, 4ª)</li>
+                            <li><strong>i:</strong> Índice (3ª cuerda)</li>
+                            <li><strong>m:</strong> Medio (2ª cuerda)</li>
+                            <li><strong>a:</strong> Anular (1ª cuerda)</li>
+                            <li><strong>e:</strong> Meñique (rasgueos flamencos)</li>
+                        </ul>
+                    </div>
+                    <div class="tech-section">
+                        <h4>🎸 Cuerdas y Trastes en ASCII</h4>
+                        <p><strong>Cuerdas:</strong> Del 1 al 6 (1=fina, 6=gruesa).<br>
+                           <strong>Trastes:</strong> Números romanos (I, II, III).<br>
+                           <strong>O:</strong> Cuerda al aire | <strong>X:</strong> Cuerda que no suena.</p>
+                    </div>
+
+                    <h3>Generador de Cursos IA</h3>
+                    <div class="input-group" style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px;">
+                        <label for="theory-level">Elige tu nivel:</label>
+                        <select id="theory-level" style="padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.5); color: white; border: 1px solid var(--glass-border);">
+                            <option value="Principiante">Principiante (Primeros acordes y rasgueos básicos)</option>
+                            <option value="Intermedio">Intermedio (Cejillas, arpegios simples y transiciones)</option>
+                            <option value="Avanzado">Avanzado (Fingerpicking complejo, armonía y técnicas exóticas)</option>
+                        </select>
+                        <button id="generate-course-btn" class="btn primary-btn" style="background: linear-gradient(45deg, var(--neon-cyan), var(--neon-green));">Generar Clase Magistral</button>
+                    </div>
+
+                    <div id="theory-loading" class="hidden" style="margin-top: 2rem;">
+                        <div class="spinner"></div>
+                        <p>El profesor IA está redactando la clase...</p>
+                    </div>
+
+                    <div id="theory-result" class="tech-section hidden" style="margin-top: 2rem; border: 1px solid var(--neon-cyan);">
+                        <!-- Curso inyectado aquí -->
+                    </div>
+
+                    <div id="theory-expand-container" class="hidden" style="text-align: center; margin-top: 2rem; margin-bottom: 2rem;">
+                        <button id="expand-course-btn" class="btn primary-btn" style="border-radius: 50%; width: 60px; height: 60px; font-size: 2rem; line-height: 1; padding: 0; background: linear-gradient(45deg, var(--neon-magenta), var(--neon-cyan));" title="Ampliar Clase">
+                            +
+                        </button>
+                    </div>
+                </main>
+            </div>
+        </section>
+
+        <!-- PANTALLA 3: Configuración de Juego -->
+        <section id="game-setup-screen" class="screen hidden">
+            <header>
+                <button id="back-from-setup-btn" class="btn icon-btn">⬅️ Volver</button>
+                <h2 class="logo-title-small">Modo <span class="neon-text">Juego</span></h2>
+            </header>
+            <main class="content-panel">
+                <h3>¿Qué quieres tocar hoy?</h3>
+                <div class="input-group">
+                    <input type="text" id="youtube-url" placeholder="Pega el link de YouTube aquí">
+                    <input type="text" id="song-name" placeholder="Nombre de la canción y artista (para IA)">
+                    <button id="load-song-btn" class="btn primary-btn">Analizar Canción</button>
+                </div>
+                
+                <div id="loading-indicator" class="hidden">
+                    <div class="spinner"></div>
+                    <p>La IA está analizando la técnica, acordes y ritmos...</p>
+                </div>
+            </main>
+        </section>
+
+        <!-- MODAL: Análisis Pre-Juego (Técnica) -->
+        <div id="technique-modal" class="modal hidden">
+            <div class="modal-content glass-panel">
+                <h2>Guía de Técnica: <span id="tech-song-title"></span></h2>
+                <div class="tech-details">
+                    <h4>✋ Posición de las Manos</h4>
+                    <p id="tech-hands"></p>
+                    
+                    <h4>🎸 Esquema ASCII de Acordes/Posición</h4>
+                    <pre id="tech-schema" class="ascii-schema">Cargando...</pre>
+
+                    <h4>🎸 Punteo / Ritmo (Mano Derecha)</h4>
+                    <p id="tech-rhythm"></p>
+                    
+                    <h4>✨ Efectos Específicos</h4>
+                    <p id="tech-effects"></p>
+                </div>
+                <div class="modal-actions">
+                    <button id="preview-audio-btn" class="btn secondary-btn">🔊 Escuchar Pista Sintetizada</button>
+                    <button id="start-game-btn" class="btn primary-btn">▶️ Iniciar Juego</button>
+                </div>
+                <button id="close-tech-modal" class="btn text-btn close-btn">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 4: Modo Práctica -->
+        <section id="practice-screen" class="screen hidden">
+            <header>
+                <button id="back-from-practice-btn" class="btn icon-btn">⬅️ Volver</button>
+                <h2 class="logo-title-small">Modo <span class="neon-text">Práctica</span></h2>
+            </header>
+            <div class="practice-container">
+                <aside class="styles-sidebar">
+                    <button class="style-btn active" data-style="rock">Rock</button>
+                    <button class="style-btn" data-style="pop">Pop</button>
+                    <button class="style-btn" data-style="flamenco">Flamenco</button>
+                    <button class="style-btn" data-style="rancheras">Rancheras</button>
+                    <button class="style-btn" data-style="custom" style="border-color: var(--neon-cyan); color: var(--neon-cyan);">🔍 A la Carta</button>
+                </aside>
+                <main class="style-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 id="style-title" style="margin-bottom: 0;">Rock</h3>
+                        <div class="level-badge">Nivel <span id="current-level-display">1</span></div>
+                    </div>
+                    <p id="style-desc">Cargando...</p>
+                    
+                    <div class="tech-section">
+                        <h4>Mano Derecha</h4>
+                        <p id="style-right-hand">...</p>
+                    </div>
+
+                    <div class="tech-section" id="custom-song-input-container" style="display: none; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--neon-cyan);">
+                        <h4>🔍 ¿Qué canción quieres aprender?</h4>
+                        <div class="input-group">
+                            <input type="text" id="custom-song-input" placeholder="Ej: Wonderwall - Oasis">
+                            <button id="search-custom-song-btn" class="btn primary-btn">Enséñame esta canción</button>
+                        </div>
+                    </div>
+
+                    <div id="practice-loading" class="hidden">
+                        <div class="spinner"></div>
+                        <p>El profesor virtual está preparando tu nivel...</p>
+                    </div>
+
+                    <div id="practice-content">
+                        <div class="chords-grid" id="style-chords">
+                            <!-- Generado dinámicamente -->
+                        </div>
+
+                        <div class="tech-section" id="examples-section" style="margin-top: 2rem;">
+                            <h4>🎵 Canciones para Practicar</h4>
+                            <div id="style-examples" style="display: flex; flex-direction: column; gap: 1rem;">
+                                <!-- Ejemplos dinámicos -->
+                            </div>
+                        </div>
+
+                        <div id="practice-extra-actions" style="text-align: center; margin-top: 1rem;"></div>
+
+                        <div style="text-align: center; margin-top: 3rem; margin-bottom: 2rem;">
+                            <button id="level-up-btn" class="btn primary-btn" style="padding: 1rem 3rem; font-size: 1.2rem; background: linear-gradient(45deg, var(--neon-magenta), var(--neon-cyan));">
+                                Subir de Nivel ⬆️
+                            </button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </section>
+
+        <!-- PANTALLA 5: Juego (Canvas) -->
+        <section id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <button id="back-to-menu-btn" class="btn icon-btn">⬅️</button>
+                <div class="song-info">
+                    <h3 id="current-song-title">Cargando...</h3>
+                    <div class="notation-display">
+                        <span class="note-latin" id="current-note-latin">-</span>
+                        <span class="note-anglo" id="current-note-anglo">-</span>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button id="share-btn" class="btn icon-btn" title="Compartir">🔗</button>
+                    <button id="rewind-btn" class="btn control-btn">⏪ 10s</button>
+                    <button id="forward-btn" class="btn control-btn">⏩ 10s</button>
+                </div>
+            </div>
+            
+            <div class="speed-control">
+                <label for="speed-slider">Velocidad: <span id="speed-value">1.0x</span></label>
+                <input type="range" id="speed-slider" min="0.25" max="2.0" step="0.25" value="1.0">
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="game-canvas"></canvas>
+            </div>
+            
+            <div id="youtube-player" style="position: absolute; top: -9999px; left: -9999px;"></div>
+        </section>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script type="module" src="./src/main.js"></script>
+</body>
+</html>
