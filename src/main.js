@@ -191,15 +191,20 @@ function setupEventListeners() {
     // Si no hay nombre, lo intentamos sacar del título del video de YT
     if (!name && url) {
         try {
-            const response = await fetch(`https://noembed.com/embed?url=${url}`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const response = await fetch(`https://noembed.com/embed?url=${url}`, { signal: controller.signal });
+            clearTimeout(timeoutId);
             const data = await response.json();
             if (data.title) {
                 name = data.title;
             } else {
-                name = "Canción desconocida";
+                throw new Error("No title in response");
             }
         } catch (e) {
-            name = "Canción personalizada";
+            alert("No pudimos obtener el nombre del vídeo automáticamente. Por favor, escribe el nombre de la canción a mano en la casilla y dale a '¡A Tocar!'.");
+            document.getElementById('loading-indicator').classList.add('hidden');
+            return;
         }
         document.getElementById('song-name').value = name; // Update input for feedback
     }
