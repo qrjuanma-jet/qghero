@@ -38,33 +38,47 @@
         </section>
 
         <!-- PANTALLA 2: Menú Principal -->
-        <section id="main-screen" class="screen hidden">
-            <header>
-                <h2 class="logo-title-small">QG<span class="neon-text">HERO</span></h2>
-                <div class="header-actions">
-                    <button id="install-app-btn" class="btn secondary-btn hidden" style="border-color: var(--neon-cyan);">⬇️ Instalar App</button>
-                    <button id="share-app-btn" class="btn secondary-btn" style="border-color: var(--neon-magenta);">📲 Compartir</button>
-                    <button id="logout-btn" class="btn text-btn">Cambiar API Key</button>
-                </div>
-            </header>
+        <section id="main-screen" class="screen hidden" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 100vh;">
+            <div>
+                <header style="justify-content: center; margin-bottom: 2rem;">
+                    <h2 class="logo-title" style="font-size: 3.5rem; text-align: center; margin: 0;">QG<span class="neon-text">HERO</span></h2>
+                </header>
+                
+                <main class="content-panel" style="text-align: center; max-width: 800px;">
+                    <h3 style="margin-bottom: 2rem;">Elige un Modo</h3>
+                    <div class="mode-selection" style="justify-content: center;">
+                        <button id="btn-theory-mode" class="btn secondary-btn mode-card" style="border-color: var(--neon-cyan);">
+                            <h4>Modo Teoría</h4>
+                            <p>Aprende la nomenclatura oficial y genera cursos.</p>
+                        </button>
+                        <button id="btn-practice-mode" class="btn secondary-btn mode-card">
+                            <h4>Modo Práctica</h4>
+                            <p>Aprende técnicas y acordes por estilos musicales.</p>
+                        </button>
+                        <button id="btn-game-mode" class="btn primary-btn mode-card">
+                            <h4>Modo Juego</h4>
+                            <p>Aprende cualquier canción con un link de YouTube.</p>
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 3rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                            <button id="install-app-btn" class="btn secondary-btn hidden" style="border-color: var(--neon-cyan);">⬇️ Instalar App</button>
+                            <button id="share-app-btn" class="btn secondary-btn" style="border-color: var(--neon-magenta);">📲 Compartir</button>
+                        </div>
+                        <button id="logout-btn" class="btn text-btn">Cambiar API Key</button>
+                    </div>
+                </main>
+            </div>
             
-            <main class="content-panel">
-                <h3>Elige un Modo</h3>
-                <div class="mode-selection">
-                    <button id="btn-theory-mode" class="btn secondary-btn mode-card" style="border-color: var(--neon-cyan);">
-                        <h4>Modo Teoría</h4>
-                        <p>Aprende la nomenclatura oficial y genera cursos.</p>
-                    </button>
-                    <button id="btn-practice-mode" class="btn secondary-btn mode-card">
-                        <h4>Modo Práctica</h4>
-                        <p>Aprende técnicas y acordes por estilos musicales.</p>
-                    </button>
-                    <button id="btn-game-mode" class="btn primary-btn mode-card">
-                        <h4>Modo Juego</h4>
-                        <p>Aprende cualquier canción con un link de YouTube.</p>
-                    </button>
+            <footer style="margin-top: 3rem; padding: 2rem 0; text-align: center; border-top: 1px solid rgba(255,255,255,0.05);">
+                <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <a href="#" class="text-btn" style="font-size: 0.85rem; text-decoration: none;">Política de privacidad</a>
+                    <a href="#" class="text-btn" style="font-size: 0.85rem; text-decoration: none;">Términos de uso</a>
+                    <a href="mailto:qghero@gmail.com" class="text-btn" style="font-size: 0.85rem; text-decoration: none;">Soporte: qghero@gmail.com</a>
                 </div>
-            </main>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">&copy; 2026 Todos los derechos reservados QGHERO</p>
+            </footer>
         </section>
 
         <!-- NUEVA PANTALLA: Modo Teoría -->
