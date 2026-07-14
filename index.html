@@ -134,14 +134,18 @@
                 <h2 class="logo-title-small">Modo <span class="neon-text">Juego</span></h2>
             </header>
             <main class="content-panel">
-                <h3>¿Qué quieres tocar hoy?</h3>
+                <h3>Configuración de la Partida</h3>
                 <div class="input-group">
-                    <input type="text" id="youtube-url" placeholder="Pega el link de YouTube aquí">
-                    <input type="text" id="song-name" placeholder="Nombre de la canción y artista (para IA)">
-                    <button id="load-song-btn" class="btn primary-btn">Analizar Canción</button>
+                    <label>Nombre de la Canción (Opcional si pones el link)</label>
+                    <input type="text" id="song-name" placeholder="Ej: Smells Like Teen Spirit">
                 </div>
+                <div class="input-group" style="margin-top: 1rem;">
+                    <label>Enlace de YouTube (Opcional si pones el nombre)</label>
+                    <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+                <button id="load-song-btn" class="btn primary-btn" style="margin-top: 2rem; width: 100%;">¡A Tocar!</button>
                 
-                <div id="loading-indicator" class="hidden">
+                <div id="loading-indicator" class="hidden" style="margin-top: 2rem;">
                     <div class="spinner"></div>
                     <p>La IA está analizando la técnica, acordes y ritmos...</p>
                 </div>

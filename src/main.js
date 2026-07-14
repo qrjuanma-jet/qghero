@@ -102,20 +102,38 @@ function initApp() {
 
   // Load Song for Game Mode
   document.getElementById('load-song-btn').addEventListener('click', async () => {
-    const url = document.getElementById('youtube-url').value.trim();
-    const name = document.getElementById('song-name').value.trim();
+    let url = document.getElementById('youtube-url').value.trim();
+    let name = document.getElementById('song-name').value.trim();
     
-    if (!url || !name) {
-      alert("Ingresa el link y el nombre de la canción.");
+    if (!url && !name) {
+      alert("Debes ingresar el nombre de la canción o el enlace de YouTube.");
       return;
     }
-    const videoId = extractVideoId(url);
-    if (!videoId) {
-      alert("Link inválido.");
-      return;
+    
+    document.getElementById('loading-indicator').classList.remove('hidden');
+
+    // Si no hay nombre, lo intentamos sacar del título del video de YT
+    if (!name && url) {
+        try {
+            const response = await fetch(`https://noembed.com/embed?url=${url}`);
+            const data = await response.json();
+            if (data.title) {
+                name = data.title;
+            } else {
+                name = "Canción desconocida";
+            }
+        } catch (e) {
+            name = "Canción personalizada";
+        }
+        document.getElementById('song-name').value = name; // Update input for feedback
     }
 
-    document.getElementById('loading-indicator').classList.remove('hidden');
+    const videoId = url ? extractVideoId(url) : null;
+    if (url && !videoId) {
+      alert("Enlace de YouTube inválido.");
+      document.getElementById('loading-indicator').classList.add('hidden');
+      return;
+    }
     
     try {
       currentSongData = await fetchSongData(groqApiKey, name);
@@ -123,8 +141,17 @@ function initApp() {
       // Setup Game UI
       document.getElementById('current-song-title').textContent = currentSongData.title || name;
       gameEngine.loadSong(currentSongData);
-      initShareButtons(url);
-      initYouTubePlayer(videoId);
+      
+      if (videoId) {
+        initShareButtons(url);
+        document.getElementById('youtube-player').style.display = 'block';
+        initYouTubePlayer(videoId);
+      } else {
+        initShareButtons('');
+        document.getElementById('youtube-player').style.display = 'none';
+        // Arrancar el motor de juego manualmente ya que no hay video que le de al Play
+        setTimeout(() => gameEngine.play(), 1000);
+      }
       
       // Show Technique Modal before game
       showTechniqueModal(currentSongData);

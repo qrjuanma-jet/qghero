@@ -197,4 +197,12 @@ canvas { display: block; width: 100%; height: 100%; }
 @media (max-width: 600px) {
   .practice-container { flex-direction: column; height: auto; }
   .styles-sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+  
+  .ascii-schema {
+    background: #ffffff !important;
+    color: #000000 !important;
+    text-shadow: none !important;
+    border: 1px solid #cccccc !important;
+    font-weight: bold;
+  }
 }
