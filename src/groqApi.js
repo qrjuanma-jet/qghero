@@ -15,7 +15,7 @@ Debe tener exactamente esta estructura:
     "hands": "Explicación detallada de la posición de la mano izquierda (cejillas, acordes abiertos). Usa números 1-4 para dedos, T/P para pulgar.",
     "rhythm": "Explicación del punteo/rasgueo. Usa p,i,m,a,e para los dedos de la mano derecha.",
     "effects": "Efectos especiales o percusión.",
-    "schema": "Un dibujo ASCII de 6 líneas (cuerdas 1 fina a 6 gruesa) mostrando la posición del acorde principal o riff. Dibuja SIEMPRE las 6 cuerdas aunque no se toquen, y añade una primera fila con los números de traste en números romanos usando los caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste. EMPIEZA ESA FILA con la palabra 'Trastes:' sin espacios para forzar la alineación. Usa 1,2,3,4 para los dedos, O (al aire) y X (no suena) al inicio. Ejemplo:\\nTrastes:Ⅰ   Ⅱ   Ⅲ\\nE (1) |---|---|---\\nB (2) |-1-|---|---\\nG (3) |---|-2-|---\\nD (4) |---|-3-|---\\nA (5) X---|---|---\\nE (6) O---|---|---\\n"
+    "schema": "Un dibujo ASCII de 6 líneas (cuerdas 1 fina a 6 gruesa) mostrando la posición del acorde principal o riff. Dibuja SIEMPRE las 6 cuerdas aunque no se toquen, y añade una primera fila con los números de traste en números romanos usando los caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste. EMPIEZA ESA FILA con la palabra 'TS' seguida de 6 espacios vacíos (para forzar la alineación). Usa 1,2,3,4 para los dedos, O (al aire) y X (no suena) al inicio. Ejemplo:\\nTS      Ⅰ   Ⅱ   Ⅲ\\nE (1) |---|---|---\\nB (2) |-1-|---|---\\nG (3) |---|-2-|---\\nD (4) |---|-3-|---\\nA (5) X---|---|---\\nE (6) O---|---|---\\n"
   },
   "notes": [
     { "time": 1.0, "duration": 1.5, "string": 6, "fret": 3, "finger": 2, "latin": "Sol", "anglo": "G" }
@@ -58,16 +58,17 @@ Genera una clase magistral en formato HTML básico (usando etiquetas <h3>, <p>, 
 REGLAS ESTRICTAS DE NOMENCLATURA que debes usar en tus explicaciones:
 - Mano Izquierda: Dedos 1 (índice), 2 (medio), 3 (anular), 4 (meñique), T/P (pulgar).
 - Mano Derecha: p (pulgar), i (índice), m (medio), a (anular), e (meñique).
-- Cuerdas: 1 a 6 (1 fina, 6 gruesa). Trastes: Números romanos (I, II, III).
+- Cuerdas: 1 a 6 (1 fina, 6 gruesa).
 - Acordes: Mencionar O (al aire) o X (no tocar).
+- ES OBLIGATORIO Y CRÍTICO que TODOS los esquemas ASCII empiecen por la fila de trastes ("TS      Ⅰ   Ⅱ   Ⅲ"). ¡NO LA OMITAS NUNCA!
 
 El HTML debe contener:
 - Una introducción motivadora.
 - Explicaciones muy claras sobre qué son y cómo pisar los trastes correctamente.
 - MENCIONA SIEMPRE las notas y acordes en ambas nomenclaturas a la vez (Latina y Anglo. Ej: "Do Mayor (C)", "Sol (G)").
-- Cuando enseñes un acorde o posición, DEBES incluir su esquema ASCII (6 cuerdas) envuelto en la etiqueta <pre class="ascii-schema">. Dibuja SIEMPRE las 6 cuerdas aunque no se toquen y pon el número de traste en números romanos en la primera fila. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) para que queden perfectamente alineados sobre el guion central de cada traste, y EMPIEZA ESA FILA con la palabra 'Trastes:' sin espacios. Ejemplo:
+- Cuando enseñes un acorde o posición, DEBES incluir su esquema ASCII (6 cuerdas) envuelto en la etiqueta <pre class="ascii-schema">. Dibuja SIEMPRE las 6 cuerdas y pon SIEMPRE el número de traste en la primera fila. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste, y EMPIEZA ESA FILA con la palabra 'TS' seguida de 6 espacios vacíos. Ejemplo:
 <pre class="ascii-schema">
-Trastes:Ⅰ   Ⅱ   Ⅲ
+TS      Ⅰ   Ⅱ   Ⅲ
 E (1) |---|---|---
 B (2) |-1-|---|---
 G (3) |---|-2-|---
@@ -119,9 +120,10 @@ REGLAS ESTRICTAS DE NOMENCLATURA:
 - Mano Derecha: p (pulgar), i (índice), m (medio), a (anular), e (meñique).
 - Explicaciones muy claras sobre qué son y cómo pisar los trastes correctamente.
 - MENCIONA SIEMPRE las notas y acordes en ambas nomenclaturas a la vez (Latina y Anglo. Ej: "Do Mayor (C)", "Sol (G)").
-- Cuando enseñes un acorde o posición, DEBES incluir su esquema ASCII (6 cuerdas) envuelto en la etiqueta <pre class="ascii-schema">. Dibuja SIEMPRE las 6 cuerdas aunque no se toquen y pon el número de traste en números romanos en la primera fila. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) para que queden perfectamente alineados sobre el guion central de cada traste, y EMPIEZA ESA FILA con la palabra 'Trastes:' sin espacios. Ejemplo:
+- ES OBLIGATORIO Y CRÍTICO que TODOS los esquemas ASCII empiecen por la fila de trastes ("TS      Ⅰ   Ⅱ   Ⅲ"). ¡NO LA OMITAS NUNCA!
+- Cuando enseñes un acorde o posición, DEBES incluir su esquema ASCII (6 cuerdas) envuelto en la etiqueta <pre class="ascii-schema">. Dibuja SIEMPRE las 6 cuerdas y pon SIEMPRE el número de traste en la primera fila. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste, y EMPIEZA ESA FILA con la palabra 'TS' seguida de 6 espacios vacíos. Ejemplo:
 <pre class="ascii-schema">
-Trastes:Ⅰ   Ⅱ   Ⅲ
+TS      Ⅰ   Ⅱ   Ⅲ
 E (1) |---|---|---
 B (2) |-1-|---|---
 G (3) |---|-2-|---
@@ -161,7 +163,7 @@ Devuelve un JSON estricto con la siguiente estructura:
       "name": "Nombre Acorde (ej. Fa Mayor)",
       "notes": ["F2", "C3", "F3", "A3", "C4", "F4"], 
       "finger": "Explicación de dedos (usa 1,2,3,4)",
-      "schema": "Diagrama ASCII exacto de 6 cuerdas (dibuja SIEMPRE las 6 cuerdas aunque no se toquen) con O, X y números romanos en la primera fila superior para los trastes. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste, empezando la fila con 'Trastes:'. Ejemplo:\\nTrastes:Ⅰ   Ⅱ   Ⅲ\\nE (1) |---|---|---\\nB (2) |-1-|---|---\\nG (3) |---|-2-|---\\nD (4) |---|-3-|---\\nA (5) X---|---|---\\nE (6) X---|---|---\\n"
+      "schema": "Diagrama ASCII exacto de 6 cuerdas (dibuja SIEMPRE las 6 cuerdas aunque no se toquen) con O, X y números romanos en la primera fila superior para los trastes. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste, empezando la fila con 'TS      ' (TS y 6 espacios). Ejemplo:\\nTS      Ⅰ   Ⅱ   Ⅲ\\nE (1) |---|---|---\\nB (2) |-1-|---|---\\nG (3) |---|-2-|---\\nD (4) |---|-3-|---\\nA (5) X---|---|---\\nE (6) X---|---|---\\n"
     }
   ],
   "examples": [
@@ -201,7 +203,7 @@ Devuelve un JSON estricto con la siguiente estructura:
       "name": "Nombre Acorde (ej. Fa Mayor)",
       "notes": ["F2", "C3", "F3", "A3", "C4", "F4"], 
       "finger": "Explicación de dedos (usa 1,2,3,4)",
-      "schema": "Diagrama ASCII exacto de 6 cuerdas (dibuja SIEMPRE las 6 cuerdas aunque no se toquen) con O, X y números romanos en la primera fila superior para los trastes. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste, empezando la fila con 'Trastes:'. Ejemplo:\\nTrastes:Ⅰ   Ⅱ   Ⅲ\\nE (1) |---|---|---\\nB (2) |-1-|---|---\\nG (3) |---|-2-|---\\nD (4) |---|-3-|---\\nA (5) X---|---|---\\nE (6) X---|---|---\\n"
+      "schema": "Diagrama ASCII exacto de 6 cuerdas (dibuja SIEMPRE las 6 cuerdas aunque no se toquen) con O, X y números romanos en la primera fila superior para los trastes. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste, empezando la fila con 'TS      ' (TS y 6 espacios). Ejemplo:\\nTS      Ⅰ   Ⅱ   Ⅲ\\nE (1) |---|---|---\\nB (2) |-1-|---|---\\nG (3) |---|-2-|---\\nD (4) |---|-3-|---\\nA (5) X---|---|---\\nE (6) X---|---|---\\n"
     }
   ],
   "examples": [
