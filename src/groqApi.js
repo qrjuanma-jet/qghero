@@ -41,7 +41,7 @@ Debe tener exactamente esta estructura:
   ]
 }
 
-Genera al menos 30 notas iniciales (una progresión o intro completa).
+Genera al menos 16 notas iniciales (una progresión o intro completa, aprox 4 compases).
 
 REGLAS ESTRICTAS PARA EL JSON:
 1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los valores de texto ("hands", "rhythm", "effects", etc)! Si necesitas separar párrafos, escribe literalmente los caracteres \\\\n.
@@ -57,7 +57,7 @@ export async function expandGameSong(apiKey, songName, lastTime) {
 Eres un maestro de guitarra acústica.
 El usuario está tocando la canción "${songName}" y acaba de pulsar "+" para seguir aprendiendo.
 El último tiempo (time) de la última nota generada fue: ${lastTime} segundos.
-Genera un JSON puro con la CONTINUACIÓN de los acordes/notas de la canción (al menos 30 notas más, siguiendo el ritmo y melodía).
+Genera un JSON puro con la CONTINUACIÓN de los acordes/notas de la canción (al menos 16 notas más, aprox 4 compases, siguiendo el ritmo y melodía).
 Estructura obligatoria:
 {
   "new_schemas": [
@@ -73,7 +73,7 @@ REGLAS ESTRICTAS PARA EL JSON:
 1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los strings! Si necesitas saltos de línea, usa literalmente \\\\n.
 2. Devuelve SÓLO el JSON puro, sin bloques markdown de código.`;
 
-  return callGroq(apiKey, prompt, 0.1, 1000);
+  return callGroq(apiKey, prompt, 0.1, 2500);
 }
 
 export async function fetchTheoryCourse(apiKey, level) {
