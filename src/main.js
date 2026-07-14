@@ -271,6 +271,18 @@ function setupEventListeners() {
         
         if (newSongData.notes && newSongData.notes.length > 0) {
           currentSongData.notes = currentSongData.notes.concat(newSongData.notes);
+          
+          if (newSongData.new_schemas && newSongData.new_schemas.length > 0) {
+             if (!currentSongData.technique.schema) {
+                currentSongData.technique.schema = [];
+             } else if (!Array.isArray(currentSongData.technique.schema)) {
+                currentSongData.technique.schema = [currentSongData.technique.schema];
+             }
+             currentSongData.technique.schema = currentSongData.technique.schema.concat(["", "--- Acordes Añadidos ---", ""], newSongData.new_schemas);
+             const schemaEl = document.getElementById('tech-schema');
+             if (schemaEl) schemaEl.textContent = currentSongData.technique.schema.join('\n');
+          }
+          
           gameEngine.loadSong(currentSongData);
           alert(`¡Genial! Se han añadido ${newSongData.notes.length} notas/acordes más a la partitura.`);
         }

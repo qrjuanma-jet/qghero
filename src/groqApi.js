@@ -16,7 +16,7 @@ Debe tener exactamente esta estructura:
     "rhythm": "Explicación del punteo/rasgueo. Usa p,i,m,a,e para los dedos de la mano derecha.",
     "effects": "Efectos especiales o percusión.",
     "schema": [
-      "Los dibujos ASCII de TODOS los acordes de la canción, representados como un array de strings (una línea por string).",
+      "¡MUY IMPORTANTE!: NO pongas solo 1 o 2 acordes. Escribe los esquemas ASCII de TODOS los acordes distintos que aparecen en TODA LA CANCIÓN (Intro, Verso, Estribillo, etc.). Mínimo genera de 4 a 6 esquemas para canciones completas. Representados como un array de strings (una línea por string).",
       "Re Mayor (D):",
       "TS      Ⅰ   Ⅱ   Ⅲ",
       "E (1) |---|-2-|---",
@@ -56,6 +56,9 @@ El último tiempo (time) de la última nota generada fue: ${lastTime} segundos.
 Genera un JSON puro con la CONTINUACIÓN de los acordes/notas de la canción (al menos 30 notas más, siguiendo el ritmo y melodía).
 Estructura obligatoria:
 {
+  "new_schemas": [
+    "Opcional: Si en esta nueva parte de la canción aparecen acordes NUEVOS que no se usaron en la parte anterior, añade aquí sus esquemas ASCII (con el mismo formato de array de strings, poniendo TS en los trastes, etc). Si no hay acordes nuevos, deja el array vacío []."
+  ],
   "notes": [
     { "time": ${lastTime + 1}, "duration": 1.5, "string": 6, "fret": 3, "finger": 2, "latin": "Sol", "anglo": "G" }
   ]
