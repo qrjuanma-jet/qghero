@@ -287,10 +287,15 @@ function setupEventListeners() {
           alert(`¡Genial! Se han añadido ${newSongData.notes.length} notas/acordes más a la partitura.`);
         }
       } catch (err) {
-        alert("Error ampliando la canción: " + err.message);
-      } finally {
         expandBtn.disabled = false;
         expandBtn.textContent = "➕ Seguir Aprendiendo (Alargar Canción)";
+        if (err.message.includes('429')) {
+            const match = err.message.match(/try again in ([\d\.]+)s/);
+            const waitTime = match ? Math.ceil(parseFloat(match[1])) : 40;
+            alert(`¡Uf! La IA va muy rápido. Por usar la versión gratuita, necesitamos dejarla respirar. Por favor, espera ${waitTime} segundos y vuelve a darle al botón.`);
+        } else {
+            alert("Error ampliando la canción: " + err.message);
+        }
       }
     });
   }

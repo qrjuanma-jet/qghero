@@ -73,7 +73,7 @@ REGLAS ESTRICTAS PARA EL JSON:
 1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los strings! Si necesitas saltos de línea, usa literalmente \\\\n.
 2. Devuelve SÓLO el JSON puro, sin bloques markdown de código.`;
 
-  return callGroq(apiKey, prompt);
+  return callGroq(apiKey, prompt, 0.1, 1000);
 }
 
 export async function fetchTheoryCourse(apiKey, level) {
@@ -276,7 +276,7 @@ REGLAS ESTRICTAS PARA EL JSON:
   return callGroq(apiKey, prompt, 0.4);
 }
 
-async function callGroq(apiKey, prompt, temperature = 0.1) {
+async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500) {
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -288,7 +288,7 @@ async function callGroq(apiKey, prompt, temperature = 0.1) {
         model: 'llama-3.1-8b-instant',
         messages: [{ role: 'user', content: prompt }],
         temperature: temperature,
-        max_tokens: 4500
+        max_tokens: maxTokens
       })
     });
 
