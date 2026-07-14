@@ -67,12 +67,19 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 function checkSharedUrl() {
   const urlParams = new URLSearchParams(window.location.search);
-  const sharedUrl = urlParams.get('url') || urlParams.get('text');
+  const sharedUrl = urlParams.get('v') || urlParams.get('url') || urlParams.get('text');
   if (sharedUrl && sharedUrl.includes('youtu')) {
-    showScreen('game', true);
     document.getElementById('youtube-url').value = sharedUrl;
+    document.getElementById('song-name').value = '';
+    
     // Quitamos los query params para no re-ejecutar al recargar
     window.history.replaceState({}, document.title, window.location.pathname);
+    
+    // Redirigir a la pantalla de setup y simular el click para cargar de verdad
+    showScreen('setup', true);
+    setTimeout(() => {
+        document.getElementById('load-song-btn').click();
+    }, 100);
   }
 }
 
