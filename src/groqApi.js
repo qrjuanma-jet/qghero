@@ -41,7 +41,11 @@ Debe tener exactamente esta estructura:
   ]
 }
 
-Genera al menos 30 notas iniciales (una progresión o intro completa). Sólo JSON.`;
+Genera al menos 30 notas iniciales (una progresión o intro completa).
+
+REGLAS ESTRICTAS PARA EL JSON:
+1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los valores de texto ("hands", "rhythm", "effects", etc)! Si necesitas separar párrafos, escribe literalmente los caracteres \\\\n.
+2. Devuelve SÓLO el JSON puro, sin bloques markdown de código.`;
 
   return callGroq(apiKey, prompt);
 }
@@ -64,7 +68,10 @@ Estructura obligatoria:
   ]
 }
 Asegúrate de que el "time" de las nuevas notas sea estrictamente mayor que ${lastTime}, de forma ascendente.
-SÓLO JSON, sin texto, sin etiquetas Markdown.`;
+
+REGLAS ESTRICTAS PARA EL JSON:
+1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los strings! Si necesitas saltos de línea, usa literalmente \\\\n.
+2. Devuelve SÓLO el JSON puro, sin bloques markdown de código.`;
 
   return callGroq(apiKey, prompt);
 }
@@ -209,7 +216,10 @@ Devuelve un JSON estricto con la siguiente estructura:
 - Genera de 2 a 4 acordes por nivel.
 - notes: Array estricto de notas de Tone.js (ej. "C3", "E3") para que el sintetizador pueda reproducirlo.
 - examples: 1 o 2 canciones famosas reales que usen EXACTAMENTE los acordes enseñados en este nivel.
-- Sólo responde con el JSON puro, sin markdown de bloque de código.
+
+REGLAS ESTRICTAS PARA EL JSON:
+1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los valores de texto (desc, rightHand, etc)! Si necesitas saltos de línea, usa literalmente \\\\n.
+2. Devuelve SÓLO el JSON puro, sin bloques markdown de código.
 `;
 
   return callGroq(apiKey, prompt, 0.4);
@@ -257,7 +267,10 @@ Devuelve un JSON estricto con la siguiente estructura:
 
 - notes: Array estricto de notas de Tone.js para el sintetizador.
 - examples: Usa este array para describir la progresión de las diferentes partes de la canción.
-- Sólo responde con el JSON puro.
+
+REGLAS ESTRICTAS PARA EL JSON:
+1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los valores de texto (desc, rightHand, etc)! Si necesitas saltos de línea, usa literalmente \\\\n.
+2. Devuelve SÓLO el JSON puro, sin bloques markdown de código.
 `;
 
   return callGroq(apiKey, prompt, 0.4);
