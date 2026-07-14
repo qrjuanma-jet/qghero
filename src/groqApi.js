@@ -287,7 +287,8 @@ async function callGroq(apiKey, prompt, temperature = 0.1) {
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
         messages: [{ role: 'user', content: prompt }],
-        temperature: temperature
+        temperature: temperature,
+        max_tokens: 8000
       })
     });
 
