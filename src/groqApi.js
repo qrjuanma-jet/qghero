@@ -15,7 +15,26 @@ Debe tener exactamente esta estructura:
     "hands": "Explicación detallada de la posición de la mano izquierda (cejillas, acordes abiertos). Usa números 1-4 para dedos, T/P para pulgar.",
     "rhythm": "Explicación del punteo/rasgueo. Usa p,i,m,a,e para los dedos de la mano derecha.",
     "effects": "Efectos especiales o percusión.",
-    "schema": "Los dibujos ASCII de TODOS los acordes o posiciones del riff de la canción. Debes escribir todos los esquemas necesarios, uno debajo de otro (separados por una línea en blanco), indicando el nombre del acorde encima de cada uno. ¡MUY IMPORTANTE: Como esto es un JSON, debes escapar siempre los saltos de línea con \\\\n en este string! Dibuja SIEMPRE las 6 cuerdas aunque no se toquen, y añade una primera fila con los números de traste en números romanos usando los caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste. EMPIEZA ESA FILA con la palabra 'TS' seguida de 6 espacios vacíos. Usa 1,2,3,4 para los dedos, O (al aire) y X (no suena) al inicio. Ejemplo:\\nRe Mayor (D):\\nTS      Ⅰ   Ⅱ   Ⅲ\\nE (1) |---|-2-|---\\nB (2) |---|---|-3-\\nG (3) |---|-1-|---\\nD (4) O---|---|---\\nA (5) X---|---|---\\nE (6) X---|---|---\\n\\nDo Mayor (C):\\nTS      Ⅰ   Ⅱ   Ⅲ\\nE (1) O---|---|---\\nB (2) |-1-|---|---\\nG (3) O---|---|---\\nD (4) |---|-2-|---\\nA (5) |---|---|-3-\\nE (6) X---|---|---\\n"
+    "schema": [
+      "Los dibujos ASCII de TODOS los acordes de la canción, representados como un array de strings (una línea por string).",
+      "Re Mayor (D):",
+      "TS      Ⅰ   Ⅱ   Ⅲ",
+      "E (1) |---|-2-|---",
+      "B (2) |---|---|-3-",
+      "G (3) |---|-1-|---",
+      "D (4) O---|---|---",
+      "A (5) X---|---|---",
+      "E (6) X---|---|---",
+      "",
+      "Do Mayor (C):",
+      "TS      Ⅰ   Ⅱ   Ⅲ",
+      "E (1) O---|---|---",
+      "B (2) |-1-|---|---",
+      "G (3) O---|---|---",
+      "D (4) |---|-2-|---",
+      "A (5) |---|---|-3-",
+      "E (6) X---|---|---"
+    ]
   },
   "notes": [
     { "time": 1.0, "duration": 1.5, "string": 6, "fret": 3, "finger": 2, "latin": "Sol", "anglo": "G" }
@@ -163,7 +182,16 @@ Devuelve un JSON estricto con la siguiente estructura:
       "name": "Nombre Acorde (ej. Fa Mayor)",
       "notes": ["F2", "C3", "F3", "A3", "C4", "F4"], 
       "finger": "Explicación de dedos (usa 1,2,3,4)",
-      "schema": "Diagrama ASCII exacto de 6 cuerdas (dibuja SIEMPRE las 6 cuerdas aunque no se toquen) con O, X y números romanos en la primera fila superior para los trastes. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste, empezando la fila con 'TS      ' (TS y 6 espacios). Ejemplo:\\nTS      Ⅰ   Ⅱ   Ⅲ\\nE (1) |---|---|---\\nB (2) |-1-|---|---\\nG (3) |---|-2-|---\\nD (4) |---|-3-|---\\nA (5) X---|---|---\\nE (6) X---|---|---\\n"
+      "schema": [
+        "Array de strings (una línea por string) para el esquema ASCII. Ejemplo:",
+        "TS      Ⅰ   Ⅱ   Ⅲ",
+        "E (1) |---|---|---",
+        "B (2) |-1-|---|---",
+        "G (3) |---|-2-|---",
+        "D (4) |---|-3-|---",
+        "A (5) X---|---|---",
+        "E (6) X---|---|---"
+      ]
     }
   ],
   "examples": [
@@ -203,7 +231,16 @@ Devuelve un JSON estricto con la siguiente estructura:
       "name": "Nombre Acorde (ej. Fa Mayor)",
       "notes": ["F2", "C3", "F3", "A3", "C4", "F4"], 
       "finger": "Explicación de dedos (usa 1,2,3,4)",
-      "schema": "Diagrama ASCII exacto de 6 cuerdas (dibuja SIEMPRE las 6 cuerdas aunque no se toquen) con O, X y números romanos en la primera fila superior para los trastes. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste, empezando la fila con 'TS      ' (TS y 6 espacios). Ejemplo:\\nTS      Ⅰ   Ⅱ   Ⅲ\\nE (1) |---|---|---\\nB (2) |-1-|---|---\\nG (3) |---|-2-|---\\nD (4) |---|-3-|---\\nA (5) X---|---|---\\nE (6) X---|---|---\\n"
+      "schema": [
+        "Array de strings (una línea por string) para el esquema ASCII. Ejemplo:",
+        "TS      Ⅰ   Ⅱ   Ⅲ",
+        "E (1) |---|---|---",
+        "B (2) |-1-|---|---",
+        "G (3) |---|-2-|---",
+        "D (4) |---|-3-|---",
+        "A (5) X---|---|---",
+        "E (6) X---|---|---"
+      ]
     }
   ],
   "examples": [

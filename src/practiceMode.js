@@ -168,7 +168,7 @@ function renderDataToUI(data, customSongQuery = null) {
         card.innerHTML = `
           <h4>${chord.name}</h4>
           <p><strong>Dedo:</strong> ${chord.finger}</p>
-          ${chord.schema ? `<pre class="ascii-schema">${chord.schema}</pre>` : ''}
+          ${chord.schema ? `<pre class="ascii-schema">${Array.isArray(chord.schema) ? chord.schema.join('\n') : chord.schema}</pre>` : ''}
           <button class="btn primary-btn play-chord-btn" data-notes='${JSON.stringify(chord.notes)}'>
             🔊 Escuchar
           </button>

@@ -331,7 +331,7 @@ function showTechniqueModal(data) {
   
   const schemaEl = document.getElementById('tech-schema');
   if (tech.schema) {
-    schemaEl.textContent = tech.schema;
+    schemaEl.textContent = Array.isArray(tech.schema) ? tech.schema.join('\n') : tech.schema;
     schemaEl.classList.remove('hidden');
   } else {
     schemaEl.classList.add('hidden');
