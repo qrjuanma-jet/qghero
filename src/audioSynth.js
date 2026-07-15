@@ -50,3 +50,41 @@ export function playNote(note, timeOffset = 0, duration = "8n") {
   if (!isLoaded || !synth) return;
   synth.triggerAttackRelease(note, duration, Tone.now() + timeOffset);
 }
+
+let previewPart = null;
+
+export function playPreviewSequence(notesArray, onComplete = null) {
+  if (!isLoaded || !synth) return;
+  stopPreviewSequence();
+  
+  // Array of { time: note.time, pitch: "C4" }
+  const toneEvents = notesArray.map(n => {
+    const octave = n.string < 4 ? "4" : "3";
+    const pitch = (n.anglo || 'C') + octave;
+    return { time: n.time, note: pitch };
+  });
+
+  previewPart = new Tone.Part((time, value) => {
+    synth.triggerAttackRelease(value.note, "8n", time);
+  }, toneEvents).start(0);
+
+  Tone.Transport.start();
+
+  // Schedule completion if needed
+  if (onComplete && toneEvents.length > 0) {
+    const lastEventTime = Math.max(...toneEvents.map(e => e.time));
+    Tone.Transport.scheduleOnce(() => {
+        onComplete();
+    }, lastEventTime + 1); // wait 1 sec after last note
+  }
+}
+
+export function stopPreviewSequence() {
+  if (previewPart) {
+    previewPart.dispose();
+    previewPart = null;
+  }
+  Tone.Transport.stop();
+  Tone.Transport.cancel();
+  if (synth) synth.releaseAll();
+}

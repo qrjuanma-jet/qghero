@@ -40,8 +40,9 @@
         <!-- PANTALLA 2: Menú Principal -->
         <section id="main-screen" class="screen hidden" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 100vh;">
             <div>
-                <header style="justify-content: center; margin-bottom: 2rem;">
+                <header style="position: relative; display: flex; justify-content: center; margin-bottom: 2rem;">
                     <h2 class="logo-title" style="font-size: 3.5rem; text-align: center; margin: 0;">QG<span class="neon-text">HERO</span></h2>
+                    <button class="btn icon-btn help-btn" data-help="main" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 1.5rem;" title="Ayuda">❔</button>
                 </header>
                 
                 <main class="content-panel" style="text-align: center; max-width: 800px;">
@@ -83,9 +84,10 @@
 
         <!-- NUEVA PANTALLA: Modo Teoría -->
         <section id="theory-screen" class="screen hidden">
-            <header>
+            <header style="display: flex; justify-content: space-between; align-items: center;">
                 <button id="back-from-theory-btn" class="btn icon-btn">⬅️ Volver</button>
                 <h2 class="logo-title-small">Modo <span class="neon-text" style="color: var(--neon-cyan);">Teoría</span></h2>
+                <button class="btn icon-btn help-btn" data-help="theory" title="Ayuda">❔</button>
             </header>
             <div class="practice-container">
                 <main class="style-content" style="width: 100%; max-width: 800px; margin: 0 auto;">
@@ -150,19 +152,20 @@
 
         <!-- PANTALLA 3: Configuración de Juego -->
         <section id="game-setup-screen" class="screen hidden">
-            <header>
+            <header style="display: flex; justify-content: space-between; align-items: center;">
                 <button id="back-from-setup-btn" class="btn icon-btn">⬅️ Volver</button>
                 <h2 class="logo-title-small">Modo <span class="neon-text">Juego</span></h2>
+                <button class="btn icon-btn help-btn" data-help="setup" title="Ayuda">❔</button>
             </header>
             <main class="content-panel">
                 <h3>Configuración de la Partida</h3>
                 <div class="input-group">
                     <label>Nombre de la Canción (Opcional si pones el link)</label>
-                    <input type="text" id="song-name" placeholder="Ej: Smells Like Teen Spirit">
+                    <input type="search" id="song-name" placeholder="Ej: Smells Like Teen Spirit">
                 </div>
                 <div class="input-group" style="margin-top: 1rem;">
                     <label>Enlace de YouTube (Opcional si pones el nombre)</label>
-                    <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+                    <input type="search" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
                 </div>
                 <button id="load-song-btn" class="btn primary-btn" style="margin-top: 2rem; width: 100%;">¡A Tocar!</button>
                 
@@ -201,9 +204,10 @@
 
         <!-- PANTALLA 4: Modo Práctica -->
         <section id="practice-screen" class="screen hidden">
-            <header>
+            <header style="display: flex; justify-content: space-between; align-items: center;">
                 <button id="back-from-practice-btn" class="btn icon-btn">⬅️ Volver</button>
                 <h2 class="logo-title-small">Modo <span class="neon-text">Práctica</span></h2>
+                <button class="btn icon-btn help-btn" data-help="practice" title="Ayuda">❔</button>
             </header>
             <div class="practice-container">
                 <aside class="styles-sidebar">
@@ -228,7 +232,7 @@
                     <div class="tech-section" id="custom-song-input-container" style="display: none; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--neon-cyan);">
                         <h4>🔍 ¿Qué canción quieres aprender?</h4>
                         <div class="input-group">
-                            <input type="text" id="custom-song-input" placeholder="Ej: Wonderwall - Oasis">
+                            <input type="search" id="custom-song-input" placeholder="Ej: Wonderwall - Oasis">
                             <button id="search-custom-song-btn" class="btn primary-btn">Enséñame esta canción</button>
                         </div>
                     </div>
@@ -274,10 +278,17 @@
                     </div>
                 </div>
                 <div class="controls">
+                    <button class="btn icon-btn help-btn" data-help="game" title="Ayuda del Juego">❔</button>
                     <button id="share-btn" class="btn icon-btn" title="Compartir">🔗</button>
                     <button id="rewind-btn" class="btn control-btn">⏪ 10s</button>
                     <button id="forward-btn" class="btn control-btn">⏩ 10s</button>
                 </div>
+            </div>
+            
+            <div class="time-control" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 0 1rem; margin-top: 1rem;">
+                <button id="play-pause-btn" class="btn icon-btn" title="Pausar/Reanudar">⏸️</button>
+                <input type="range" id="time-slider" min="0" max="100" step="0.1" value="0" style="flex-grow: 1;">
+                <span id="time-display" style="font-size: 0.9rem; min-width: 45px; color: var(--text-secondary);">0:00</span>
             </div>
             
             <div class="speed-control">
@@ -291,6 +302,16 @@
             
             <div id="youtube-player" style="position: absolute; top: -9999px; left: -9999px;"></div>
         </section>
+        <!-- MODAL GLOBAL DE AYUDA -->
+        <div id="global-help-modal" class="modal hidden">
+            <div class="modal-content glass-panel">
+                <h2 id="help-title" style="margin-bottom: 1rem; color: var(--neon-cyan);">Ayuda</h2>
+                <div id="help-content" style="text-align: left; max-height: 60vh; overflow-y: auto; padding-right: 1rem; margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.6;">
+                    <!-- El contenido se inyecta por JS -->
+                </div>
+                <button id="close-help-btn" class="btn primary-btn" style="width: 100%;">¡Entendido!</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>

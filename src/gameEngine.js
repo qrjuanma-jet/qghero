@@ -13,7 +13,6 @@ export class GameEngine {
     this.resize();
     window.addEventListener('resize', () => this.resize());
     
-    // Guitar Strings (1 to 6)
     this.stringColors = [
       '#ff0055', // 1: e
       '#ffaa00', // 2: B
@@ -22,6 +21,46 @@ export class GameEngine {
       '#00ffff', // 5: A
       '#cc00ff'  // 6: E
     ];
+    
+    this.stringFlashes = [0, 0, 0, 0, 0, 0, 0];
+    this.onManualHit = null;
+    
+    const handleTouch = (e) => {
+        if (!this.isPlaying) return;
+        if (e.type === 'touchstart') e.preventDefault();
+        
+        const touches = e.type.includes('mouse') ? [e] : e.changedTouches;
+        const rect = this.canvas.getBoundingClientRect();
+        
+        for (let i = 0; i < touches.length; i++) {
+            const touch = touches[i];
+            const x = touch.clientX - rect.left;
+            let stringIdx = Math.round(x / this.stringSpacing);
+            if (stringIdx >= 1 && stringIdx <= 6) {
+                this.handleStringTap(stringIdx);
+            }
+        }
+    };
+    
+    this.canvas.addEventListener('touchstart', handleTouch, { passive: false });
+    this.canvas.addEventListener('mousedown', handleTouch);
+  }
+
+  handleStringTap(stringIdx) {
+    this.stringFlashes[stringIdx] = 1.0;
+    
+    const hitWindow = 0.25; // +/- 0.25s hit window for manual taps
+    
+    for (let note of this.notes) {
+      if (!note.hit && note.string === stringIdx && Math.abs(note.time - this.currentTime) < hitWindow) {
+        note.hit = true;
+        note.manuallyHit = true;
+        
+        if (this.onManualHit) this.onManualHit(note);
+        if (this.onNoteHit) this.onNoteHit(note);
+        break; // only hit one note per tap
+      }
+    }
   }
 
   resize() {
@@ -73,6 +112,14 @@ export class GameEngine {
     
     // Predict current time based on delta, actual sync comes from YouTube API via updateTime
     this.currentTime += delta * this.playbackRate;
+    
+    // Decay flashes
+    for (let i=1; i<=6; i++) {
+        if (this.stringFlashes[i] > 0) {
+            this.stringFlashes[i] -= delta * 4;
+            if (this.stringFlashes[i] < 0) this.stringFlashes[i] = 0;
+        }
+    }
     
     this.render();
     this.checkHits();
@@ -151,6 +198,14 @@ export class GameEngine {
       this.ctx.strokeStyle = this.stringColors[i-1];
       this.ctx.lineWidth = 2;
       this.ctx.stroke();
+
+      // Flash feedback
+      if (this.stringFlashes[i] > 0) {
+        this.ctx.beginPath();
+        this.ctx.arc(this.stringSpacing * i, this.hitLineY, 15 + (1 - this.stringFlashes[i]) * 25, 0, Math.PI * 2);
+        this.ctx.fillStyle = `rgba(255, 255, 255, ${this.stringFlashes[i]})`;
+        this.ctx.fill();
+      }
     }
   }
 
