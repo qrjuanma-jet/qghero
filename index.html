@@ -160,12 +160,8 @@
             <main class="content-panel">
                 <h3>Configuración de la Partida</h3>
                 <div class="input-group">
-                    <label>Nombre de la Canción (Opcional si pones el link)</label>
-                    <input type="search" id="song-name" placeholder="Ej: Smells Like Teen Spirit">
-                </div>
-                <div class="input-group" style="margin-top: 1rem;">
-                    <label>Enlace de YouTube (Opcional si pones el nombre)</label>
-                    <input type="search" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+                    <label>Canción o Link de YouTube</label>
+                    <input type="search" id="song-input" placeholder="Ej: Smells Like Teen Spirit  ó  https://youtube.com/...">
                 </div>
                 <button id="load-song-btn" class="btn primary-btn" style="margin-top: 2rem; width: 100%;">¡A Tocar!</button>
                 
@@ -179,22 +175,30 @@
         <!-- MODAL: Análisis Pre-Juego (Técnica) -->
         <div id="technique-modal" class="modal hidden">
             <div class="modal-content glass-panel">
-                <h2>Guía de Técnica: <span id="tech-song-title"></span></h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h2 style="margin: 0;">Guía de Técnica: <span id="tech-song-title"></span></h2>
+                    <button class="btn icon-btn help-btn" data-help="technique" title="¿Cómo leer esto?">❔</button>
+                </div>
                 <div class="tech-details">
                     <h4>✋ Posición de las Manos</h4>
                     <p id="tech-hands"></p>
                     
-                    <h4>🎸 Esquema ASCII de Acordes/Posición</h4>
-                    <pre id="tech-schema" class="ascii-schema">Cargando...</pre>
+                    <div style="background: rgba(0,229,255,0.07); border-left: 3px solid var(--neon-cyan); border-radius: 0.5rem; padding: 0.8rem 1rem; margin: 1rem 0;">
+                        <h4 style="margin: 0 0 0.4rem 0; color: var(--neon-cyan);">&#127928; Ritmo / Punteo (Mano Derecha)</h4>
+                        <p id="tech-rhythm" style="margin: 0; font-size: 0.95rem;"></p>
+                        <h4 style="margin: 0.8rem 0 0.4rem 0; color: var(--neon-cyan);">&#10024; Efectos / Estilo Característico</h4>
+                        <p id="tech-effects" style="margin: 0; font-size: 0.95rem;"></p>
+                        <p style="margin: 0.6rem 0 0 0; font-size: 0.75rem; color: var(--text-secondary);">&#128073; Estos datos confirman que la IA ha reconocido bien la canción. Si no coinciden, sé crítico.</p>
+                    </div>
 
-                    <h4>🎸 Punteo / Ritmo (Mano Derecha)</h4>
-                    <p id="tech-rhythm"></p>
-                    
-                    <h4>✨ Efectos Específicos</h4>
-                    <p id="tech-effects"></p>
+                    <h4>&#127928; Mapa de Acordes (Cronológico)</h4>
+                    <pre id="tech-schema" class="ascii-schema">Cargando...</pre>
                 </div>
                 <div class="modal-actions">
+                    <div id="auto-expand-status" style="text-align: center; padding: 0.5rem; font-size: 0.95rem; color: var(--neon-cyan); min-height: 1.5rem;"></div>
+                    <p style="text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 1rem 0;">💡 Si quieres jugar con la canción completa, espera a que aparezca <strong>✅ Canción construida</strong>.</p>
                     <button id="expand-game-song-btn" class="btn secondary-btn" style="border-color: var(--neon-cyan); margin-bottom: 1rem; font-size: 1.2rem;">➕ Seguir Aprendiendo (Alargar Canción)</button>
+                    <button id="show-score-btn" class="btn secondary-btn" style="border-color: #aaa; color: #aaa; margin-bottom: 0.5rem;">🎼 Buscar Partitura</button>
                     <button id="preview-audio-btn" class="btn secondary-btn">🔊 Escuchar Pista Sintetizada</button>
                     <button id="start-game-btn" class="btn primary-btn">▶️ Iniciar Juego</button>
                 </div>
@@ -303,13 +307,34 @@
             <div id="youtube-player" style="position: absolute; top: -9999px; left: -9999px;"></div>
         </section>
         <!-- MODAL GLOBAL DE AYUDA -->
-        <div id="global-help-modal" class="modal hidden">
+        <div id="global-help-modal" class="modal hidden" style="z-index: 10000;">
             <div class="modal-content glass-panel">
                 <h2 id="help-title" style="margin-bottom: 1rem; color: var(--neon-cyan);">Ayuda</h2>
                 <div id="help-content" style="text-align: left; max-height: 60vh; overflow-y: auto; padding-right: 1rem; margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.6;">
                     <!-- El contenido se inyecta por JS -->
                 </div>
                 <button id="close-help-btn" class="btn primary-btn" style="width: 100%;">¡Entendido!</button>
+            </div>
+        </div>
+        <!-- VISOR DE PARTITURA -->
+        <div id="score-viewer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0a0a0a; z-index:9999; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.8rem 1.2rem; background:rgba(0,0,0,0.8); border-bottom:1px solid rgba(255,255,255,0.1);">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <h3 id="score-title" style="margin:0; color:var(--neon-cyan); font-size:1rem;">Partitura</h3>
+                    <button class="btn icon-btn help-btn" data-help="score" title="Ayuda" style="font-size:0.9rem; padding:2px;">❔</button>
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <span id="score-page-info" style="font-size:0.85rem; color:#aaa;">1 / 1</span>
+                    <button id="score-prev" class="btn control-btn">⬅️</button>
+                    <button id="score-auto" class="btn control-btn" title="Reproducción automática">▶️ Auto</button>
+                    <button id="score-next" class="btn control-btn">➡️</button>
+                    <button id="score-close" class="btn icon-btn" style="border-color:var(--neon-magenta); color:var(--neon-magenta);">✖️</button>
+                </div>
+            </div>
+            <div id="score-loading" style="display:none; text-align:center; padding:2rem; color:var(--neon-cyan);">🔍 Buscando partitura...</div>
+            <div id="score-error" style="display:none; text-align:center; padding:2rem; color:#ff6b6b;"></div>
+            <div id="score-image-container" style="flex:1; overflow:hidden; display:flex; align-items:center; justify-content:center; padding:1rem;">
+                <img id="score-image" src="" alt="Partitura" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:0.5rem;">
             </div>
         </div>
     </div>

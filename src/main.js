@@ -69,8 +69,7 @@ function checkSharedUrl() {
   const urlParams = new URLSearchParams(window.location.search);
   const sharedUrl = urlParams.get('v') || urlParams.get('url') || urlParams.get('text');
   if (sharedUrl && sharedUrl.includes('youtu')) {
-    document.getElementById('youtube-url').value = sharedUrl;
-    document.getElementById('song-name').value = '';
+    document.getElementById('song-input').value = sharedUrl;
     
     // Quitamos los query params para no re-ejecutar al recargar
     window.history.replaceState({}, document.title, window.location.pathname);
@@ -167,6 +166,55 @@ function setupEventListeners() {
               <li><strong>▶️ / ⏸️:</strong> Pausa o reanuda la canción/juego.</li>
               <li><strong>Deslizador:</strong> Muévelo para rebobinar o adelantar a una parte específica de la canción.</li>
               <li><strong>Velocidad:</strong> Reduce la velocidad a 0.5x si la canción va demasiado rápido para ti.</li>
+          </ul>`,
+      technique: `
+          <h3>¿Cómo leer esta pantalla?</h3>
+          <p>Aquí la IA te muestra los acordes y técnicas que necesitas antes de empezar a jugar. Vamos por partes:</p>
+
+          <h4>🔍 ¿Cómo sé que la IA ha reconocido bien la canción?</h4>
+          <p>La caja azul de <strong>Ritmo / Punteo</strong> y <strong>Efectos</strong> es la "huella digital" de la canción. Léela primero:</p>
+          <ul>
+              <li><strong>Ritmo:</strong> ¿Dice algo parecido al patrón que conoces? (ej: "rasgueo hacia abajo en negras", "arpegio p-i-m-a"). Si suena razonable para esa canción, la IA la ha identificado bien.</li>
+              <li><strong>Efectos:</strong> ¿Menciona el estilo característico? (ej: "Power chords con distorsión", "punteo limpio fingerpicking"). Esto confirma que la IA conoce la canción.</li>
+              <li>Si el ritmo o los efectos no tienen nada que ver, prueba a buscar con más detalle: "artista - nombre de la canción".</li>
+          </ul>
+
+          <h4>📊 El Esquema de Mástil (tablatura ASCII)</h4>
+          <p>Cada bloque de líneas es como una foto del mástil de tu guitarra girada 90°. La primera línea indica los <strong>trastes</strong> (Ⅰ, Ⅱ, Ⅲ = traste 1, 2, 3; Ⅴ = traste 5, etc.).</p>
+          <p>Cada fila es una <strong>cuerda</strong>, de más fina (E arriba, número 1) a más gruesa (E abajo, número 6):</p>
+          <ul>
+              <li><strong>O</strong> = cuerda <em>al aire</em> (suénala sin pisar ningún traste).</li>
+              <li><strong>X</strong> = cuerda <em>silenciada</em> (no la toques, apágala con algún dedo).</li>
+              <li><strong>1, 2, 3, 4</strong> = el <em>dedo</em> que debes usar (1=índice, 2=medio, 3=anular, 4=meñique).</li>
+          </ul>
+
+          <h4>🤚 ¿Qué es una Cejilla?</h4>
+          <p>Una <strong>cejilla</strong> es cuando usas el dedo índice (dedo 1) para presionar <em>todas</em> las cuerdas en un mismo traste a la vez, como si fuera una pequeña ceja o puente. En los esquemas se indica con el número 1 repetido en todas las cuerdas del mismo traste.</p>
+          <p>Por ejemplo, una cejilla en el traste V significa que pones el índice tumbado en el traste 5 y el resto de dedos forman el acorde encima. Esto te permite tocar acordes de bar en cualquier posición del mástil.</p>
+
+          <h4>🎵 Mapa Cronológico de Acordes</h4>
+          <p>El mapa muestra los acordes en el orden <em>exacto</em> en que suenan en la canción. La primera vez que aparece un acorde se dibuja su esquema completo. Si se repite, aparece <strong>↩️ Sol (Repetición)</strong> para no repetir el dibujo. El mapa va creciendo automáticamente mientras la IA construye la canción.</p>
+
+          <h4>🔊 Botones de esta pantalla</h4>
+          <ul>
+              <li><strong>Escuchar Pista Sintetizada:</strong> Reproduce en orden todos los acordes del mapa. Púlsalo de nuevo para parar.</li>
+              <li><strong>➕ Seguir Aprendiendo:</strong> Fuerza a la IA a añadir más compases manualmente si quieres acelerar el proceso.</li>
+              <li><strong>▶️ Iniciar Juego:</strong> ¡Empieza a tocar! Espera primero a que aparezca <strong>✅ Canción construida</strong> si quieres jugar con la canción completa.</li>
+          </ul>`,
+      score: `
+          <h3>¿Cómo leer la partitura / tablatura?</h3>
+          <p>Esta es una tablatura de guitarra (tab) generada automáticamente por la IA a partir de las notas de la canción.</p>
+          <ul style="margin-bottom: 1rem;">
+              <li><strong>Las 6 líneas:</strong> Representan las cuerdas de la guitarra. La línea de arriba es la primera cuerda (e, la más fina), y la de abajo es la sexta (E, la más gruesa).</li>
+              <li><strong>Los números (en azul):</strong> Indican en qué <strong>traste</strong> debes poner el dedo en esa cuerda específica. Si hay varios números apilados en la misma vertical, se tocan a la vez (es un acorde).</li>
+              <li><strong>Nombre del acorde (en rosa):</strong> Aparece arriba de cada columna de notas indicando el nombre del acorde que estás tocando (ej: Am, G).</li>
+              <li><strong>Guiones (–):</strong> Significan que esa cuerda no se toca en ese momento.</li>
+          </ul>
+          <h4>Controles del visor</h4>
+          <ul>
+              <li><strong>⬅️ / ➡️:</strong> Pasa a la página anterior o siguiente de la partitura.</li>
+              <li><strong>▶️ Auto:</strong> Activa el modo de avance automático. La partitura pasará de página sola cada 4 segundos para que puedas tocar sin soltar la guitarra.</li>
+              <li><strong>✖️:</strong> Cierra el visor y vuelve a la pantalla anterior.</li>
           </ul>`
   };
 
@@ -246,41 +294,55 @@ function setupEventListeners() {
     }
   };
   bindEnterToClick('groq-api-key', 'save-key-btn');
-  bindEnterToClick('song-name', 'load-song-btn');
-  bindEnterToClick('youtube-url', 'load-song-btn');
+  bindEnterToClick('song-input', 'load-song-btn');
   bindEnterToClick('custom-song-input', 'search-custom-song-btn');
 
   // Load Song for Game Mode
   document.getElementById('load-song-btn').addEventListener('click', async () => {
-    let url = document.getElementById('youtube-url').value.trim();
-    let name = document.getElementById('song-name').value.trim();
+    const rawInput = document.getElementById('song-input').value.trim();
     
-    if (!url && !name) {
-      alert("Debes ingresar el nombre de la canción o el enlace de YouTube.");
+    if (!rawInput) {
+      alert("Escribe el nombre de una canción o pega un enlace de YouTube.");
       return;
     }
+
+    // Smart detection: is it a YouTube URL?
+    const isYouTubeUrl = rawInput.includes('youtube.com') || rawInput.includes('youtu.be');
+    let url = isYouTubeUrl ? rawInput : '';
+    let name = isYouTubeUrl ? '' : rawInput;
     
     document.getElementById('loading-indicator').classList.remove('hidden');
 
-    // Si no hay nombre, lo intentamos sacar del título del video de YT
-    if (!name && url) {
+    // Si es URL de YT, intentar obtener el nombre del vídeo con varios métodos
+    if (isYouTubeUrl) {
+        const videoId = extractVideoId(url);
+        
+        // Método 1: noembed.com
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 3000);
-            const response = await fetch(`https://noembed.com/embed?url=${url}`, { signal: controller.signal });
+            const response = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`, { signal: controller.signal });
             clearTimeout(timeoutId);
             const data = await response.json();
-            if (data.title) {
-                name = data.title;
-            } else {
-                throw new Error("No title in response");
-            }
-        } catch (e) {
-            alert("No pudimos obtener el nombre del vídeo automáticamente. Por favor, escribe el nombre de la canción a mano en la casilla y dale a '¡A Tocar!'.");
-            document.getElementById('loading-indicator').classList.add('hidden');
-            return;
+            if (data.title) name = data.title;
+        } catch (e) { /* Falló, prueba siguiente */ }
+
+        // Método 2: YouTube oEmbed API oficial
+        if (!name && videoId) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                const data = await response.json();
+                if (data.title) name = data.title;
+            } catch (e) { /* Falló, prueba siguiente */ }
         }
-        document.getElementById('song-name').value = name; // Update input for feedback
+
+        // Método 3: Usar el ID del vídeo como nombre genérico — nunca preguntar al usuario
+        if (!name) {
+            name = videoId ? `Canción de YouTube (${videoId})` : "Canción de YouTube";
+        }
     }
 
     const videoId = url ? extractVideoId(url) : null;
@@ -320,6 +382,7 @@ function setupEventListeners() {
 
   // Technique Modal
   document.getElementById('close-tech-modal').addEventListener('click', () => {
+    autoExpandRunning = false; // Stop background expansion
     stopPreviewSequence();
     isPreviewPlaying = false;
     document.getElementById('preview-audio-btn').textContent = "🔊 Escuchar Pista Sintetizada";
@@ -327,6 +390,7 @@ function setupEventListeners() {
   });
   
   document.getElementById('start-game-btn').addEventListener('click', async () => {
+    autoExpandRunning = false; // Stop background expansion
     stopPreviewSequence();
     isPreviewPlaying = false;
     document.getElementById('preview-audio-btn').textContent = "🔊 Escuchar Pista Sintetizada";
@@ -461,23 +525,560 @@ function setupEventListeners() {
   });
 }
 
+/**
+ * Parses the raw schema array from the LLM into a map of {chordKey → [asciiLines]}
+ * Chord keys are derived from the first line of each block (e.g. "La menor (Am)")
+ */
+function parseSchemaBlocks(rawSchemaArray) {
+  if (!rawSchemaArray || !Array.isArray(rawSchemaArray)) return {};
+  const blocks = {};
+  let currentKey = null;
+  let currentLines = [];
+
+  for (const line of rawSchemaArray) {
+    // A line ending with ':' or containing '(' is likely a chord name header
+    const isHeader = typeof line === 'string' && line.trim().length > 0 &&
+                     !line.startsWith('TS') && !line.startsWith('E ') &&
+                     !line.startsWith('B ') && !line.startsWith('G ') &&
+                     !line.startsWith('D ') && !line.startsWith('A ') &&
+                     !line.includes('|') && !line.includes('---') &&
+                     (line.includes('(') || line.endsWith(':'));
+
+    if (isHeader) {
+      if (currentKey && currentLines.length > 0) {
+        blocks[currentKey] = currentLines;
+      }
+      // Normalize key: extract content in parentheses as secondary key
+      currentKey = line.trim().replace(/:$/, '');
+      currentLines = [line.trim()];
+    } else if (currentKey) {
+      if (line !== undefined) currentLines.push(line);
+    }
+  }
+  // Push last block
+  if (currentKey && currentLines.length > 0) {
+    blocks[currentKey] = currentLines;
+  }
+  return blocks;
+}
+
+/**
+ * Builds a chronological schema display from notes + raw schema blocks.
+ * Each unique chord shows its full ASCII diagram once; repeats show just the name.
+ */
+function buildChronologicalSchema(notes, rawSchemaArray) {
+  if (!notes || notes.length === 0) return '';
+
+  const schemaBlocks = parseSchemaBlocks(rawSchemaArray);
+  const lines = [];
+  const shownChords = new Set();
+  let lastChordKey = null;
+
+  for (const note of notes) {
+    const chordName = note.latin || note.anglo || '?';
+    if (chordName === lastChordKey) continue; // skip if same chord as previous note
+    lastChordKey = chordName;
+
+    if (shownChords.has(chordName)) {
+      lines.push(`↩️  ${chordName} (Repetición)`);
+      lines.push('');
+    } else {
+      shownChords.add(chordName);
+      // Find the matching schema block
+      const blockKey = Object.keys(schemaBlocks).find(k =>
+        k.toLowerCase().includes(chordName.toLowerCase()) ||
+        (note.anglo && k.toLowerCase().includes(note.anglo.toLowerCase()))
+      );
+      if (blockKey) {
+        lines.push(...schemaBlocks[blockKey]);
+      } else {
+        lines.push(`🎸 ${chordName}`);
+      }
+      lines.push('');
+    }
+  }
+
+  return lines.join('\n');
+}
+
+let autoExpandRunning = false;
+
+async function autoExpandSong() {
+  if (autoExpandRunning) return;
+  autoExpandRunning = true;
+
+  const statusEl = document.getElementById('auto-expand-status');
+  const MAX_EXPANSIONS = 8;
+  const MIN_DURATION_S = 120; // stop when song is at least 2 minutes
+
+  let expansions = 0;
+
+  const setStatus = (msg) => { if (statusEl) statusEl.textContent = msg; };
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  setStatus(`🏗️ Construyendo canción... (sección 1/${MAX_EXPANSIONS})`);
+
+  while (expansions < MAX_EXPANSIONS) {
+    if (!currentSongData || !currentSongData.notes) break;
+
+    const lastTime = Math.max(...currentSongData.notes.map(n => n.time));
+    if (lastTime >= MIN_DURATION_S) {
+      setStatus(`✅ Canción completa (${Math.round(lastTime)}s)`);
+      break;
+    }
+
+    try {
+      const newSongData = await expandGameSong(groqApiKey, currentSongData.title || 'Canción', lastTime);
+
+      if (newSongData.notes && newSongData.notes.length > 0) {
+        currentSongData.notes = currentSongData.notes.concat(newSongData.notes);
+        if (newSongData.new_schemas && newSongData.new_schemas.length > 0) {
+          if (!Array.isArray(currentSongData.technique.schema)) {
+            currentSongData.technique.schema = currentSongData.technique.schema
+              ? [currentSongData.technique.schema] : [];
+          }
+          currentSongData.technique.schema = currentSongData.technique.schema.concat(newSongData.new_schemas);
+        }
+        // Rebuild chronological display
+        const schemaEl = document.getElementById('tech-schema');
+        if (schemaEl) {
+          schemaEl.textContent = buildChronologicalSchema(currentSongData.notes, currentSongData.technique.schema);
+        }
+        gameEngine.loadSong(currentSongData);
+        expansions++;
+        const newLast = Math.max(...currentSongData.notes.map(n => n.time));
+        setStatus(`🏗️ Construyendo canción... (sección ${expansions + 1}/${MAX_EXPANSIONS}, ${Math.round(newLast)}s)`);
+      } else {
+        break; // No new notes, done
+      }
+
+      // Small pause between requests to avoid flooding
+      await sleep(1500);
+
+    } catch (err) {
+      if (err.message.includes('429')) {
+        // Rate limited — read the wait time and retry silently
+        const match = err.message.match(/try again in ([\d\.]+)s/);
+        const waitMs = match ? Math.ceil(parseFloat(match[1])) * 1000 + 2000 : 45000;
+        setStatus(`⏳ Esperando límite de IA... (${Math.round(waitMs / 1000)}s)`);
+        await sleep(waitMs);
+        // Don't increment expansions, retry the same step
+      } else {
+        // Any other error: stop silently without disturbing the user
+        break;
+      }
+    }
+  }
+
+  const finalTime = currentSongData?.notes?.length > 0
+    ? Math.max(...currentSongData.notes.map(n => n.time))
+    : 0;
+  if (finalTime >= MIN_DURATION_S || expansions >= MAX_EXPANSIONS) {
+    setStatus(`✅ Canción construida (${Math.round(finalTime)}s)`);
+  }
+  autoExpandRunning = false;
+}
+
+// ─── GLOSARIO MUSICAL ──────────────────────────────────────────────────────────
+const MUSIC_TERMS = {
+  'rasgueo': 'Técnica de la mano derecha en la que se pasa los dedos (o la púa) sobre todas las cuerdas en un movimiento rápido. Puede ser hacia abajo (↓) o hacia arriba (↑).',
+  'punteo': 'Técnica de la mano derecha en la que se tocan las cuerdas de una en una con la punta del dedo o la púa, en lugar de rasguearlas todas a la vez. Produce notas individuales.',
+  'arpegio': 'Técnica en la que las notas de un acorde se tocan sucesivamente (una a una) en lugar de simultáneamente. Muy común en guitarra clásica y fingerpicking.',
+  'fingerpicking': 'Estilo de punteo con los dedos de la mano derecha (sin púa). Cada dedo cubre cuerdas específicas: p=pulgar(cuerdas gruesas), i=índice, m=medio, a=anular.',
+  'cejilla': 'Técnica en la que el dedo índice (dedo 1) presiona todas las cuerdas en un mismo traste a la vez, actuando como una ceja. Permite transportar acordes a cualquier posición del mástil.',
+  'power chord': 'Acorde de 2 o 3 notas (fundamental + quinta) muy usado en rock y metal. No tiene tercera, por lo que suena "potente" y neutro. Se toca normalmente con distorsión.',
+  'corchea': 'Figura musical que vale la mitad de una negra. A 120 BPM, una corchea dura 0.25 segundos. En rasgueo "en corcheas" das 8 golpes por compás de 4/4.',
+  'negra': 'Figura musical básica. A 120 BPM, una negra dura 0.5 segundos. En rasgueo "en negras" das 4 golpes por compás de 4/4.',
+  'compás': 'Unidad de tiempo en música. Un compás de 4/4 tiene 4 pulsos de negra. El número de compases determina la duración de una sección de la canción.',
+  'bpm': 'Beats Per Minute (pulsaciones por minuto). Indica la velocidad de la canción. 60 BPM = 1 golpe por segundo. 120 BPM = 2 golpes por segundo.',
+  'distorsión': 'Efecto electrónico que distorsiona la señal de la guitarra eléctrica para crear un sonido más agresivo y saturado. Característico del rock y el metal.',
+  'vibrato': 'Técnica de hacer oscilar el dedo sobre una cuerda pulsada para variar ligeramente la altura del sonido, creando un efecto expresivo y cantable.',
+  'hammer-on': 'Técnica en la que se pulsa una cuerda y luego se golpea otro traste más alto con otro dedo sin volver a rasguear. Produce una nota legata (ligada).',
+  'pull-off': 'Técnica opuesta al hammer-on. Se tienen dos dedos pisados y se "tira" del que está más arriba para hacer sonar el traste inferior sin rasguear.',
+  'slide': 'Técnica en la que se desliza el dedo por el mástil de un traste a otro manteniendo la presión, creando una transición suave entre notas.',
+  'traste': 'Cada uno de los espacios separados por las barras metálicas (trastes) en el mástil de la guitarra. El traste 1 está más cerca de la cejilla, el 12 en el centro.',
+  'mástil': 'La parte larga de la guitarra donde están los trastes y donde se pisan las notas con la mano izquierda.',
+  'acorde': 'Conjunto de 3 o más notas tocadas simultáneamente. En guitarra, la mayoría de acordes básicos usan entre 3 y 6 cuerdas.',
+  'pentatónica': 'Escala musical de 5 notas. La escala pentatónica menor es el vocabulario básico del blues, rock y muchos solos de guitarra.',
+};
+
+function linkMusicTerms(text) {
+  if (!text) return '';
+  // Escape HTML first
+  let safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Detect and wrap known terms (case-insensitive, whole-word-ish)
+  const termsSorted = Object.keys(MUSIC_TERMS).sort((a,b) => b.length - a.length);
+  for (const term of termsSorted) {
+    const regex = new RegExp(`(${term}s?)`, 'gi');
+    safe = safe.replace(regex, (match) => {
+      const key = termsSorted.find(t => match.toLowerCase().startsWith(t));
+      if (!key) return match;
+      const def = MUSIC_TERMS[key].replace(/'/g, '&#39;');
+      return `<span class="music-term" data-def="${def}" title="¿Qué es esto?">${match}</span>`;
+    });
+  }
+  return safe;
+}
+
+// ─── VISOR DE PARTITURA ────────────────────────────────────────────────────────
+let scoreImages = [];
+let scoreIndex = 0;
+let scoreAutoInterval = null;
+
+// Wikimedia Commons — search specifically within music score categories
+async function searchCommons(query) {
+  // Force search within Music scores category to avoid photos/concert images
+  const q = encodeURIComponent(`${query} incategory:Music_scores`);
+  const url = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${q}&srnamespace=6&format=json&origin=*&srlimit=30`;
+  const resp = await fetch(url, { signal: AbortSignal.timeout(6000) });
+  const data = await resp.json();
+  if (!data.query?.search?.length) return [];
+
+  const titles = data.query.search.map(r => r.title).join('|');
+  const infoUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(titles)}&prop=imageinfo&iiprop=url|mediatype&format=json&origin=*`;
+  const infoData = await (await fetch(infoUrl, { signal: AbortSignal.timeout(6000) })).json();
+
+  return Object.values(infoData.query?.pages || {}).reduce((acc, page) => {
+    const info = page.imageinfo?.[0];
+    if (!info) return acc;
+    const imgUrl = info.url;
+    const title = (page.title || '').toLowerCase();
+    // Only accept images (not audio/video) AND must look like a score page
+    const isImage = /\.(jpg|jpeg|png|gif|svg)$/i.test(imgUrl);
+    const looksLikeScore = title.includes('score') || title.includes('sheet') ||
+      title.includes('music') || title.includes('tablature') || title.includes('partitura') ||
+      title.includes('notation') || title.includes('manuscript') || title.endsWith('.svg');
+    if (isImage && looksLikeScore) acc.push({ url: imgUrl, title: page.title });
+    return acc;
+  }, []);
+}
+
+/**
+ * Generates paginated guitar tablature images from currentSongData.
+ * Returns array of { url, title } objects (data URLs).
+ */
+function generateTabImages(songData) {
+  if (!songData || !songData.notes || songData.notes.length === 0) return [];
+
+  const STRING_NAMES = ['e', 'B', 'G', 'D', 'A', 'E']; // string index 1→e, 6→E
+  const BG        = '#0d0d1a';
+  const LINE_CLR  = '#334';
+  const TEXT_CLR  = '#e0e8ff';
+  const NEON      = '#00e5ff';
+  const DIM_CLR   = '#556';
+  const ACCENT    = '#ff2d78';
+
+  // Layout
+  const PW = 900, PH = 1100;
+  const MARGIN = 50;
+  const HEADER_H = 170;
+  const STR_SPACING = 24;       // px between tab lines
+  const TAB_H = STR_SPACING * 5; // total height of 6 lines
+  const ROW_LABEL_W = 30;        // width for string labels
+  const COL_W = 58;              // width per chord column
+  const ROW_GAP = 50;            // gap between rows (for chord names above)
+  const ROW_H = TAB_H + ROW_GAP;
+  const USABLE_W = PW - MARGIN * 2 - ROW_LABEL_W;
+  const COLS_PER_ROW = Math.floor(USABLE_W / COL_W);
+  const ROWS_PER_PAGE = Math.floor((PH - HEADER_H - MARGIN) / ROW_H);
+
+  // Deduplicate consecutive identical chords in notes → chord sequence
+  const chords = [];
+  let lastChordKey = null;
+  for (const note of songData.notes) {
+    const key = `${note.latin||note.anglo||'?'}-${note.fret}-${note.string}`;
+    if (key !== lastChordKey) {
+      chords.push(note);
+      lastChordKey = key;
+    }
+  }
+
+  const pages = [];
+  let chordIdx = 0;
+
+  while (chordIdx < chords.length) {
+    const canvas = document.createElement('canvas');
+    canvas.width = PW; canvas.height = PH;
+    const ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, PW, PH);
+
+    // Header (only first page)
+    if (pages.length === 0) {
+      ctx.fillStyle = NEON;
+      ctx.font = 'bold 28px Outfit, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(songData.title || 'Tablatura', PW / 2, 40);
+      ctx.fillStyle = TEXT_CLR;
+      ctx.font = '18px Outfit, sans-serif';
+      ctx.fillText(`${songData.artist || ''}   ♩ = ${songData.bpm || 120} BPM`, PW / 2, 68);
+      
+      const tech = songData.technique || {};
+      ctx.font = '14px Outfit, sans-serif';
+      ctx.fillStyle = '#bbb';
+      
+      // Limit text length to avoid overflowing canvas
+      const trunc = (str, len) => str.length > len ? str.substring(0, len) + '...' : str;
+      
+      ctx.fillText(`✋ Manos: ${trunc(tech.hands || 'Estándar', 100)}`, PW / 2, 98);
+      ctx.fillText(`🎸 Ritmo: ${trunc(tech.rhythm || 'Básico', 100)}`, PW / 2, 120);
+      ctx.fillText(`🎛️ Efectos: ${trunc(tech.effects || 'Ninguno', 100)}`, PW / 2, 142);
+
+      // Divider
+      ctx.strokeStyle = NEON;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(MARGIN, 155); ctx.lineTo(PW - MARGIN, 155); ctx.stroke();
+    }
+
+    let y0 = pages.length === 0 ? HEADER_H : MARGIN;
+
+    for (let row = 0; row < ROWS_PER_PAGE && chordIdx < chords.length; row++) {
+      const x0 = MARGIN + ROW_LABEL_W;
+      const y = y0 + row * ROW_H;
+
+      // Draw string labels
+      for (let s = 0; s < 6; s++) {
+        ctx.fillStyle = DIM_CLR;
+        ctx.font = '13px Courier New, monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(STRING_NAMES[s], MARGIN + ROW_LABEL_W - 4, y + s * STR_SPACING + 5);
+      }
+
+      // Draw 6 horizontal tab lines for this row
+      const rowEndX = x0 + COLS_PER_ROW * COL_W;
+      for (let s = 0; s < 6; s++) {
+        ctx.strokeStyle = LINE_CLR;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x0, y + s * STR_SPACING);
+        ctx.lineTo(rowEndX, y + s * STR_SPACING);
+        ctx.stroke();
+      }
+
+      // Draw each chord column in this row
+      for (let col = 0; col < COLS_PER_ROW && chordIdx < chords.length; col++) {
+        const note = chords[chordIdx];
+        const cx = x0 + col * COL_W + COL_W / 2;
+        const stringIdx = note.string - 1; // 0-based (0=e, 5=E)
+
+        // Chord name above tab
+        ctx.fillStyle = ACCENT;
+        ctx.font = 'bold 12px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(note.latin || note.anglo || '', cx, y - 6);
+
+        // Draw fret number on the correct string line
+        const sy = y + stringIdx * STR_SPACING;
+        const fretStr = String(note.fret);
+        const fretW = fretStr.length * 9 + 6;
+
+        // Clear line behind number
+        ctx.fillStyle = BG;
+        ctx.fillRect(cx - fretW / 2, sy - 10, fretW, 16);
+
+        // Fret number
+        ctx.fillStyle = NEON;
+        ctx.font = 'bold 14px Courier New, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(fretStr, cx, sy + 5);
+
+        // Other strings show dashes
+        for (let s = 0; s < 6; s++) {
+          if (s === stringIdx) continue;
+          ctx.fillStyle = DIM_CLR;
+          ctx.font = '12px Courier New, monospace';
+          ctx.fillText('–', cx, y + s * STR_SPACING + 5);
+        }
+
+        chordIdx++;
+      }
+    }
+
+    // Page number
+    ctx.fillStyle = DIM_CLR;
+    ctx.font = '12px Outfit, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Pág. ${pages.length + 1}  •  Generada por QGHERO IA`, PW / 2, PH - 15);
+
+    pages.push({ url: canvas.toDataURL('image/png'), title: `Página ${pages.length + 1}` });
+  }
+
+  return pages;
+}
+
+async function searchSheetMusicSmart(songTitle, artistHint = '') {
+  const clean = songTitle.replace(/[\(\)\[\]]/g, '').trim();
+  const artist = artistHint.trim();
+
+  // Only try queries where Commons is likely to have a score (classical/well-known)
+  const queries = [
+    artist ? `${artist} ${clean} guitar` : null,
+    `${clean} guitar`,
+    artist ? `${artist} ${clean}` : null,
+    `${clean}`,
+  ].filter(Boolean);
+
+  for (const q of queries) {
+    try {
+      const results = await searchCommons(q);
+      if (results.length > 0) return { mode: 'images', images: results };
+    } catch (_) { /* try next */ }
+  }
+
+  // No external score found → generate our own tablature from the song data
+  return { mode: 'images', images: generateTabImages(currentSongData) };
+}
+
+function openScoreViewer(result, songTitle) {
+  scoreImages = result.mode === 'images' ? result.images : [];
+  scoreIndex = 0;
+  const viewer = document.getElementById('score-viewer');
+  const img = document.getElementById('score-image');
+  const container = document.getElementById('score-image-container');
+  const info = document.getElementById('score-page-info');
+  const titleEl = document.getElementById('score-title');
+  const prevBtn = document.getElementById('score-prev');
+  const nextBtn = document.getElementById('score-next');
+  const autoBtn = document.getElementById('score-auto');
+
+  titleEl.textContent = `Partitura: ${songTitle}`;
+  viewer.style.display = 'flex';
+  document.getElementById('score-error').style.display = 'none';
+
+  if (result.mode === 'iframe') {
+    // Embed MuseScore search results directly — no user action needed
+    img.style.display = 'none';
+    let iframe = document.getElementById('score-iframe');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.id = 'score-iframe';
+      iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0.5rem;';
+      container.appendChild(iframe);
+    }
+    iframe.src = result.url;
+    iframe.style.display = 'block';
+    info.textContent = 'MuseScore';
+    // Navigation not applicable for iframe mode
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    autoBtn.style.display = 'none';
+  } else {
+    // Image navigation mode
+    let iframe = document.getElementById('score-iframe');
+    if (iframe) iframe.style.display = 'none';
+    img.style.display = 'block';
+    prevBtn.style.display = '';
+    nextBtn.style.display = '';
+    autoBtn.style.display = '';
+
+    const show = (i) => {
+      scoreIndex = Math.max(0, Math.min(i, scoreImages.length - 1));
+      img.src = scoreImages[scoreIndex].url;
+      info.textContent = `${scoreIndex + 1} / ${scoreImages.length}`;
+    };
+    show(0);
+
+    prevBtn.onclick = () => show(scoreIndex - 1);
+    nextBtn.onclick = () => show(scoreIndex + 1);
+
+    autoBtn.onclick = () => {
+      if (scoreAutoInterval) {
+        clearInterval(scoreAutoInterval); scoreAutoInterval = null;
+        autoBtn.textContent = '▶️ Auto';
+      } else {
+        scoreAutoInterval = setInterval(() => {
+          if (scoreIndex >= scoreImages.length - 1) {
+            clearInterval(scoreAutoInterval); scoreAutoInterval = null;
+            autoBtn.textContent = '▶️ Auto';
+          } else { show(scoreIndex + 1); }
+        }, 4000);
+        autoBtn.textContent = '⏹ Parar';
+      }
+    };
+  }
+
+  document.getElementById('score-close').onclick = () => {
+    if (scoreAutoInterval) { clearInterval(scoreAutoInterval); scoreAutoInterval = null; }
+    autoBtn.textContent = '▶️ Auto';
+    prevBtn.style.display = ''; nextBtn.style.display = ''; autoBtn.style.display = '';
+    viewer.style.display = 'none';
+    const iframe = document.getElementById('score-iframe');
+    if (iframe) iframe.src = '';
+  };
+}
+
 function showTechniqueModal(data) {
+
+  autoExpandRunning = false; // Reset so a new song starts fresh
+
   document.getElementById('tech-song-title').textContent = data.title;
   
   const tech = data.technique || {};
-  document.getElementById('tech-hands').textContent = tech.hands || "Posición estándar.";
-  document.getElementById('tech-rhythm').textContent = tech.rhythm || "Ritmo básico.";
-  document.getElementById('tech-effects').textContent = tech.effects || "Ninguno.";
+  document.getElementById('tech-hands').innerHTML = linkMusicTerms(tech.hands || "Posición estándar.");
+  document.getElementById('tech-rhythm').innerHTML = linkMusicTerms(tech.rhythm || "Ritmo básico.");
+  document.getElementById('tech-effects').innerHTML = linkMusicTerms(tech.effects || "Ninguno.");
+
+  // Wire up clickable music terms
+  modals.technique.querySelectorAll('.music-term').forEach(span => {
+    span.style.cssText = 'color:#00e5ff; cursor:pointer; text-decoration:underline dotted; font-weight:500;';
+    span.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const helpModal = document.getElementById('global-help-modal');
+      document.getElementById('help-title').textContent = `📖 ${span.textContent}`;
+      document.getElementById('help-content').innerHTML = `<p style="font-size:1.1rem;">${span.getAttribute('data-def')}</p>`;
+      helpModal.classList.remove('hidden');
+    });
+  });
   
   const schemaEl = document.getElementById('tech-schema');
-  if (tech.schema) {
+  if (data.notes && data.notes.length > 0) {
+    schemaEl.textContent = buildChronologicalSchema(data.notes, tech.schema);
+    schemaEl.classList.remove('hidden');
+  } else if (tech.schema) {
     schemaEl.textContent = Array.isArray(tech.schema) ? tech.schema.join('\n') : tech.schema;
     schemaEl.classList.remove('hidden');
   } else {
     schemaEl.classList.add('hidden');
   }
+
+  const statusEl = document.getElementById('auto-expand-status');
+  if (statusEl) statusEl.textContent = '';
+  
+  // ── Partitura: buscar en background, abrir al instante cuando el usuario pulse ──
+  const scoreBtn = document.getElementById('show-score-btn');
+  scoreBtn.disabled = true;
+  scoreBtn.textContent = '⏳ Buscando partitura...';
+  scoreBtn.style.cssText = 'border-color:#555; color:#555; margin-bottom:0.5rem;';
+
+  let prefetchedScore = null;
+
+  searchSheetMusicSmart(data.title || 'guitar', data.artist || '')
+    .then(result => {
+      prefetchedScore = result;
+      scoreBtn.disabled = false;
+      scoreBtn.textContent = '🎼 Ver Partitura';
+      scoreBtn.style.cssText = 'border-color:var(--neon-cyan); color:var(--neon-cyan); margin-bottom:0.5rem;';
+    })
+    .catch(() => {
+      // Fallback to MuseScore iframe — always available
+      const msQuery = encodeURIComponent(data.title || 'guitar');
+      prefetchedScore = { mode: 'iframe', url: `https://musescore.com/sheetmusic?text=${msQuery}&instrument=guitar` };
+      scoreBtn.disabled = false;
+      scoreBtn.textContent = '🎼 Ver Partitura';
+      scoreBtn.style.cssText = 'border-color:var(--neon-cyan); color:var(--neon-cyan); margin-bottom:0.5rem;';
+    });
+
+  scoreBtn.onclick = () => {
+    if (!prefetchedScore) return;
+    openScoreViewer(prefetchedScore, data.title || 'Partitura');
+  };
   
   modals.technique.classList.remove('hidden');
+
+  // Start auto-expanding the song in the background
+  setTimeout(() => autoExpandSong(), 1200);
 }
 
 function extractVideoId(url) {

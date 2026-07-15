@@ -16,24 +16,23 @@ Debe tener exactamente esta estructura:
     "rhythm": "Explicación del punteo/rasgueo. Usa p,i,m,a,e para los dedos de la mano derecha.",
     "effects": "Efectos especiales o percusión.",
     "schema": [
-      "¡MUY IMPORTANTE!: NO pongas solo 1 o 2 acordes. Escribe los esquemas ASCII de TODOS los acordes distintos que aparecen en TODA LA CANCIÓN (Intro, Verso, Estribillo, etc.). Mínimo genera de 4 a 6 esquemas para canciones completas. Representados como un array de strings (una línea por string).",
-      "Re Mayor (D):",
-      "TS      Ⅰ   Ⅱ   Ⅲ",
-      "E (1) |---|-2-|---",
-      "B (2) |---|---|-3-",
-      "G (3) |---|-1-|---",
-      "D (4) O---|---|---",
-      "A (5) X---|---|---",
-      "E (6) X---|---|---",
-      "",
-      "Do Mayor (C):",
+      "La menor (Am) [trastes I-III, acorde abierto]:",
       "TS      Ⅰ   Ⅱ   Ⅲ",
       "E (1) O---|---|---",
       "B (2) |-1-|---|---",
-      "G (3) O---|---|---",
-      "D (4) |---|-2-|---",
-      "A (5) |---|---|-3-",
-      "E (6) X---|---|---"
+      "G (3) |---|-2-|---",
+      "D (4) |---|-3-|---",
+      "A (5) O---|---|---",
+      "E (6) X---|---|---",
+      "",
+      "La Mayor barre (A) [cejilla en traste V]:",
+      "TS      Ⅴ   Ⅵ   Ⅶ",
+      "E (1) 1---|---|---",
+      "B (2) 1---|---|---",
+      "G (3) 1---|---|---",
+      "D (4) 1---|-3-|---",
+      "A (5) 1---|-3-|---",
+      "E (6) 1---|---|---"
     ]
   },
   "notes": [
@@ -44,8 +43,10 @@ Debe tener exactamente esta estructura:
 Genera al menos 16 notas iniciales (una progresión o intro completa, aprox 4 compases).
 
 REGLAS ESTRICTAS PARA EL JSON:
-1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los valores de texto ("hands", "rhythm", "effects", etc)! Si necesitas separar párrafos, escribe literalmente los caracteres \\\\n.
-2. Devuelve SÓLO el JSON puro, sin bloques markdown de código.`;
+1. ¡CRÍTICO PARA LOS TRASTES EN 'schema'!: La fila "TS" de cada esquema DEBE indicar los trastes REALES del acorde. Si el acorde usa los trastes IV, V y VI, escribe "TS      Ⅳ   Ⅴ   Ⅵ". Si usa trastes I, II, III, escribe "TS      Ⅰ   Ⅱ   Ⅲ". NO siempre uses Ⅰ Ⅱ Ⅲ para todos los acordes, eso sería incorrecto.
+2. ¡CRÍTICO PARA 'schema'!: El array 'schema' DEBE ser una lista CRONOLÓGICA EXACTA de todos los acordes o notas que suenan en el array 'notes', en el mismo orden. Para la PRIMERA vez que aparece un acorde/nota, dibuja su esquema ASCII completo (6 cuerdas). Si el acorde/nota SE REPITE más adelante, escribe solo su nombre (ej. 'Re Mayor (D) - Repetición').
+3. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los valores de texto ("hands", "rhythm", "effects", etc)! Si necesitas separar párrafos, escribe literalmente los caracteres \\\\n.
+4. Devuelve SÓLO el JSON puro, sin bloques markdown de código.`;
 
   return callGroq(apiKey, prompt);
 }
@@ -61,7 +62,16 @@ Genera un JSON puro con la CONTINUACIÓN de los acordes/notas de la canción (al
 Estructura obligatoria:
 {
   "new_schemas": [
-    "Si en esta nueva parte aparecen acordes NUEVOS, añade sus esquemas ASCII aquí. Si los acordes simplemente se repiten y no hay ninguno nuevo, DEBES devolver un array con un único string que diga exactamente: 'Se repiten los acordes anteriores.'"
+    "La menor (Am) - Repetición",
+    "",
+    "La Mayor barre (A) [cejilla en traste V]:",
+    "TS      Ⅴ   Ⅵ   Ⅶ",
+    "E (1) 1---|---|---",
+    "B (2) 1---|---|---",
+    "G (3) 1---|---|---",
+    "D (4) 1---|-3-|---",
+    "A (5) 1---|-3-|---",
+    "E (6) 1---|---|---"
   ],
   "notes": [
     { "time": ${lastTime + 1}, "duration": 1.5, "string": 6, "fret": 3, "finger": 2, "latin": "Sol", "anglo": "G" }
@@ -70,8 +80,10 @@ Estructura obligatoria:
 Asegúrate de que el "time" de las nuevas notas sea estrictamente mayor que ${lastTime}, de forma ascendente.
 
 REGLAS ESTRICTAS PARA EL JSON:
-1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los strings! Si necesitas saltos de línea, usa literalmente \\\\n.
-2. Devuelve SÓLO el JSON puro, sin bloques markdown de código.`;
+1. ¡CRÍTICO PARA LOS TRASTES EN 'new_schemas'!: La fila "TS" de cada esquema DEBE indicar los trastes REALES del acorde. Si el acorde está en traste VII, VIII y IX, escribe "TS      Ⅶ   Ⅷ   Ⅸ". NO siempre uses Ⅰ Ⅱ Ⅲ.
+2. ¡CRÍTICO PARA 'new_schemas'!: El array 'new_schemas' DEBE ser una lista CRONOLÓGICA EXACTA de los acordes/notas generados en 'notes'. Para acordes NUEVOS dibuja su esquema ASCII completo. Para acordes que SE REPITEN, escribe solo su nombre (ej. 'Do Mayor (C) - Repetición').
+3. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los strings! Si necesitas saltos de línea, usa literalmente \\\\n.
+4. Devuelve SÓLO el JSON puro, sin bloques markdown de código.`;
 
   return callGroq(apiKey, prompt, 0.1, 2500);
 }
