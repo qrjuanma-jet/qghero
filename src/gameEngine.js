@@ -16,6 +16,7 @@ export class GameEngine {
 
     this.container = document.getElementById('note-cards-container');
     this.viewport = document.getElementById('note-cards-viewport');
+    this.lyricsBar = document.getElementById('lyrics-bar');
     this.progressFill = document.getElementById('game-progress-fill');
     this.progressText = document.getElementById('game-progress-text');
 
@@ -49,7 +50,9 @@ export class GameEngine {
       card.className = 'note-card';
       card.dataset.index = i;
 
-      const chordName = note.latin || note.anglo || '?';
+      const latin = note.latin || '?';
+      const anglo = note.anglo || '?';
+      const chordName = `${latin} (${anglo})`;
       const mins = Math.floor(note.time / 60);
       const secs = Math.floor(note.time % 60).toString().padStart(2, '0');
       const timeStr = `${mins}:${secs}`;
@@ -74,7 +77,7 @@ export class GameEngine {
       const footer = document.createElement('div');
       footer.className = 'card-footer';
       const fingerText = note.finger > 0 ? `Dedo ${note.finger}` : '';
-      const fretText = note.fret >= 0 ? `Traste ${note.fret}` : '';
+      const fretText = note.fret >= 0 ? `Traste ${this.toRoman(note.fret)}` : '';
       footer.innerHTML = `
         <span class="card-finger">${fingerText}</span>
         <span class="card-fret">${fretText}</span>
@@ -117,7 +120,7 @@ export class GameEngine {
       if (note.string === s) {
         const dot = document.createElement('div');
         dot.className = `mini-fret-dot str-${s}`;
-        dot.textContent = note.fret;
+        dot.textContent = this.toRoman(note.fret);
         // Position: map fret 0-24 to 5%-95% of width
         const pos = note.fret === 0 ? 3 : Math.min(5 + (note.fret / 24) * 90, 95);
         dot.style.left = `${pos}%`;
@@ -132,12 +135,25 @@ export class GameEngine {
     if (note.fret > 0) {
       const label = document.createElement('div');
       label.className = 'mini-fret-label';
-      label.textContent = `T${note.fret}`;
+      label.textContent = `T${this.toRoman(note.fret)}`;
       fb.appendChild(label);
     }
 
     return fb;
   }
+
+  toRoman(num) {
+    if (num <= 0) return num.toString();
+    const romanMap = {
+      1: 'Ⅰ', 2: 'Ⅱ', 3: 'Ⅲ', 4: 'Ⅳ', 5: 'Ⅴ', 6: 'Ⅵ', 7: 'Ⅶ', 8: 'Ⅷ',
+      9: 'Ⅸ', 10: 'Ⅹ', 11: 'Ⅺ', 12: 'Ⅻ', 13: 'XIII', 14: 'XIV', 15: 'XV',
+      16: 'XVI', 17: 'XVII', 18: 'XVIII', 19: 'XIX', 20: 'XX', 21: 'XXI',
+      22: 'XXII', 23: 'XXIII', 24: 'XXIV'
+    };
+    return romanMap[num] || num.toString();
+  }
+
+
 
   start() {
     this.isPlaying = true;
@@ -206,6 +222,17 @@ export class GameEngine {
 
     if (newActive === this.activeIndex) return;
     this.activeIndex = newActive;
+
+    if (this.activeIndex >= 0 && this.activeIndex < this.notes.length) {
+      const currentLyric = this.notes[this.activeIndex].lyric;
+      if (this.lyricsBar) {
+        if (currentLyric && currentLyric.trim().length > 0) {
+          this.lyricsBar.textContent = currentLyric;
+        }
+      }
+    } else {
+      if (this.lyricsBar) this.lyricsBar.textContent = '';
+    }
 
     // Update card classes
     this.cards.forEach((card, i) => {

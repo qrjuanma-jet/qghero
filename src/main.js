@@ -91,6 +91,7 @@ function initApp() {
   if (groqApiKey) {
     showScreen('main', false);
     checkSharedUrl();
+    renderSavedSongs();
   } else {
     showScreen('login', false);
   }
@@ -355,6 +356,10 @@ function setupEventListeners() {
     try {
       currentSongData = await fetchSongData(groqApiKey, name);
       
+      if (videoId) {
+        currentSongData.originalVideoId = videoId;
+      }
+      
       // Setup Game UI
       document.getElementById('current-song-title').textContent = currentSongData.title || name;
       gameEngine.loadSong(currentSongData);
@@ -592,13 +597,84 @@ function buildChronologicalSchema(notes, rawSchemaArray) {
 
 let autoExpandRunning = false;
 
+function saveCurrentSong() {
+  if (!currentSongData || !currentSongData.title) return;
+  try {
+    const saved = JSON.parse(localStorage.getItem('qghero_saved_songs') || '[]');
+    const filtered = saved.filter(s => s.title !== currentSongData.title);
+    filtered.unshift(currentSongData);
+    if (filtered.length > 20) filtered.pop();
+    localStorage.setItem('qghero_saved_songs', JSON.stringify(filtered));
+    renderSavedSongs(); // update UI if visible
+  } catch (e) { console.error("Error saving song", e); }
+}
+
+function loadSavedSong(songData) {
+  currentSongData = songData;
+  document.getElementById('current-song-title').textContent = currentSongData.title || "Canción Guardada";
+  gameEngine.loadSong(currentSongData);
+  
+  // Try to find if this song had a youtube ID from the original input or title
+  // Since we don't save the URL explicitly, we can't easily get it unless we saved it.
+  // Wait, if it has a youtube URL, let's just assume it doesn't for now unless we add a field.
+  // Actually, we can add `originalUrl` to currentSongData when first fetched.
+  if (currentSongData.originalVideoId) {
+    initShareButtons(`https://youtube.com/watch?v=${currentSongData.originalVideoId}`);
+    document.getElementById('youtube-player').style.display = 'block';
+    initYouTubePlayer(currentSongData.originalVideoId);
+  } else {
+    initShareButtons('');
+    document.getElementById('youtube-player').style.display = 'none';
+    setTimeout(() => gameEngine.play(), 1000);
+  }
+  
+  showTechniqueModal(currentSongData);
+}
+
+function renderSavedSongs() {
+  const container = document.getElementById('saved-songs-container');
+  const list = document.getElementById('saved-songs-list');
+  if (!container || !list) return;
+  
+  try {
+    const saved = JSON.parse(localStorage.getItem('qghero_saved_songs') || '[]');
+    if (saved.length === 0) {
+      container.style.display = 'none';
+      return;
+    }
+    
+    container.style.display = 'block';
+    list.innerHTML = '';
+    
+    saved.forEach((song, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn secondary-btn';
+      btn.style.cssText = 'text-align: left; padding: 0.8rem; display: flex; justify-content: space-between; align-items: center; border-color: rgba(255,255,255,0.1);';
+      
+      const duration = song.notes && song.notes.length > 0 
+        ? Math.round(Math.max(...song.notes.map(n => n.time))) 
+        : 0;
+      
+      btn.innerHTML = `
+        <span><strong>${song.title}</strong> <span style="color:var(--text-secondary); font-size:0.8rem; margin-left: 0.5rem;">${song.artist || ''}</span></span>
+        <span style="color:var(--neon-cyan); font-size:0.8rem;">${duration}s</span>
+      `;
+      
+      btn.addEventListener('click', () => loadSavedSong(song));
+      list.appendChild(btn);
+    });
+  } catch (e) {
+    console.error("Error rendering saved songs", e);
+  }
+}
+
 async function autoExpandSong() {
   if (autoExpandRunning) return;
   autoExpandRunning = true;
 
   const statusEl = document.getElementById('auto-expand-status');
-  const MAX_EXPANSIONS = 8;
-  const MIN_DURATION_S = 120; // stop when song is at least 2 minutes
+  const MAX_EXPANSIONS = 20; // Increased to allow long songs
+  const MIN_DURATION_S = ytPlayer && ytPlayer.getDuration && ytPlayer.getDuration() > 0 ? ytPlayer.getDuration() : 180;
 
   let expansions = 0;
 
@@ -612,7 +688,6 @@ async function autoExpandSong() {
 
     const lastTime = Math.max(...currentSongData.notes.map(n => n.time));
     if (lastTime >= MIN_DURATION_S) {
-      setStatus(`✅ Canción completa (${Math.round(lastTime)}s)`);
       break;
     }
 
@@ -634,6 +709,8 @@ async function autoExpandSong() {
           schemaEl.textContent = buildChronologicalSchema(currentSongData.notes, currentSongData.technique.schema);
         }
         gameEngine.loadSong(currentSongData);
+        saveCurrentSong(); // Guardamos paso a paso por si recarga
+        
         expansions++;
         const newLast = Math.max(...currentSongData.notes.map(n => n.time));
         setStatus(`🏗️ Construyendo canción... (sección ${expansions + 1}/${MAX_EXPANSIONS}, ${Math.round(newLast)}s)`);
@@ -641,19 +718,14 @@ async function autoExpandSong() {
         break; // No new notes, done
       }
 
-      // Small pause between requests to avoid flooding
       await sleep(1500);
-
     } catch (err) {
       if (err.message.includes('429')) {
-        // Rate limited — read the wait time and retry silently
         const match = err.message.match(/try again in ([\d\.]+)s/);
         const waitMs = match ? Math.ceil(parseFloat(match[1])) * 1000 + 2000 : 45000;
         setStatus(`⏳ Esperando límite de IA... (${Math.round(waitMs / 1000)}s)`);
         await sleep(waitMs);
-        // Don't increment expansions, retry the same step
       } else {
-        // Any other error: stop silently without disturbing the user
         break;
       }
     }
@@ -662,9 +734,9 @@ async function autoExpandSong() {
   const finalTime = currentSongData?.notes?.length > 0
     ? Math.max(...currentSongData.notes.map(n => n.time))
     : 0;
-  if (finalTime >= MIN_DURATION_S || expansions >= MAX_EXPANSIONS) {
-    setStatus(`✅ Canción construida (${Math.round(finalTime)}s)`);
-  }
+    
+  setStatus(`✅ Canción construida (${Math.round(finalTime)}s)`);
+  
   autoExpandRunning = false;
 }
 

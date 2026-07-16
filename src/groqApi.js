@@ -2,7 +2,7 @@ export async function fetchSongData(apiKey, songName) {
   if (!apiKey) throw new Error("No API Key provided");
   if (!songName) throw new Error("No song name provided");
 
-  const systemMsg = `Eres un maestro de guitarra acústica con 30 años de experiencia. Conoces a la perfección los acordes, trastes y posiciones REALES de miles de canciones. Cuando analizas una canción, usas los trastes EXACTOS donde se toca cada acorde en la realidad, NUNCA los mismos trastes genéricos para todas las canciones. Cada canción es diferente.`;
+  const systemMsg = `Eres un maestro de guitarra acústica con 30 años de experiencia. Tienes PROHIBIDO inventar los trastes o usar siempre 1, 2 y 3. Conoces los trastes EXACTOS donde se toca cada acorde en la canción real. Si la canción usa cejilla en el traste 7, usarás el traste 7. Nunca usas los mismos trastes genéricos para todas las canciones. Cada canción es diferente.`;
 
   const prompt = `
 Analiza la canción "${songName}" y devuelve un JSON puro con su estructura musical REAL para guitarra.
@@ -28,7 +28,7 @@ FORMATO OBLIGATORIO del JSON (rellena con los datos REALES de "${songName}", NO 
     ]
   },
   "notes": [
-    { "time": <segundos>, "duration": <seg>, "string": <1-6>, "fret": <TRASTE REAL 0-24>, "finger": <1-4>, "latin": "<nombre latino>", "anglo": "<nombre anglo>" }
+    { "time": <segundos>, "duration": <seg>, "string": <1-6>, "fret": <TRASTE REAL 0-24>, "finger": <1-4>, "latin": "<nombre latino puro>", "anglo": "<nombre anglo puro>", "lyric": "<palabra o sílaba cantada en este instante, o vacío>" }
   ]
 }
 
@@ -39,12 +39,14 @@ REFERENCIA DE FORMATO (esto es solo para que entiendas la estructura, NO copies 
 - Power chord traste VII: TS usa Ⅶ Ⅷ Ⅸ
 - Símbolos: O = al aire, X = no tocar, 1-4 = dedo que pisa
 
-INSTRUCCIONES CRÍTICAS:
-1. TRASTES: Analiza "${songName}" y usa los trastes donde REALMENTE se toca. "Entre Dos Tierras" usa power chords en trastes V, VII. "Wonderwall" usa trastes I-III. "Hotel California" usa trastes I-IV y VII. Cada canción es diferente. El fret del array notes DEBE coincidir con los trastes del esquema.
-2. SCHEMA CRONOLÓGICO: El array 'schema' sigue el orden de 'notes'. Primera aparición de un acorde = esquema completo. Repeticiones = solo "Nombre (X) - Repetición".
-3. NOTAS: Genera mínimo 16 notas (4 compases de intro). El BPM debe ser el real de la canción.
-4. STRINGS: hands/rhythm/effects son strings simples, sin saltos de línea reales. Usa \\\\n si necesitas separar.
-5. Devuelve SÓLO JSON puro, sin markdown.`;
+INSTRUCCIONES CRÍTICAS, BAJO PENA DE FALLO:
+1. TRASTES: Analiza "${songName}" y usa los trastes donde REALMENTE se toca. ¡ES OBLIGATORIO usar trastes altos si la canción los lleva! Por ejemplo, "Entre Dos Tierras" DEBE usar power chords en trastes 5 y 7. El fret del array notes DEBE coincidir numéricamente con los trastes romanos del esquema (ej: fret: 7 -> TS Ⅶ Ⅷ Ⅸ).
+2. NÚMEROS ROMANOS EN TS: La fila TS siempre debe empezar con "TS" y usar NÚMEROS ROMANOS para indicar los trastes (Ⅰ, Ⅱ, Ⅲ, Ⅳ, Ⅴ, Ⅵ, Ⅶ, Ⅷ, Ⅸ, Ⅹ). ¡NUNCA uses números decimales en la fila TS!
+3. SCHEMA CRONOLÓGICO: El array 'schema' sigue el orden de 'notes'. Primera aparición de un acorde = esquema completo. Repeticiones = solo "Nombre (X) - Repetición".
+4. NOTAS: Genera mínimo 16 notas (4 compases de intro). El BPM debe ser el real de la canción.
+5. STRINGS: hands/rhythm/effects son strings simples, sin saltos de línea reales. Usa \\\\n si necesitas separar.
+6. LETRAS: PROHIBIDO mezclar la letra de la canción en los campos latin o anglo. Pon la letra en el campo "lyric".
+7. Devuelve SÓLO JSON puro, sin markdown.`;
 
   return callGroq(apiKey, prompt, 0.1, 3500, systemMsg);
 }
@@ -52,7 +54,7 @@ INSTRUCCIONES CRÍTICAS:
 export async function expandGameSong(apiKey, songName, lastTime) {
   if (!apiKey) throw new Error("No API Key provided");
 
-  const systemMsg = `Eres un maestro de guitarra. Continúas generando los acordes REALES de canciones conocidas con trastes correctos. NUNCA generas trastes genéricos.`;
+  const systemMsg = `Eres un maestro de guitarra. Continúas generando los acordes REALES de canciones conocidas. TIENES PROHIBIDO usar trastes genéricos (1,2,3) si la canción usa trastes altos. Si la canción usa cejilla en el 5, genera el 5.`;
 
   const prompt = `
 Continúa la canción "${songName}" desde el segundo ${lastTime}.
@@ -65,16 +67,17 @@ FORMATO JSON obligatorio (rellena con datos REALES, NO copies estos valores):
     "<si es nuevo, esquema completo de 8 líneas con trastes reales>"
   ],
   "notes": [
-    { "time": <mayor que ${lastTime}>, "duration": <seg>, "string": <1-6>, "fret": <TRASTE REAL>, "finger": <1-4>, "latin": "<nota>", "anglo": "<nota>" }
+    { "time": <mayor que ${lastTime}>, "duration": <seg>, "string": <1-6>, "fret": <TRASTE REAL>, "finger": <1-4>, "latin": "<nota pura>", "anglo": "<nota pura>", "lyric": "<palabra cantada>" }
   ]
 }
 
-REGLAS:
+REGLAS ESTRICTAS:
 1. Los "time" DEBEN ser estrictamente mayores que ${lastTime} y ascendentes.
-2. Los "fret" deben ser los trastes REALES de la canción. Si la siguiente sección usa un acorde en traste V, pon fret:5. NO pongas siempre 1, 2, 3.
-3. La fila "TS" del esquema debe mostrar los trastes reales (ej. "TS      Ⅴ   Ⅵ   Ⅶ" para un acorde en traste V).
+2. TRASTES REALES: Los "fret" en notes deben ser los trastes REALES de la canción. Si la siguiente sección usa un acorde en traste 5, pon fret:5. ¡NO pongas siempre 1, 2, 3!
+3. NÚMEROS ROMANOS EN TS: La fila "TS" del esquema debe usar NÚMEROS ROMANOS (ej. "TS      Ⅴ   Ⅵ   Ⅶ" para un acorde en traste 5). ¡NUNCA uses decimales ahí!
 4. Acordes ya vistos = solo "Nombre - Repetición". Acordes nuevos = esquema ASCII completo de 8 líneas.
-5. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
+5. LETRAS: PROHIBIDO poner la letra de la canción en latin o anglo. Solo en el campo "lyric".
+6. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
 
   return callGroq(apiKey, prompt, 0.1, 2500, systemMsg);
 }
