@@ -2,7 +2,7 @@ export async function fetchSongData(apiKey, songName) {
   if (!apiKey) throw new Error("No API Key provided");
   if (!songName) throw new Error("No song name provided");
 
-  const systemMsg = `Eres un maestro de guitarra acústica con 30 años de experiencia. Tienes PROHIBIDO inventar los trastes o usar siempre 1, 2 y 3. Conoces los trastes EXACTOS donde se toca cada acorde en la canción real. Si la canción usa cejilla en el traste 7, usarás el traste 7. Nunca usas los mismos trastes genéricos para todas las canciones. Cada canción es diferente.`;
+  const systemMsg = `Eres un maestro de guitarra acústica con 30 años de experiencia, experto en dibujar diagramas de acordes. Tienes reglas lógicas estrictas para la digitación: un mismo dedo (1, 2, 3 o 4) NUNCA se puede usar en cuerdas distintas en el mismo acorde, a menos que esté haciendo una CEJILLA en un mismo traste (generalmente el dedo 1). ¡No inventes posiciones anatómicamente imposibles! Tienes PROHIBIDO inventar los trastes o usar siempre 1, 2 y 3. Conoces los trastes EXACTOS donde se toca cada acorde en la canción real.`;
 
   const prompt = `
 Analiza la canción "${songName}" y devuelve un JSON puro con su estructura musical REAL para guitarra.
@@ -16,16 +16,16 @@ FORMATO OBLIGATORIO del JSON (rellena con los datos REALES de "${songName}", NO 
     "hands": "<posición real de manos para ESTA canción>",
     "rhythm": "<patrón rítmico real: rasgueo, punteo, arpegio...>",
     "effects": "<efectos reales: distorsión, limpio, palm mute...>",
-    "schema": [
-      "<Latina (Anglo)> [posición real]:",
-      "TS      <traste_inicio>   <traste_inicio+1>   <traste_inicio+2>",
-      "E (1) <posición real en esta cuerda>",
-      "B (2) <posición real>",
-      "G (3) <posición real>",
-      "D (4) <posición real>",
-      "A (5) <posición real>",
-      "E (6) <posición real>"
-    ]
+      "schema": [
+        "<Latina (Anglo)> [posición real]:",
+        "TS      <traste_inicio>   <traste_inicio+1>   <traste_inicio+2>",
+        "E (1) <O/X/->---|<O/X/->---|<O/X/->---",
+        "B (2) <O/X/->---|<O/X/->---|<O/X/->---",
+        "G (3) <O/X/->---|<O/X/->---|<O/X/->---",
+        "D (4) <O/X/->---|<O/X/->---|<O/X/->---",
+        "A (5) <O/X/->---|<O/X/->---|<O/X/->---",
+        "E (6) <O/X/->---|<O/X/->---|<O/X/->---"
+      ]
   },
   "notes": [
     { "time": <segundos>, "duration": <seg>, "fingering": [{"string": 1, "fret": <traste>, "finger": <0-4>}, {"string": 2, "fret": <traste>, "finger": <0-4>}, {"string": 3, "fret": <traste>, "finger": <0-4>}, {"string": 4, "fret": <traste>, "finger": <0-4>}, {"string": 5, "fret": <traste>, "finger": <0-4>}, {"string": 6, "fret": <traste>, "finger": <0-4>}], "right_hand": "<↓, ↑, P, o X>", "latin": "<Latina>", "anglo": "<Anglo>", "lyric": "<palabra o vacío>" }
@@ -46,7 +46,8 @@ INSTRUCCIONES CRÍTICAS, BAJO PENA DE FALLO:
 4. NOTAS: Genera mínimo 16 notas (4 compases de intro). El BPM debe ser el real de la canción. "fingering" DEBE contener las 6 cuerdas con sus trastes reales y el dedo (0=al aire, -1=no tocar). "right_hand" debe ser ↓ (rasgueo abajo), ↑ (rasgueo arriba), P (punteo/arpegio) o X (muteo).
 5. STRINGS: hands/rhythm/effects son strings simples, sin saltos de línea reales. Usa \\\\n si necesitas separar.
 6. LETRAS: PROHIBIDÍSIMO escribir partes de la canción dentro del campo schema, latin o anglo. Pon la letra en el campo "lyric".
-7. Devuelve SÓLO JSON puro, sin markdown.`;
+7. DEDOS LÓGICOS: Un mismo número de dedo (2, 3 o 4) NO PUEDE estar en dos cuerdas a la vez. Solo el dedo 1 puede repetirse si hace cejilla.
+8. Devuelve SÓLO JSON puro, sin markdown.`;
 
   return callGroq(apiKey, prompt, 0.1, 2000, systemMsg);
 }
@@ -54,7 +55,7 @@ INSTRUCCIONES CRÍTICAS, BAJO PENA DE FALLO:
 export async function expandGameSong(apiKey, songName, lastTime) {
   if (!apiKey) throw new Error("No API Key provided");
 
-  const systemMsg = `Eres un maestro de guitarra. Continúas generando los acordes REALES de canciones conocidas. TIENES PROHIBIDO usar trastes genéricos (1,2,3) si la canción usa trastes altos. Si la canción usa cejilla en el 5, genera el 5.`;
+  const systemMsg = `Eres un maestro de guitarra. Continúas generando los acordes REALES. Eres un experto rellenando esquemas: recuerda que un dedo (2, 3 o 4) no puede repetirse en distintas cuerdas. Solo el dedo 1 repite si hace cejilla. TIENES PROHIBIDO usar trastes genéricos (1,2,3) si la canción usa trastes altos.`;
 
   const prompt = `
 Continúa la canción "${songName}" desde el segundo ${lastTime}.
@@ -76,9 +77,10 @@ REGLAS ESTRICTAS:
 2. TRASTES REALES: Los "fret" en notes deben ser los trastes REALES de la canción. Si la siguiente sección usa un acorde en traste 5, pon fret:5. ¡NO pongas siempre 1, 2, 3!
 3. NÚMEROS ROMANOS EN TS: La fila "TS" del esquema debe usar NÚMEROS ROMANOS (ej. "TS      Ⅴ   Ⅵ   Ⅶ" para un acorde en traste 5). ¡NUNCA uses decimales ahí!
 4. Acordes: OBLIGATORIO usar el formato "Latina (Anglo)" SIEMPRE (ej. "Sol Mayor (G)"). Acordes ya vistos = "Sol Mayor (G) - Repetición". Acordes nuevos = esquema completo.
-5. MANO DERECHA: "right_hand" debe ser estrictamente un símbolo (↓, ↑, P, X).
+5. MANO DERECHA: "right_hand" debe ser estrictamente un símbolo (↓, ↑, P, X). STRINGS sin saltos de línea reales. Usa \\\\n.
 6. LETRAS: PROHIBIDÍSIMO escribir fragmentos de la canción en latin, anglo o en los schemas. Usa el campo "lyric".
-7. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
+7. DEDOS LÓGICOS: Un dedo (2, 3, 4) no puede pisar dos cuerdas a la vez. Solo el 1 repite en cejilla.
+8. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
 
   return callGroq(apiKey, prompt, 0.1, 2000, systemMsg);
 }
@@ -86,7 +88,7 @@ REGLAS ESTRICTAS:
 export async function fetchTheoryCourse(apiKey, level) {
   if (!apiKey) throw new Error("No API Key provided");
   
-  const systemMsg = `Eres un profesor de guitarra experto. Generas clases con esquemas ASCII que SIEMPRE muestran los trastes REALES de cada acorde. Nunca usas los mismos trastes para todos los acordes.`;
+  const systemMsg = `Eres un profesor de guitarra experto. Generas clases con esquemas ASCII que SIEMPRE muestran los trastes REALES de cada acorde. Tienes una lógica perfecta: nunca repites el uso de los dedos 2, 3 o 4 en un mismo acorde. Solo el dedo 1 puede usarse en múltiples cuerdas si es cejilla.`;
 
   const prompt = `
 Genera una clase magistral de guitarra para el nivel "${level}" en HTML básico (h3, p, ul, strong).
@@ -146,7 +148,7 @@ export async function expandTheoryCourse(apiKey, level, previousContent) {
       textHistory = "..." + textHistory.substring(textHistory.length - 15000);
   }
 
-  const systemMsg = `Eres un profesor de guitarra experto. Generas clases con esquemas ASCII que SIEMPRE muestran los trastes REALES de cada acorde. Nunca repites contenido ya enseñado.`;
+  const systemMsg = `Eres un profesor de guitarra experto. Generas clases con esquemas ASCII que SIEMPRE muestran los trastes REALES de cada acorde. Tienes una lógica perfecta: nunca repites el uso de los dedos 2, 3 o 4 en un mismo acorde. Solo el dedo 1 puede usarse en múltiples cuerdas si es cejilla. Nunca repites contenido ya enseñado.`;
 
   const prompt = `
 Continúa la clase de guitarra nivel "${level}". 
@@ -189,7 +191,7 @@ export async function fetchPracticeLevel(apiKey, style, level) {
 Genera la lección de ${style.toUpperCase()} NIVEL ${level} para guitarra acústica.
 ${fretGuidance}
 
-FORMATO JSON obligatorio (rellena con acordes REALES del estilo ${style}, NO copies los valores del ejemplo):
+FORMATO JSON obligatorio (rellena con acordes REALES del estilo ${style}, NO copies los valores del ejemplo, respeta la regla de que un dedo no pisa dos cuerdas salvo cejilla):
 {
   "title": "<Nombre creativo del nivel>",
   "desc": "<Descripción motivadora>",
@@ -240,7 +242,7 @@ REGLAS:
 export async function fetchPracticeSong(apiKey, songName) {
   if (!apiKey) throw new Error("No API Key provided");
   
-  const systemMsg = `Eres un profesor de guitarra experto. Cuando analizas una canción específica, proporcionas los acordes REALES con los trastes EXACTOS donde se tocan.`;
+  const systemMsg = `Eres un profesor de guitarra experto. Eres especialista en dibujar tablaturas. Tu regla de oro es anatómica: un dedo (2, 3 o 4) JAMÁS se repite en dos cuerdas a la vez. Solo el dedo 1 puede repetir si hace cejilla. Proporcionas acordes REALES con los trastes EXACTOS.`;
 
   const prompt = `
 Analiza la canción "${songName}" y enséñale al usuario los acordes REALES para tocarla en guitarra.
@@ -258,12 +260,12 @@ FORMATO JSON obligatorio (rellena con los acordes REALES de "${songName}", NO co
       "schema": [
         "<Nombre acorde real> [posición real]:",
         "TS      <trastes reales romanos>",
-        "E (1) <pos real>",
-        "B (2) <pos real>",
-        "G (3) <pos real>",
-        "D (4) <pos real>",
-        "A (5) <pos real>",
-        "E (6) <pos real>"
+        "E (1) <O/X/->---|<O/X/->---|<O/X/->---",
+        "B (2) <O/X/->---|<O/X/->---|<O/X/->---",
+        "G (3) <O/X/->---|<O/X/->---|<O/X/->---",
+        "D (4) <O/X/->---|<O/X/->---|<O/X/->---",
+        "A (5) <O/X/->---|<O/X/->---|<O/X/->---",
+        "E (6) <O/X/->---|<O/X/->---|<O/X/->---"
       ]
     }
   ],
@@ -281,7 +283,8 @@ REGLAS:
 2. Genera TODOS los acordes distintos que usa la canción (típicamente 3-6).
 3. examples: describe la estructura real (intro usa X→Y, verso usa Y→Z, estribillo...).
 4. notes = notas de Tone.js REALES de cada acorde.
-5. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
+5. DEDOS LÓGICOS: Un dedo (2, 3, 4) no puede pisar dos cuerdas a la vez. Solo el dedo 1 hace cejilla.
+6. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
 
   return callGroq(apiKey, prompt, 0.4, 2500, systemMsg);
 }
