@@ -48,7 +48,7 @@ INSTRUCCIONES CRÍTICAS, BAJO PENA DE FALLO:
 6. LETRAS: PROHIBIDÍSIMO escribir partes de la canción dentro del campo schema, latin o anglo. Pon la letra en el campo "lyric".
 7. Devuelve SÓLO JSON puro, sin markdown.`;
 
-  return callGroq(apiKey, prompt, 0.1, 1600, systemMsg);
+  return callGroq(apiKey, prompt, 0.1, 2000, systemMsg);
 }
 
 export async function expandGameSong(apiKey, songName, lastTime) {
@@ -80,7 +80,7 @@ REGLAS ESTRICTAS:
 6. LETRAS: PROHIBIDÍSIMO escribir fragmentos de la canción en latin, anglo o en los schemas. Usa el campo "lyric".
 7. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
 
-  return callGroq(apiKey, prompt, 0.1, 1400, systemMsg);
+  return callGroq(apiKey, prompt, 0.1, 2000, systemMsg);
 }
 
 export async function fetchTheoryCourse(apiKey, level) {
@@ -126,7 +126,7 @@ CONTENIDO:
 - Un ejercicio práctico
 - Solo HTML crudo, sin markdown ni backticks`;
 
-  const content = await callGroq(apiKey, prompt, 0.5, 1500, systemMsg);
+  const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg);
   let cleanContent = content;
   if (cleanContent.startsWith('```html')) cleanContent = cleanContent.substring(7);
   if (cleanContent.startsWith('```')) cleanContent = cleanContent.substring(3);
@@ -165,7 +165,7 @@ REGLAS:
 - Debajo de cada esquema, botón: <button class="btn primary-btn play-chord-btn" data-notes='["<notas_reales>"]'>🔊 Escuchar</button>
 - Solo HTML crudo. Sin markdown. Sin repetir conceptos del historial.`;
 
-  const content = await callGroq(apiKey, prompt, 0.5, 1500, systemMsg);
+  const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg);
   let cleanContent = content;
   if (cleanContent.startsWith('```html')) cleanContent = cleanContent.substring(7);
   if (cleanContent.startsWith('```')) cleanContent = cleanContent.substring(3);
@@ -234,7 +234,7 @@ REGLAS:
 3. examples = 1-2 canciones famosas REALES que usen exactamente estos acordes.
 4. Sin saltos de línea reales en strings de texto. Sin markdown. Solo JSON puro.`;
 
-  return callGroq(apiKey, prompt, 0.4, 1500, systemMsg);
+  return callGroq(apiKey, prompt, 0.4, 2500, systemMsg);
 }
 
 export async function fetchPracticeSong(apiKey, songName) {
@@ -283,7 +283,7 @@ REGLAS:
 4. notes = notas de Tone.js REALES de cada acorde.
 5. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
 
-  return callGroq(apiKey, prompt, 0.4, 1500, systemMsg);
+  return callGroq(apiKey, prompt, 0.4, 2500, systemMsg);
 }
 
 async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, systemMsg = '') {
@@ -295,7 +295,7 @@ async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, sys
     messages.push({ role: 'user', content: prompt });
 
     const body = {
-        model: 'llama-3.1-8b-instant',
+        model: 'llama3-8b-8192',
         messages: messages,
         temperature: temperature,
         max_tokens: maxTokens
