@@ -296,8 +296,8 @@
                 <input type="range" id="time-slider" min="0" max="100" step="0.1" value="0" class="gc-slider">
                 <span id="time-display" class="gc-time">0:00</span>
                 <div class="gc-speed">
-                    <label for="speed-slider">🎛️ <span id="speed-value">1.0x</span></label>
-                    <input type="range" id="speed-slider" min="0.25" max="2.0" step="0.25" value="1.0" class="gc-speed-slider">
+                    <label for="speed-slider">🎛️ <span id="speed-value">0.7x</span></label>
+                    <input type="range" id="speed-slider" min="0.25" max="2.0" step="0.05" value="0.70" class="gc-speed-slider">
                 </div>
             </div>
 
@@ -306,12 +306,14 @@
                 <div id="note-cards-container">
                     <!-- Las viñetas se generan dinámicamente por gameEngine -->
                 </div>
-                <div id="right-hand-bar" class="right-hand-bar">↓</div>
             </div>
 
-            <!-- Renglón de letras -->
-            <div id="lyrics-bar" class="lyrics-bar">
-                <!-- La letra sincronizada aparece aquí -->
+            <!-- Renglón de letras y técnica mano derecha -->
+            <div style="display: flex; gap: 1rem; align-items: center; justify-content: center; width: 100%; max-width: 960px; margin: 1rem auto; padding: 0 1rem;">
+                <div id="lyrics-bar" class="lyrics-bar" style="flex: 1; margin: 0;">
+                    <!-- La letra sincronizada aparece aquí -->
+                </div>
+                <div id="right-hand-bar" class="right-hand-bar-bottom">↓</div>
             </div>
 
             <!-- Indicador de progreso -->

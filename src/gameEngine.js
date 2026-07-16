@@ -313,9 +313,20 @@ export class GameEngine {
       if (this.rightHandBar) this.rightHandBar.classList.remove('active');
     }
 
-    // Update card classes
+    // Update card classes and visibility (only 3 visible at a time)
+    // We want to show: activeIndex - 1, activeIndex, activeIndex + 1
+    // If activeIndex is -1 or 0, we show 0, 1, 2
+    let startIdx = Math.max(0, this.activeIndex - 1);
+    if (this.notes.length >= 3 && startIdx + 2 >= this.notes.length) {
+      startIdx = this.notes.length - 3;
+    }
+
     this.cards.forEach((card, i) => {
       card.classList.remove('active', 'played');
+      
+      const isVisible = (i >= startIdx && i <= startIdx + 2);
+      card.style.display = isVisible ? 'block' : 'none';
+
       if (i === this.activeIndex) {
         card.classList.add('active');
       } else if (i < this.activeIndex) {
@@ -323,18 +334,6 @@ export class GameEngine {
       }
     });
 
-    // Auto-scroll to keep active card visible
-    if (this.activeIndex >= 0 && this.cards[this.activeIndex]) {
-      const activeCard = this.cards[this.activeIndex];
-      const viewport = this.viewport;
-      const cardRect = activeCard.getBoundingClientRect();
-      const viewportRect = viewport.getBoundingClientRect();
-
-      // If card is below the visible area or above it, scroll it into view
-      if (cardRect.bottom > viewportRect.bottom - 20 || cardRect.top < viewportRect.top + 20) {
-        activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
   }
 
   updateProgress() {

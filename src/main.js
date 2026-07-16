@@ -615,6 +615,16 @@ function loadSavedSong(songData) {
     setTimeout(() => gameEngine.play(), 1000);
   }
   
+  // Set default speed to 0.7
+  const speedSlider = document.getElementById('speed-slider');
+  const speedValue = document.getElementById('speed-value');
+  if (speedSlider) speedSlider.value = 0.70;
+  if (speedValue) speedValue.textContent = '0.70x';
+  gameEngine.playbackRate = 0.7;
+  if (ytPlayer && ytPlayer.setPlaybackRate) {
+    ytPlayer.setPlaybackRate(0.7);
+  }
+  
   showTechniqueModal(currentSongData);
 }
 
@@ -1140,6 +1150,7 @@ function initYouTubePlayer(videoId) {
   if (ytPlayer && ytPlayer.loadVideoById) {
     ytPlayer.loadVideoById(videoId);
     ytPlayer.pauseVideo();
+    ytPlayer.setPlaybackRate(0.7);
     return;
   }
   if (window.YT && window.YT.Player) {
@@ -1154,7 +1165,9 @@ function createPlayer(videoId) {
     height: '100', width: '100', videoId: videoId,
     playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
     events: {
-      'onReady': (e) => {}, 
+      'onReady': (e) => {
+        e.target.setPlaybackRate(0.7);
+      },
       'onStateChange': (e) => {
         if (e.data == window.YT.PlayerState.PLAYING) gameEngine.start();
         else if (e.data == window.YT.PlayerState.PAUSED || e.data == window.YT.PlayerState.ENDED) gameEngine.stop();

@@ -181,7 +181,7 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 }
 #note-cards-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.8rem;
   max-width: 960px; margin: 0 auto;
 }
@@ -359,11 +359,8 @@ header { display: flex; justify-content: space-between; align-items: center; mar
   transition: all 0.2s;
 }
 
-.right-hand-bar {
-  position: absolute;
-  right: 10%;
-  top: 50%;
-  transform: translateY(-50%);
+.right-hand-bar-bottom {
+  flex-shrink: 0;
   width: 60px;
   height: 60px;
   background: rgba(0, 0, 0, 0.8);
@@ -376,14 +373,13 @@ header { display: flex; justify-content: space-between; align-items: center; mar
   color: var(--neon-magenta);
   text-shadow: 0 0 15px var(--neon-magenta);
   box-shadow: 0 0 20px rgba(255, 45, 120, 0.4);
-  opacity: 0;
+  opacity: 0.2;
   transition: all 0.1s ease-out;
-  z-index: 10;
 }
 
-.right-hand-bar.active {
+.right-hand-bar-bottom.active {
   opacity: 1;
-  transform: translateY(-50%) scale(1.3);
+  transform: scale(1.3);
 }
 
 .mini-fret-line {
