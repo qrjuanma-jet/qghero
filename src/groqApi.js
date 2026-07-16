@@ -18,19 +18,20 @@ FORMATO OBLIGATORIO del JSON:
     "effects": "<efectos reales>"
   },
   "notes": [
-    { "time": <segundos>, "duration": <seg>, "right_hand": "<↓/↑/P/X>", "latin": "<nombre latino>", "anglo": "<nombre anglo>", "lyric": "<palabra o vacío>", "single_note": {"string": <1-6>, "fret": <0-24>} }
+    { "time": <segundos>, "duration": <seg>, "right_hand": "<↓/↑/P/X>", "latin": "<nombre latino>", "anglo": "<nombre anglo>", "base_fret": <0-24>, "lyric": "<palabra o vacío>", "single_note": {"string": <1-6>, "fret": <0-24>} }
   ]
 }
 
 INSTRUCCIONES:
-1. "anglo" = notación estándar. Si es un acorde: C, D, Am, F#m, etc. Si es una NOTA SUELTA (punteo/riff), pon ej: "E note".
+1. "anglo" = notación estándar. Si es un acorde: C, D, Am, F#m, etc. Si es NOTA SUELTA (punteo): "E note".
 2. "latin" = Si es acorde: Do Mayor, Re menor. Si es NOTA SUELTA: "Nota Mi".
-3. "single_note": SI es un punteo (riff), devuelve el objeto {"string": 6, "fret": 0}. SI es un acorde, pon "single_note": null.
-4. Genera mínimo 16 notas. BPM real de la canción.
-5. "right_hand": ↓ (rasgueo abajo), ↑ (arriba), P (punteo) o X (muteo).
-6. "lyric": palabra cantada en ese instante o vacío.
-7. Tiempos ascendentes, representando la canción REAL.
-8. Devuelve SÓLO JSON puro, sin markdown.`;
+3. "base_fret" = El traste de inicio REAL del acorde en esta canción. 0 para abiertos, >0 para cejillas o acordes altos.
+4. "single_note": SI es un punteo, el objeto {"string": 6, "fret": 0}. SI es un acorde, "single_note": null.
+5. Genera mínimo 16 notas. BPM real de la canción.
+6. "right_hand": ↓ (rasgueo abajo), ↑ (arriba), P (punteo) o X (muteo).
+7. "lyric": palabra cantada en ese instante o vacío.
+8. Tiempos ascendentes, representando la canción REAL.
+9. Devuelve SÓLO JSON puro, sin markdown.`;
 
   return callGroq(apiKey, prompt, 0.1, 2000, systemMsg);
 }
@@ -47,16 +48,18 @@ Genera la SIGUIENTE sección (al menos 16 notas, 4 compases más) con los acorde
 FORMATO JSON obligatorio:
 {
   "notes": [
-    { "time": <mayor que ${lastTime}>, "duration": <seg>, "right_hand": "<↓/↑/P/X>", "latin": "<Latina>", "anglo": "<Anglo>", "lyric": "<palabra o vacío>", "single_note": {"string": <1-6>, "fret": <0-24>} }
+    { "time": <mayor que ${lastTime}>, "duration": <seg>, "right_hand": "<↓/↑/P/X>", "latin": "<Latina>", "anglo": "<Anglo>", "base_fret": <0-24>, "lyric": "<palabra o vacío>", "single_note": {"string": <1-6>, "fret": <0-24>} }
   ]
 }
 
 REGLAS ESTRICTAS:
 1. Los "time" DEBEN ser estrictamente mayores que ${lastTime} y ascendentes.
-2. "anglo" y "latin" deben ser los acordes correctos. Si es un PUNTEO, pon "E note" y rellena "single_note": {"string": 6, "fret": 0}. Si es acorde, pon "single_note": null.
-3. "right_hand" debe ser estrictamente un símbolo (↓, ↑, P, X).
-4. "lyric" la letra real en ese segundo, o vacío si no hay voz.
-5. Devuelve SÓLO JSON puro, sin markdown.`;
+2. "anglo" y "latin" deben ser los acordes correctos. 
+3. "base_fret": el traste inicial REAL del acorde (0=abierto, >0=cejilla).
+4. Si es PUNTEO, pon "E note", base_fret: 0, y "single_note": {"string": 6, "fret": 0}. Si es acorde, "single_note": null.
+5. "right_hand" debe ser estrictamente un símbolo (↓, ↑, P, X).
+6. "lyric" la letra real en ese segundo, o vacío si no hay voz.
+7. Devuelve SÓLO JSON puro, sin markdown.`;
 
   return callGroq(apiKey, prompt, 0.1, 2000, systemMsg);
 }
