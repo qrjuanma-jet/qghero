@@ -2,51 +2,34 @@ export async function fetchSongData(apiKey, songName) {
   if (!apiKey) throw new Error("No API Key provided");
   if (!songName) throw new Error("No song name provided");
 
-  const systemMsg = `Eres un maestro de guitarra acústica con 30 años de experiencia, experto en dibujar diagramas de acordes. Tienes reglas lógicas estrictas para la digitación: un mismo dedo (1, 2, 3 o 4) NUNCA se puede usar en cuerdas distintas en el mismo acorde, a menos que esté haciendo una CEJILLA en un mismo traste (generalmente el dedo 1). ¡No inventes posiciones anatómicamente imposibles! Tienes PROHIBIDO inventar los trastes o usar siempre 1, 2 y 3. Conoces los trastes EXACTOS donde se toca cada acorde en la canción real.`;
+  const systemMsg = `Eres un maestro de guitarra con 30 años de experiencia. Analizas canciones y devuelves la secuencia de acordes con sus tiempos exactos. NO necesitas generar esquemas de digitación ni fingerings, solo los NOMBRES de los acordes y sus tiempos.`;
 
   const prompt = `
 Analiza la canción "${songName}" y devuelve un JSON puro con su estructura musical REAL para guitarra.
 
-FORMATO OBLIGATORIO del JSON (rellena con los datos REALES de "${songName}", NO copies los valores de ejemplo):
+FORMATO OBLIGATORIO del JSON:
 {
   "title": "<título real>",
   "artist": "<artista real>",
-  "bpm": <BPM real de la canción>,
+  "bpm": <BPM real>,
   "technique": {
-    "hands": "<posición real de manos para ESTA canción>",
-    "rhythm": "<patrón rítmico real: rasgueo, punteo, arpegio...>",
-    "effects": "<efectos reales: distorsión, limpio, palm mute...>",
-      "schema": [
-        "<Latina (Anglo)> [posición real]:",
-        "TS      <traste_inicio>   <traste_inicio+1>   <traste_inicio+2>",
-        "E (1) <O/X/->---|<O/X/->---|<O/X/->---",
-        "B (2) <O/X/->---|<O/X/->---|<O/X/->---",
-        "G (3) <O/X/->---|<O/X/->---|<O/X/->---",
-        "D (4) <O/X/->---|<O/X/->---|<O/X/->---",
-        "A (5) <O/X/->---|<O/X/->---|<O/X/->---",
-        "E (6) <O/X/->---|<O/X/->---|<O/X/->---"
-      ]
+    "hands": "<posición real de manos>",
+    "rhythm": "<patrón rítmico real>",
+    "effects": "<efectos reales>"
   },
   "notes": [
-    { "time": <segundos>, "duration": <seg>, "fingering": [{"string": 1, "fret": <traste>, "finger": <0-4>}, {"string": 2, "fret": <traste>, "finger": <0-4>}, {"string": 3, "fret": <traste>, "finger": <0-4>}, {"string": 4, "fret": <traste>, "finger": <0-4>}, {"string": 5, "fret": <traste>, "finger": <0-4>}, {"string": 6, "fret": <traste>, "finger": <0-4>}], "right_hand": "<↓, ↑, P, o X>", "latin": "<Latina>", "anglo": "<Anglo>", "lyric": "<palabra o vacío>" }
+    { "time": <segundos>, "duration": <seg>, "right_hand": "<↓/↑/P/X>", "latin": "<nombre latino>", "anglo": "<nombre anglo>", "lyric": "<palabra o vacío>", "single_note": {"string": <1-6>, "fret": <0-24>} }
   ]
 }
 
-REFERENCIA DE FORMATO (esto es solo para que entiendas la estructura, NO copies estos acordes ni estos trastes):
-- Acorde abierto (ej. Mi menor, trastes 0-3): TS usa Ⅰ Ⅱ Ⅲ, cuerdas con O/X/números
-- Cejilla en traste II (ej. Fa#m): TS usa Ⅱ Ⅲ Ⅳ
-- Cejilla en traste V (ej. La Mayor barre): TS usa Ⅴ Ⅵ Ⅶ
-- Power chord traste VII: TS usa Ⅶ Ⅷ Ⅸ
-- Símbolos: O = al aire, X = no tocar, 1-4 = dedo que pisa
-
-INSTRUCCIONES CRÍTICAS, BAJO PENA DE FALLO:
-1. TRASTES: Analiza "${songName}" y usa los trastes donde REALMENTE se toca. ¡ES OBLIGATORIO usar trastes altos si la canción los lleva! Por ejemplo, "Entre Dos Tierras" DEBE usar power chords en trastes 5 y 7. El fret del array notes DEBE coincidir numéricamente con los trastes romanos del esquema (ej: fret: 7 -> TS Ⅶ Ⅷ Ⅸ).
-2. NÚMEROS ROMANOS EN TS: La fila TS siempre debe empezar con "TS" y usar NÚMEROS ROMANOS para indicar los trastes (Ⅰ, Ⅱ, Ⅲ, Ⅳ, Ⅴ, Ⅵ, Ⅶ, Ⅷ, Ⅸ, Ⅹ). ¡NUNCA uses números decimales en la fila TS!
-3. SCHEMA CRONOLÓGICO: El array 'schema' sigue el orden de 'notes'. OBLIGATORIO usar el formato "Latina (Anglo)" SIEMPRE, por ejemplo "Sol Mayor (G)". PROHIBIDO mezclar letra de la canción en este esquema.
-4. NOTAS: Genera mínimo 16 notas (4 compases de intro). El BPM debe ser el real de la canción. "fingering" DEBE contener las 6 cuerdas con sus trastes reales y el dedo (0=al aire, -1=no tocar). "right_hand" debe ser ↓ (rasgueo abajo), ↑ (rasgueo arriba), P (punteo/arpegio) o X (muteo).
-5. STRINGS: hands/rhythm/effects son strings simples, sin saltos de línea reales. Usa \\\\n si necesitas separar.
-6. LETRAS: PROHIBIDÍSIMO escribir partes de la canción dentro del campo schema, latin o anglo. Pon la letra en el campo "lyric".
-7. DEDOS LÓGICOS: Un mismo número de dedo (2, 3 o 4) NO PUEDE estar en dos cuerdas a la vez. Solo el dedo 1 puede repetirse si hace cejilla.
+INSTRUCCIONES:
+1. "anglo" = notación estándar. Si es un acorde: C, D, Am, F#m, etc. Si es una NOTA SUELTA (punteo/riff), pon ej: "E note".
+2. "latin" = Si es acorde: Do Mayor, Re menor. Si es NOTA SUELTA: "Nota Mi".
+3. "single_note": SI es un punteo (riff), devuelve el objeto {"string": 6, "fret": 0}. SI es un acorde, pon "single_note": null.
+4. Genera mínimo 16 notas. BPM real de la canción.
+5. "right_hand": ↓ (rasgueo abajo), ↑ (arriba), P (punteo) o X (muteo).
+6. "lyric": palabra cantada en ese instante o vacío.
+7. Tiempos ascendentes, representando la canción REAL.
 8. Devuelve SÓLO JSON puro, sin markdown.`;
 
   return callGroq(apiKey, prompt, 0.1, 2000, systemMsg);
@@ -55,32 +38,25 @@ INSTRUCCIONES CRÍTICAS, BAJO PENA DE FALLO:
 export async function expandGameSong(apiKey, songName, lastTime) {
   if (!apiKey) throw new Error("No API Key provided");
 
-  const systemMsg = `Eres un maestro de guitarra. Continúas generando los acordes REALES. Eres un experto rellenando esquemas: recuerda que un dedo (2, 3 o 4) no puede repetirse en distintas cuerdas. Solo el dedo 1 repite si hace cejilla. TIENES PROHIBIDO usar trastes genéricos (1,2,3) si la canción usa trastes altos.`;
+  const systemMsg = `Eres un maestro de guitarra. Continúas analizando canciones. NO necesitas generar esquemas de digitación, solo los nombres de los acordes y tiempos exactos.`;
 
   const prompt = `
 Continúa la canción "${songName}" desde el segundo ${lastTime}.
 Genera la SIGUIENTE sección (al menos 16 notas, 4 compases más) con los acordes REALES que siguen en la canción.
 
-FORMATO JSON obligatorio (rellena con datos REALES, NO copies estos valores):
+FORMATO JSON obligatorio:
 {
-  "new_schemas": [
-    "<si ya apareció>: Latina (Anglo) - Repetición",
-    "<si es nuevo, esquema completo de 8 líneas con trastes reales>"
-  ],
   "notes": [
-    { "time": <mayor que ${lastTime}>, "duration": <seg>, "fingering": [{"string": 1, "fret": <traste>, "finger": <0-4>}, {"string": 2, "fret": <traste>, "finger": <0-4>}, {"string": 3, "fret": <traste>, "finger": <0-4>}, {"string": 4, "fret": <traste>, "finger": <0-4>}, {"string": 5, "fret": <traste>, "finger": <0-4>}, {"string": 6, "fret": <traste>, "finger": <0-4>}], "right_hand": "<↓, ↑, P, o X>", "latin": "<Latina>", "anglo": "<Anglo>", "lyric": "<palabra cantada>" }
+    { "time": <mayor que ${lastTime}>, "duration": <seg>, "right_hand": "<↓/↑/P/X>", "latin": "<Latina>", "anglo": "<Anglo>", "lyric": "<palabra o vacío>", "single_note": {"string": <1-6>, "fret": <0-24>} }
   ]
 }
 
 REGLAS ESTRICTAS:
 1. Los "time" DEBEN ser estrictamente mayores que ${lastTime} y ascendentes.
-2. TRASTES REALES: Los "fret" en notes deben ser los trastes REALES de la canción. Si la siguiente sección usa un acorde en traste 5, pon fret:5. ¡NO pongas siempre 1, 2, 3!
-3. NÚMEROS ROMANOS EN TS: La fila "TS" del esquema debe usar NÚMEROS ROMANOS (ej. "TS      Ⅴ   Ⅵ   Ⅶ" para un acorde en traste 5). ¡NUNCA uses decimales ahí!
-4. Acordes: OBLIGATORIO usar el formato "Latina (Anglo)" SIEMPRE (ej. "Sol Mayor (G)"). Acordes ya vistos = "Sol Mayor (G) - Repetición". Acordes nuevos = esquema completo.
-5. MANO DERECHA: "right_hand" debe ser estrictamente un símbolo (↓, ↑, P, X). STRINGS sin saltos de línea reales. Usa \\\\n.
-6. LETRAS: PROHIBIDÍSIMO escribir fragmentos de la canción en latin, anglo o en los schemas. Usa el campo "lyric".
-7. DEDOS LÓGICOS: Un dedo (2, 3, 4) no puede pisar dos cuerdas a la vez. Solo el 1 repite en cejilla.
-8. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
+2. "anglo" y "latin" deben ser los acordes correctos. Si es un PUNTEO, pon "E note" y rellena "single_note": {"string": 6, "fret": 0}. Si es acorde, pon "single_note": null.
+3. "right_hand" debe ser estrictamente un símbolo (↓, ↑, P, X).
+4. "lyric" la letra real en ese segundo, o vacío si no hay voz.
+5. Devuelve SÓLO JSON puro, sin markdown.`;
 
   return callGroq(apiKey, prompt, 0.1, 2000, systemMsg);
 }

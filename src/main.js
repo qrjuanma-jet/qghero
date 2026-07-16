@@ -1,5 +1,6 @@
 // Estilos cargados en index.html
 import { fetchSongData, expandGameSong } from './groqApi.js';
+import { enrichSongData, enrichNotesWithChordDb } from './chordDb.js';
 import { GameEngine } from './gameEngine.js';
 import { initShareButtons } from './share.js';
 import { initPracticeMode } from './practiceMode.js';
@@ -378,6 +379,8 @@ function setupEventListeners() {
     
     try {
       currentSongData = await fetchSongData(groqApiKey, name);
+      // Enriquecer con la base de datos de acordes verificados
+      currentSongData = enrichSongData(currentSongData);
       
       if (videoId) {
         currentSongData.originalVideoId = videoId;
@@ -594,7 +597,7 @@ function saveCurrentSong() {
 }
 
 function loadSavedSong(songData) {
-  currentSongData = songData;
+  currentSongData = enrichSongData(songData); // Re-enriquecer con la DB de acordes
   document.getElementById('current-song-title').textContent = currentSongData.title || "Canción Guardada";
   gameEngine.loadSong(currentSongData);
   
@@ -679,6 +682,8 @@ async function autoExpandSong() {
       const newSongData = await expandGameSong(groqApiKey, currentSongData.title || 'Canción', lastTime);
 
       if (newSongData.notes && newSongData.notes.length > 0) {
+        // Enriquecer notas nuevas con la base de datos de acordes
+        newSongData.notes = enrichNotesWithChordDb(newSongData.notes);
         currentSongData.notes = currentSongData.notes.concat(newSongData.notes);
         if (newSongData.new_schemas && newSongData.new_schemas.length > 0) {
           if (!Array.isArray(currentSongData.technique.schema)) {

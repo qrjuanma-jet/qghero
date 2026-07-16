@@ -120,7 +120,7 @@ export class GameEngine {
     fb.className = 'mini-fretboard';
 
     // Get fingering array or fallback to single note logic
-    const fingerings = note.fingering || [{ string: note.string, fret: note.fret, finger: note.finger }];
+    const fingerings = note.fingering || (note.single_note ? [note.single_note] : [{ string: note.string, fret: note.fret, finger: note.finger }]);
     
     // Find min and max fret for rendering scale
     let minFret = 999;
