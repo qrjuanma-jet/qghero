@@ -224,7 +224,7 @@
                 <main class="style-content">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h3 id="style-title" style="margin-bottom: 0;">Rock</h3>
-                        <div class="level-badge">Nivel <span id="current-level-display">1</span></div>
+                        <button id="level-selector-btn" class="level-badge" style="cursor: pointer; transition: all 0.2s; border-color: var(--neon-cyan); color: var(--neon-cyan); background: rgba(0,229,255,0.1);" title="Cambiar nivel de dificultad">Nivel <span id="current-level-display">1</span> 🔽</button>
                     </div>
                     <p id="style-desc">Cargando...</p>
                     
@@ -270,40 +270,44 @@
             </div>
         </section>
 
-        <!-- PANTALLA 5: Juego (Canvas) -->
+        <!-- PANTALLA 5: Juego (Viñetas) -->
         <section id="game-screen" class="screen hidden">
             <div class="game-header">
                 <button id="back-to-menu-btn" class="btn icon-btn">⬅️</button>
                 <div class="song-info">
                     <h3 id="current-song-title">Cargando...</h3>
-                    <div class="notation-display">
-                        <span class="note-latin" id="current-note-latin">-</span>
-                        <span class="note-anglo" id="current-note-anglo">-</span>
-                    </div>
                 </div>
                 <div class="controls">
                     <button class="btn icon-btn help-btn" data-help="game" title="Ayuda del Juego">❔</button>
+                    <button id="song-tips-btn" class="btn icon-btn" title="Consejos de la canción">📋</button>
                     <button id="share-btn" class="btn icon-btn" title="Compartir">🔗</button>
-                    <button id="rewind-btn" class="btn control-btn">⏪ 10s</button>
-                    <button id="forward-btn" class="btn control-btn">⏩ 10s</button>
                 </div>
             </div>
             
-            <div class="time-control" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 0 1rem; margin-top: 1rem;">
-                <button id="play-pause-btn" class="btn icon-btn" title="Pausar/Reanudar">⏸️</button>
-                <input type="range" id="time-slider" min="0" max="100" step="0.1" value="0" style="flex-grow: 1;">
-                <span id="time-display" style="font-size: 0.9rem; min-width: 45px; color: var(--text-secondary);">0:00</span>
-            </div>
-            
-            <div class="speed-control">
-                <label for="speed-slider">Velocidad: <span id="speed-value">1.0x</span></label>
-                <input type="range" id="speed-slider" min="0.25" max="2.0" step="0.25" value="1.0">
+            <!-- Controles de reproducción -->
+            <div class="game-controls-bar">
+                <button id="play-pause-btn" class="btn icon-btn gc-btn" title="Pausar/Reanudar">⏸️</button>
+                <input type="range" id="time-slider" min="0" max="100" step="0.1" value="0" class="gc-slider">
+                <span id="time-display" class="gc-time">0:00</span>
+                <div class="gc-speed">
+                    <label for="speed-slider">🎛️ <span id="speed-value">1.0x</span></label>
+                    <input type="range" id="speed-slider" min="0.25" max="2.0" step="0.25" value="1.0" class="gc-speed-slider">
+                </div>
             </div>
 
-            <div class="canvas-container">
-                <canvas id="game-canvas"></canvas>
+            <!-- Contenedor de viñetas -->
+            <div id="note-cards-viewport">
+                <div id="note-cards-container">
+                    <!-- Las viñetas se generan dinámicamente por gameEngine -->
+                </div>
             </div>
-            
+
+            <!-- Indicador de progreso -->
+            <div id="game-progress-bar">
+                <div id="game-progress-fill"></div>
+                <span id="game-progress-text">0 / 0</span>
+            </div>
+
             <div id="youtube-player" style="position: absolute; top: -9999px; left: -9999px;"></div>
         </section>
         <!-- MODAL GLOBAL DE AYUDA -->

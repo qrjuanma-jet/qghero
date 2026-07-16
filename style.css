@@ -153,20 +153,155 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* GAME SCREEN */
-#game-screen { display: flex; flex-direction: column; }
-.game-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: rgba(0, 0, 0, 0.5); border-bottom: 1px solid var(--glass-border); z-index: 10; }
-.song-info { text-align: center; }
-.notation-display { display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem; }
-.note-latin { color: var(--neon-green); font-weight: 700; font-size: 1.2rem; }
-.note-anglo { color: var(--neon-magenta); font-weight: 700; font-size: 1.2rem; }
+/* GAME SCREEN - CARD-BASED VIÑETAS */
+#game-screen { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.game-header { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1rem; background: rgba(0, 0, 0, 0.7); border-bottom: 1px solid var(--glass-border); z-index: 10; flex-shrink: 0; }
+.song-info { text-align: center; flex: 1; }
+.song-info h3 { font-size: 1rem; margin: 0; }
 .controls { display: flex; gap: 0.5rem; }
-.control-btn { background: rgba(255, 255, 255, 0.1); color: white; padding: 8px 12px; font-size: 0.9rem; }
-.speed-control { position: absolute; top: 80px; right: 2rem; z-index: 10; background: var(--panel-bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 0.5rem; }
-.speed-control label { font-size: 0.9rem; color: var(--text-secondary); }
-.speed-control input[type=range] { accent-color: var(--neon-cyan); }
-.canvas-container { flex-grow: 1; width: 100%; position: relative; overflow: hidden; }
-canvas { display: block; width: 100%; height: 100%; }
+
+/* Controls Bar */
+.game-controls-bar {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1rem; background: rgba(0,0,0,0.5);
+  border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;
+}
+.gc-btn { font-size: 1.2rem; padding: 4px 8px; }
+.gc-slider { flex: 1; accent-color: var(--neon-cyan); height: 6px; }
+.gc-time { font-size: 0.85rem; min-width: 40px; color: var(--text-secondary); text-align: right; }
+.gc-speed { display: flex; align-items: center; gap: 4px; margin-left: 0.5rem; }
+.gc-speed label { font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; }
+.gc-speed-slider { width: 60px; accent-color: var(--neon-magenta); }
+
+/* Note Cards Viewport */
+#note-cards-viewport {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 1rem; scroll-behavior: smooth;
+  background: radial-gradient(ellipse at 50% 30%, rgba(0,229,255,0.03) 0%, transparent 70%);
+}
+#note-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.8rem;
+  max-width: 960px; margin: 0 auto;
+}
+
+/* Individual Note Card */
+.note-card {
+  background: rgba(15,15,30,0.8);
+  border: 2px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 0.6rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+.note-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 12px; opacity: 0; transition: opacity 0.3s;
+  background: radial-gradient(circle at 50% 50%, rgba(0,229,255,0.15), transparent 70%);
+}
+.note-card:hover { border-color: rgba(0,229,255,0.3); transform: translateY(-2px); }
+.note-card:hover::before { opacity: 1; }
+
+/* Active card = currently playing */
+.note-card.active {
+  border-color: var(--neon-cyan);
+  transform: scale(1.06);
+  box-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(0,229,255,0.15), inset 0 0 15px rgba(0,229,255,0.05);
+  z-index: 5;
+  animation: card-pulse 0.8s ease-in-out infinite alternate;
+}
+.note-card.active::before { opacity: 1; }
+
+/* Played card */
+.note-card.played {
+  border-color: rgba(0,255,140,0.2);
+  opacity: 0.55;
+}
+.note-card.played .card-check { display: block; }
+
+/* Card internals */
+.card-header {
+  text-align: center; margin-bottom: 0.4rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.card-chord-name {
+  font-size: 0.95rem; font-weight: 700;
+  color: var(--neon-magenta);
+  text-shadow: 0 0 8px rgba(255,45,120,0.4);
+}
+.card-time {
+  font-size: 0.65rem; color: var(--text-secondary);
+  background: rgba(255,255,255,0.05); border-radius: 4px; padding: 1px 5px;
+}
+.card-check {
+  display: none; position: absolute; top: 4px; right: 6px;
+  font-size: 0.7rem; color: var(--neon-green);
+}
+
+/* Mini Fretboard inside card */
+.mini-fretboard {
+  background: rgba(0,0,0,0.4); border-radius: 6px;
+  padding: 6px 8px; margin-bottom: 0.3rem; position: relative;
+}
+.mini-string {
+  height: 2px; background: rgba(255,255,255,0.15);
+  margin: 5px 0; position: relative; border-radius: 1px;
+}
+.mini-string:first-child { margin-top: 0; }
+.mini-string:last-child { margin-bottom: 0; }
+.mini-fret-dot {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 14px; height: 14px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.55rem; font-weight: 700; color: #fff;
+  box-shadow: 0 0 6px currentColor;
+}
+.mini-fret-label {
+  position: absolute; top: -2px; right: 4px;
+  font-size: 0.5rem; color: rgba(255,255,255,0.3);
+}
+
+/* Card footer */
+.card-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.2rem;
+}
+.card-finger { color: var(--neon-cyan); font-weight: 500; }
+.card-fret { color: rgba(255,255,255,0.4); }
+
+/* Progress Bar */
+#game-progress-bar {
+  height: 28px; background: rgba(0,0,0,0.6);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  position: relative; flex-shrink: 0; overflow: hidden;
+}
+#game-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+  transition: width 0.3s ease; opacity: 0.3;
+}
+#game-progress-text {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 0.7rem; color: rgba(255,255,255,0.6); font-weight: 500;
+}
+
+/* Animations */
+@keyframes card-pulse {
+  from { box-shadow: 0 0 20px rgba(0,229,255,0.4), 0 0 40px rgba(0,229,255,0.15); }
+  to   { box-shadow: 0 0 30px rgba(0,229,255,0.6), 0 0 60px rgba(0,229,255,0.25); }
+}
+
+/* String colors for fret dots */
+.str-1 { background: #ff0055; color: #fff; }
+.str-2 { background: #ffaa00; color: #000; }
+.str-3 { background: #ffff00; color: #000; }
+.str-4 { background: #00ff00; color: #000; }
+.str-5 { background: #00ffff; color: #000; }
+.str-6 { background: #cc00ff; color: #fff; }
 
 .level-badge {
   background: rgba(0, 255, 204, 0.2);

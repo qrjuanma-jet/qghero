@@ -83,7 +83,7 @@ function checkSharedUrl() {
 }
 
 function initApp() {
-  gameEngine = new GameEngine('game-canvas');
+  gameEngine = new GameEngine();
   initShareButtons('');
   initPracticeMode(getApiKey);
   initTheoryMode(getApiKey);
@@ -468,16 +468,15 @@ function setupEventListeners() {
   });
 
   // Game specific
-  gameEngine.onNoteHit = (note) => {
-    document.getElementById('current-note-latin').textContent = note.latin;
-    document.getElementById('current-note-anglo').textContent = note.anglo;
-  };
+  const songTipsBtn = document.getElementById('song-tips-btn');
+  if (songTipsBtn) {
+    songTipsBtn.addEventListener('click', () => {
+      showTechniqueModal(currentSongData);
+    });
+  }
   
-  gameEngine.onManualHit = async (note) => {
-    await initAudio();
-    const octave = note.string < 4 ? "4" : "3";
-    const pitch = (note.anglo || 'C') + octave;
-    playNote(pitch, 0, "8n");
+  gameEngine.onTimeJump = (targetTime) => {
+      if (ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(targetTime, true);
   };
 
   document.getElementById('back-to-menu-btn').addEventListener('click', () => {
@@ -493,16 +492,6 @@ function setupEventListeners() {
     document.getElementById('speed-value').textContent = rate.toFixed(2) + 'x';
     if (ytPlayer && ytPlayer.setPlaybackRate) ytPlayer.setPlaybackRate(rate);
     gameEngine.playbackRate = rate;
-  });
-  document.getElementById('rewind-btn').addEventListener('click', () => {
-    const newTime = Math.max(0, gameEngine.currentTime - 10);
-    if (ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(newTime, true);
-    gameEngine.updateTime(newTime, gameEngine.playbackRate);
-  });
-  document.getElementById('forward-btn').addEventListener('click', () => {
-    const newTime = gameEngine.currentTime + 10;
-    if (ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(newTime, true);
-    gameEngine.updateTime(newTime, gameEngine.playbackRate);
   });
 
   const timeSlider = document.getElementById('time-slider');

@@ -42,6 +42,29 @@ export function initPracticeMode(getApiKeyFn) {
   customSongInput = document.getElementById('custom-song-input');
   searchCustomSongBtn = document.getElementById('search-custom-song-btn');
 
+  const levelSelectorBtn = document.getElementById('level-selector-btn');
+  if (levelSelectorBtn) {
+    levelSelectorBtn.addEventListener('click', async () => {
+      if (isGenerating || currentStyle === 'custom') return;
+      const currentLvl = getLevel(currentStyle);
+      const input = prompt(`¿A qué nivel de ${currentStyle.toUpperCase()} quieres saltar?`, currentLvl);
+      if (input !== null) {
+        const nextLevel = parseInt(input);
+        if (!isNaN(nextLevel) && nextLevel > 0) {
+          const apiKey = getApiKeyFn();
+          if (!apiKey) {
+            alert("Inicia sesión con tu API Key primero.");
+            return;
+          }
+          setLevel(currentStyle, nextLevel);
+          await renderStyle(currentStyle, apiKey);
+        } else {
+          alert("Por favor, introduce un número válido mayor que 0.");
+        }
+      }
+    });
+  }
+
   levelUpBtn.addEventListener('click', async () => {
     if (isGenerating || currentStyle === 'custom') return;
     const apiKey = getApiKeyFn();

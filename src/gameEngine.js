@@ -1,19 +1,25 @@
+/**
+ * Card-based Game Engine for QGHERO
+ * Replaces the old Canvas-based scrolling engine with interactive note cards.
+ */
 export class GameEngine {
-  constructor(canvasId) {
-    this.canvas = document.getElementById(canvasId);
-    this.ctx = this.canvas.getContext('2d');
+  constructor() {
     this.notes = [];
+    this.cards = [];          // DOM elements for each note
     this.currentTime = 0;
     this.playbackRate = 1.0;
     this.isPlaying = false;
     this.animationId = null;
-    this.onNoteHit = null; // Callback for UI updates
-    
-    // Canvas dimensions
-    this.resize();
-    window.addEventListener('resize', () => this.resize());
-    
-    this.stringColors = [
+    this.activeIndex = -1;    // Currently highlighted card index
+    this.onNoteHit = null;
+    this.onTimeJump = null;   // Callback when user clicks a card to jump
+
+    this.container = document.getElementById('note-cards-container');
+    this.viewport = document.getElementById('note-cards-viewport');
+    this.progressFill = document.getElementById('game-progress-fill');
+    this.progressText = document.getElementById('game-progress-text');
+
+    this.STRING_COLORS = [
       '#ff0055', // 1: e
       '#ffaa00', // 2: B
       '#ffff00', // 3: G
@@ -21,68 +27,116 @@ export class GameEngine {
       '#00ffff', // 5: A
       '#cc00ff'  // 6: E
     ];
-    
-    this.stringFlashes = [0, 0, 0, 0, 0, 0, 0];
-    this.onManualHit = null;
-    
-    const handleTouch = (e) => {
-        if (!this.isPlaying) return;
-        if (e.type === 'touchstart') e.preventDefault();
-        
-        const touches = e.type.includes('mouse') ? [e] : e.changedTouches;
-        const rect = this.canvas.getBoundingClientRect();
-        
-        for (let i = 0; i < touches.length; i++) {
-            const touch = touches[i];
-            const x = touch.clientX - rect.left;
-            let stringIdx = Math.round(x / this.stringSpacing);
-            if (stringIdx >= 1 && stringIdx <= 6) {
-                this.handleStringTap(stringIdx);
-            }
-        }
-    };
-    
-    this.canvas.addEventListener('touchstart', handleTouch, { passive: false });
-    this.canvas.addEventListener('mousedown', handleTouch);
-  }
-
-  handleStringTap(stringIdx) {
-    this.stringFlashes[stringIdx] = 1.0;
-    
-    const hitWindow = 0.25; // +/- 0.25s hit window for manual taps
-    
-    for (let note of this.notes) {
-      if (!note.hit && note.string === stringIdx && Math.abs(note.time - this.currentTime) < hitWindow) {
-        note.hit = true;
-        note.manuallyHit = true;
-        
-        if (this.onManualHit) this.onManualHit(note);
-        if (this.onNoteHit) this.onNoteHit(note);
-        break; // only hit one note per tap
-      }
-    }
-  }
-
-  resize() {
-    const parent = this.canvas.parentElement;
-    this.canvas.width = parent.clientWidth;
-    this.canvas.height = parent.clientHeight;
-    this.width = this.canvas.width;
-    this.height = this.canvas.height;
-    
-    // Calculate string positions
-    this.stringSpacing = this.width / 7;
-    this.hitLineY = this.height - 100; // Position where note should be played
   }
 
   loadSong(songData) {
-    // Sort notes by time just in case
     this.notes = songData.notes.sort((a, b) => a.time - b.time).map(note => ({
       ...note,
       hit: false
     }));
     this.currentTime = 0;
-    this.render();
+    this.activeIndex = -1;
+    this.buildCards();
+    this.updateProgress();
+  }
+
+  buildCards() {
+    this.container.innerHTML = '';
+    this.cards = [];
+
+    this.notes.forEach((note, i) => {
+      const card = document.createElement('div');
+      card.className = 'note-card';
+      card.dataset.index = i;
+
+      const chordName = note.latin || note.anglo || '?';
+      const mins = Math.floor(note.time / 60);
+      const secs = Math.floor(note.time % 60).toString().padStart(2, '0');
+      const timeStr = `${mins}:${secs}`;
+
+      // Card header
+      const header = document.createElement('div');
+      header.className = 'card-header';
+      header.innerHTML = `
+        <span class="card-chord-name">${chordName}</span>
+        <span class="card-time">${timeStr}</span>
+      `;
+
+      // Check mark for played cards
+      const check = document.createElement('span');
+      check.className = 'card-check';
+      check.textContent = '✅';
+
+      // Mini fretboard
+      const fretboard = this.buildMiniFretboard(note);
+
+      // Card footer
+      const footer = document.createElement('div');
+      footer.className = 'card-footer';
+      const fingerText = note.finger > 0 ? `Dedo ${note.finger}` : '';
+      const fretText = note.fret >= 0 ? `Traste ${note.fret}` : '';
+      footer.innerHTML = `
+        <span class="card-finger">${fingerText}</span>
+        <span class="card-fret">${fretText}</span>
+      `;
+
+      card.appendChild(check);
+      card.appendChild(header);
+      card.appendChild(fretboard);
+      card.appendChild(footer);
+
+      // Click to jump to this note's time
+      card.addEventListener('click', () => {
+        const targetTime = Math.max(0, note.time - 0.3); // slightly before
+        this.currentTime = targetTime;
+        // Reset hit state for all notes from this point forward
+        this.notes.forEach((n, idx) => {
+          if (idx >= i) n.hit = false;
+          else n.hit = true;
+        });
+        this.updateActiveCard();
+        this.updateProgress();
+        if (this.onTimeJump) this.onTimeJump(targetTime);
+      });
+
+      this.container.appendChild(card);
+      this.cards.push(card);
+    });
+  }
+
+  buildMiniFretboard(note) {
+    const fb = document.createElement('div');
+    fb.className = 'mini-fretboard';
+
+    // Build 6 strings
+    for (let s = 1; s <= 6; s++) {
+      const stringLine = document.createElement('div');
+      stringLine.className = 'mini-string';
+
+      // If this note is on this string, add a fret dot
+      if (note.string === s) {
+        const dot = document.createElement('div');
+        dot.className = `mini-fret-dot str-${s}`;
+        dot.textContent = note.fret;
+        // Position: map fret 0-24 to 5%-95% of width
+        const pos = note.fret === 0 ? 3 : Math.min(5 + (note.fret / 24) * 90, 95);
+        dot.style.left = `${pos}%`;
+        dot.style.color = s <= 1 || s >= 6 ? '#fff' : '#000';
+        stringLine.appendChild(dot);
+      }
+
+      fb.appendChild(stringLine);
+    }
+
+    // Fret label in corner
+    if (note.fret > 0) {
+      const label = document.createElement('div');
+      label.className = 'mini-fret-label';
+      label.textContent = `T${note.fret}`;
+      fb.appendChild(label);
+    }
+
+    return fb;
   }
 
   start() {
@@ -95,152 +149,94 @@ export class GameEngine {
     this.isPlaying = false;
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
+      this.animationId = null;
     }
+  }
+
+  play() {
+    this.start();
   }
 
   updateTime(time, playbackRate = 1.0) {
     this.currentTime = time;
     this.playbackRate = playbackRate;
-    if (!this.isPlaying) this.render();
+    this.updateActiveCard();
+    this.updateProgress();
   }
 
   loop(timestamp = performance.now()) {
     if (!this.isPlaying) return;
-    
-    const delta = (timestamp - this.lastTimestamp) / 1000; // in seconds
+
+    const delta = (timestamp - this.lastTimestamp) / 1000;
     this.lastTimestamp = timestamp;
-    
-    // Predict current time based on delta, actual sync comes from YouTube API via updateTime
+
     this.currentTime += delta * this.playbackRate;
-    
-    // Decay flashes
-    for (let i=1; i<=6; i++) {
-        if (this.stringFlashes[i] > 0) {
-            this.stringFlashes[i] -= delta * 4;
-            if (this.stringFlashes[i] < 0) this.stringFlashes[i] = 0;
-        }
-    }
-    
-    this.render();
+
+    this.updateActiveCard();
     this.checkHits();
-    
+    this.updateProgress();
+
     this.animationId = requestAnimationFrame((ts) => this.loop(ts));
   }
-  
+
   checkHits() {
-    const windowOffset = 0.2; // +/- 0.2s window for visual hit
-    
-    for (let note of this.notes) {
-      if (!note.hit && Math.abs(note.time - this.currentTime) < windowOffset) {
+    const hitWindow = 0.25;
+
+    for (let i = 0; i < this.notes.length; i++) {
+      const note = this.notes[i];
+      if (!note.hit && Math.abs(note.time - this.currentTime) < hitWindow) {
         note.hit = true;
-        if (this.onNoteHit) {
-          this.onNoteHit(note);
-        }
-      } else if (note.hit && this.currentTime < note.time - windowOffset) {
-        // user rewound
-        note.hit = false;
+        if (this.onNoteHit) this.onNoteHit(note);
+      } else if (note.hit && this.currentTime < note.time - hitWindow) {
+        note.hit = false; // user rewound
       }
     }
   }
 
-  render() {
-    this.ctx.clearRect(0, 0, this.width, this.height);
-    
-    // Draw Fretboard
-    this.drawFretboard();
-    
-    // Draw Notes
-    const pixelsPerSecond = 300; // How fast notes fall
-    
-    this.notes.forEach(note => {
-      const timeDiff = note.time - this.currentTime;
-      
-      // Only draw if within screen vertically (e.g. up to 3 seconds ahead)
-      if (timeDiff > -1 && timeDiff < (this.height / pixelsPerSecond) + 1) {
-        const x = this.stringSpacing * note.string;
-        const y = this.hitLineY - (timeDiff * pixelsPerSecond);
-        
-        this.drawNote(x, y, note);
+  updateActiveCard() {
+    // Find the note closest to currentTime that hasn't fully passed
+    let newActive = -1;
+    for (let i = 0; i < this.notes.length; i++) {
+      if (this.notes[i].time <= this.currentTime + 0.5) {
+        newActive = i;
+      } else {
+        break;
+      }
+    }
+
+    if (newActive === this.activeIndex) return;
+    this.activeIndex = newActive;
+
+    // Update card classes
+    this.cards.forEach((card, i) => {
+      card.classList.remove('active', 'played');
+      if (i === this.activeIndex) {
+        card.classList.add('active');
+      } else if (i < this.activeIndex) {
+        card.classList.add('played');
       }
     });
-  }
 
-  drawFretboard() {
-    // Draw strings
-    this.ctx.lineWidth = 3;
-    for (let i = 1; i <= 6; i++) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.stringSpacing * i, 0);
-      this.ctx.lineTo(this.stringSpacing * i, this.height);
-      // Fading color towards the top
-      const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
-      grad.addColorStop(0, 'rgba(255,255,255,0.1)');
-      grad.addColorStop(1, 'rgba(255,255,255,0.4)');
-      this.ctx.strokeStyle = grad;
-      this.ctx.stroke();
-    }
-    
-    // Draw hit line (glow effect)
-    this.ctx.beginPath();
-    this.ctx.moveTo(0, this.hitLineY);
-    this.ctx.lineTo(this.width, this.hitLineY);
-    this.ctx.lineWidth = 4;
-    this.ctx.strokeStyle = 'rgba(0, 255, 204, 0.8)';
-    this.ctx.shadowBlur = 15;
-    this.ctx.shadowColor = '#00ffcc';
-    this.ctx.stroke();
-    this.ctx.shadowBlur = 0; // Reset
-    
-    // Hit indicators for each string
-    for (let i = 1; i <= 6; i++) {
-      this.ctx.beginPath();
-      this.ctx.arc(this.stringSpacing * i, this.hitLineY, 15, 0, Math.PI * 2);
-      this.ctx.strokeStyle = this.stringColors[i-1];
-      this.ctx.lineWidth = 2;
-      this.ctx.stroke();
+    // Auto-scroll to keep active card visible
+    if (this.activeIndex >= 0 && this.cards[this.activeIndex]) {
+      const activeCard = this.cards[this.activeIndex];
+      const viewport = this.viewport;
+      const cardRect = activeCard.getBoundingClientRect();
+      const viewportRect = viewport.getBoundingClientRect();
 
-      // Flash feedback
-      if (this.stringFlashes[i] > 0) {
-        this.ctx.beginPath();
-        this.ctx.arc(this.stringSpacing * i, this.hitLineY, 15 + (1 - this.stringFlashes[i]) * 25, 0, Math.PI * 2);
-        this.ctx.fillStyle = `rgba(255, 255, 255, ${this.stringFlashes[i]})`;
-        this.ctx.fill();
+      // If card is below the visible area or above it, scroll it into view
+      if (cardRect.bottom > viewportRect.bottom - 20 || cardRect.top < viewportRect.top + 20) {
+        activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
   }
 
-  drawNote(x, y, note) {
-    const color = this.stringColors[note.string - 1];
-    const radius = 20;
-    
-    // Note Glow
-    this.ctx.shadowBlur = 20;
-    this.ctx.shadowColor = color;
-    
-    // Draw Note Circle
-    this.ctx.beginPath();
-    this.ctx.arc(x, y, radius, 0, Math.PI * 2);
-    this.ctx.fillStyle = '#111';
-    this.ctx.fill();
-    this.ctx.lineWidth = 4;
-    this.ctx.strokeStyle = color;
-    this.ctx.stroke();
-    
-    // Reset shadow for text
-    this.ctx.shadowBlur = 0;
-    
-    // Draw Fret Number inside Note
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = 'bold 16px Outfit';
-    this.ctx.textAlign = 'center';
-    this.ctx.textBaseline = 'middle';
-    this.ctx.fillText(note.fret, x, y);
-    
-    // Draw Finger suggestion small below
-    if (note.finger > 0) {
-      this.ctx.fillStyle = '#aaa';
-      this.ctx.font = '12px Outfit';
-      this.ctx.fillText(`D${note.finger}`, x, y + 30);
-    }
+  updateProgress() {
+    const total = this.notes.length;
+    const played = this.activeIndex + 1;
+    const pct = total > 0 ? (played / total) * 100 : 0;
+
+    if (this.progressFill) this.progressFill.style.width = `${pct}%`;
+    if (this.progressText) this.progressText.textContent = `${Math.max(0, played)} / ${total}`;
   }
 }

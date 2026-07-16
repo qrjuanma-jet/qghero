@@ -2,128 +2,127 @@ export async function fetchSongData(apiKey, songName) {
   if (!apiKey) throw new Error("No API Key provided");
   if (!songName) throw new Error("No song name provided");
 
+  const systemMsg = `Eres un maestro de guitarra acústica con 30 años de experiencia. Conoces a la perfección los acordes, trastes y posiciones REALES de miles de canciones. Cuando analizas una canción, usas los trastes EXACTOS donde se toca cada acorde en la realidad, NUNCA los mismos trastes genéricos para todas las canciones. Cada canción es diferente.`;
+
   const prompt = `
-Eres un maestro de guitarra acústica.
-El usuario quiere tocar la canción "${songName}".
-Devuelve un JSON puro (sin formato markdown) con la estructura musical.
-Debe tener exactamente esta estructura:
+Analiza la canción "${songName}" y devuelve un JSON puro con su estructura musical REAL para guitarra.
+
+FORMATO OBLIGATORIO del JSON (rellena con los datos REALES de "${songName}", NO copies los valores de ejemplo):
 {
-  "title": "Nombre de la canción",
-  "artist": "Artista",
-  "bpm": 120,
+  "title": "<título real>",
+  "artist": "<artista real>",
+  "bpm": <BPM real de la canción>,
   "technique": {
-    "hands": "Explicación detallada de la posición de la mano izquierda (cejillas, acordes abiertos). Usa números 1-4 para dedos, T/P para pulgar. ¡REGLA DE ORO: JAMÁS asignes el mismo dedo a diferentes cuerdas en distintos trastes (salvo cejillas)! Cada nota distinta debe usar un dedo diferente.",
-    "rhythm": "Explicación del punteo/rasgueo. Usa p,i,m,a,e para los dedos de la mano derecha.",
-    "effects": "Efectos especiales o percusión.",
+    "hands": "<posición real de manos para ESTA canción>",
+    "rhythm": "<patrón rítmico real: rasgueo, punteo, arpegio...>",
+    "effects": "<efectos reales: distorsión, limpio, palm mute...>",
     "schema": [
-      "La menor (Am) [trastes I-III, acorde abierto]:",
-      "TS      Ⅰ   Ⅱ   Ⅲ",
-      "E (1) O---|---|---",
-      "B (2) |-1-|---|---",
-      "G (3) |---|-2-|---",
-      "D (4) |---|-3-|---",
-      "A (5) O---|---|---",
-      "E (6) X---|---|---",
-      "",
-      "La Mayor barre (A) [cejilla en traste V]:",
-      "TS      Ⅴ   Ⅵ   Ⅶ",
-      "E (1) 1---|---|---",
-      "B (2) 1---|---|---",
-      "G (3) 1---|---|---",
-      "D (4) 1---|-3-|---",
-      "A (5) 1---|-3-|---",
-      "E (6) 1---|---|---"
+      "<nombre acorde 1> [posición real]:",
+      "TS      <traste_inicio>   <traste_inicio+1>   <traste_inicio+2>",
+      "E (1) <posición real en esta cuerda>",
+      "B (2) <posición real>",
+      "G (3) <posición real>",
+      "D (4) <posición real>",
+      "A (5) <posición real>",
+      "E (6) <posición real>"
     ]
   },
   "notes": [
-    { "time": 1.0, "duration": 1.5, "string": 6, "fret": 3, "finger": 2, "latin": "Sol", "anglo": "G" }
+    { "time": <segundos>, "duration": <seg>, "string": <1-6>, "fret": <TRASTE REAL 0-24>, "finger": <1-4>, "latin": "<nombre latino>", "anglo": "<nombre anglo>" }
   ]
 }
 
-Genera al menos 16 notas iniciales (una progresión o intro completa, aprox 4 compases).
+REFERENCIA DE FORMATO (esto es solo para que entiendas la estructura, NO copies estos acordes ni estos trastes):
+- Acorde abierto (ej. Mi menor, trastes 0-3): TS usa Ⅰ Ⅱ Ⅲ, cuerdas con O/X/números
+- Cejilla en traste II (ej. Fa#m): TS usa Ⅱ Ⅲ Ⅳ
+- Cejilla en traste V (ej. La Mayor barre): TS usa Ⅴ Ⅵ Ⅶ
+- Power chord traste VII: TS usa Ⅶ Ⅷ Ⅸ
+- Símbolos: O = al aire, X = no tocar, 1-4 = dedo que pisa
 
-REGLAS ESTRICTAS PARA EL JSON:
-1. ¡CRÍTICO PARA LOS TRASTES EN 'schema'!: La fila "TS" de cada esquema DEBE indicar los trastes REALES del acorde. Si el acorde usa los trastes IV, V y VI, escribe "TS      Ⅳ   Ⅴ   Ⅵ". Si usa trastes I, II, III, escribe "TS      Ⅰ   Ⅱ   Ⅲ". NO siempre uses Ⅰ Ⅱ Ⅲ para todos los acordes, eso sería incorrecto.
-2. ¡CRÍTICO PARA 'schema'!: El array 'schema' DEBE ser una lista CRONOLÓGICA EXACTA de todos los acordes o notas que suenan en el array 'notes', en el mismo orden. Para la PRIMERA vez que aparece un acorde/nota, dibuja su esquema ASCII completo (6 cuerdas). Si el acorde/nota SE REPITE más adelante, escribe solo su nombre (ej. 'Re Mayor (D) - Repetición').
-3. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los valores de texto ("hands", "rhythm", "effects", etc)! Si necesitas separar párrafos, escribe literalmente los caracteres \\\\n.
-4. Devuelve SÓLO el JSON puro, sin bloques markdown de código.`;
+INSTRUCCIONES CRÍTICAS:
+1. TRASTES: Analiza "${songName}" y usa los trastes donde REALMENTE se toca. "Entre Dos Tierras" usa power chords en trastes V, VII. "Wonderwall" usa trastes I-III. "Hotel California" usa trastes I-IV y VII. Cada canción es diferente. El fret del array notes DEBE coincidir con los trastes del esquema.
+2. SCHEMA CRONOLÓGICO: El array 'schema' sigue el orden de 'notes'. Primera aparición de un acorde = esquema completo. Repeticiones = solo "Nombre (X) - Repetición".
+3. NOTAS: Genera mínimo 16 notas (4 compases de intro). El BPM debe ser el real de la canción.
+4. STRINGS: hands/rhythm/effects son strings simples, sin saltos de línea reales. Usa \\\\n si necesitas separar.
+5. Devuelve SÓLO JSON puro, sin markdown.`;
 
-  return callGroq(apiKey, prompt);
+  return callGroq(apiKey, prompt, 0.1, 3500, systemMsg);
 }
 
 export async function expandGameSong(apiKey, songName, lastTime) {
   if (!apiKey) throw new Error("No API Key provided");
 
+  const systemMsg = `Eres un maestro de guitarra. Continúas generando los acordes REALES de canciones conocidas con trastes correctos. NUNCA generas trastes genéricos.`;
+
   const prompt = `
-Eres un maestro de guitarra acústica.
-El usuario está tocando la canción "${songName}" y acaba de pulsar "+" para seguir aprendiendo.
-El último tiempo (time) de la última nota generada fue: ${lastTime} segundos.
-Genera un JSON puro con la CONTINUACIÓN de los acordes/notas de la canción (al menos 16 notas más, aprox 4 compases, siguiendo el ritmo y melodía).
-Estructura obligatoria:
+Continúa la canción "${songName}" desde el segundo ${lastTime}.
+Genera la SIGUIENTE sección (al menos 16 notas, 4 compases más) con los acordes REALES que siguen en la canción.
+
+FORMATO JSON obligatorio (rellena con datos REALES, NO copies estos valores):
 {
   "new_schemas": [
-    "La menor (Am) - Repetición",
-    "",
-    "La Mayor barre (A) [cejilla en traste V]:",
-    "TS      Ⅴ   Ⅵ   Ⅶ",
-    "E (1) 1---|---|---",
-    "B (2) 1---|---|---",
-    "G (3) 1---|---|---",
-    "D (4) 1---|-3-|---",
-    "A (5) 1---|-3-|---",
-    "E (6) 1---|---|---"
+    "<si el acorde ya apareció antes>: Nombre (X) - Repetición",
+    "<si es nuevo, esquema completo de 8 líneas con trastes reales>"
   ],
   "notes": [
-    { "time": ${lastTime + 1}, "duration": 1.5, "string": 6, "fret": 3, "finger": 2, "latin": "Sol", "anglo": "G" }
+    { "time": <mayor que ${lastTime}>, "duration": <seg>, "string": <1-6>, "fret": <TRASTE REAL>, "finger": <1-4>, "latin": "<nota>", "anglo": "<nota>" }
   ]
 }
-Asegúrate de que el "time" de las nuevas notas sea estrictamente mayor que ${lastTime}, de forma ascendente.
 
-REGLAS ESTRICTAS PARA EL JSON:
-1. ¡CRÍTICO PARA LOS TRASTES EN 'new_schemas'!: La fila "TS" de cada esquema DEBE indicar los trastes REALES del acorde. Si el acorde está en traste VII, VIII y IX, escribe "TS      Ⅶ   Ⅷ   Ⅸ". NO siempre uses Ⅰ Ⅱ Ⅲ.
-2. ¡CRÍTICO PARA 'new_schemas'!: El array 'new_schemas' DEBE ser una lista CRONOLÓGICA EXACTA de los acordes/notas generados en 'notes'. Para acordes NUEVOS dibuja su esquema ASCII completo. Para acordes que SE REPITEN, escribe solo su nombre (ej. 'Do Mayor (C) - Repetición').
-3. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los strings! Si necesitas saltos de línea, usa literalmente \\\\n.
-4. Devuelve SÓLO el JSON puro, sin bloques markdown de código.`;
+REGLAS:
+1. Los "time" DEBEN ser estrictamente mayores que ${lastTime} y ascendentes.
+2. Los "fret" deben ser los trastes REALES de la canción. Si la siguiente sección usa un acorde en traste V, pon fret:5. NO pongas siempre 1, 2, 3.
+3. La fila "TS" del esquema debe mostrar los trastes reales (ej. "TS      Ⅴ   Ⅵ   Ⅶ" para un acorde en traste V).
+4. Acordes ya vistos = solo "Nombre - Repetición". Acordes nuevos = esquema ASCII completo de 8 líneas.
+5. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
 
-  return callGroq(apiKey, prompt, 0.1, 2500);
+  return callGroq(apiKey, prompt, 0.1, 2500, systemMsg);
 }
 
 export async function fetchTheoryCourse(apiKey, level) {
   if (!apiKey) throw new Error("No API Key provided");
   
+  const systemMsg = `Eres un profesor de guitarra experto. Generas clases con esquemas ASCII que SIEMPRE muestran los trastes REALES de cada acorde. Nunca usas los mismos trastes para todos los acordes.`;
+
   const prompt = `
-Eres un profesor experto de guitarra en la academia QGHERO.
-El usuario ha seleccionado el nivel de teoría: "${level}".
-Genera una clase magistral en formato HTML básico (usando etiquetas <h3>, <p>, <ul>, <strong>) adecuada a su nivel.
+Genera una clase magistral de guitarra para el nivel "${level}" en HTML básico (h3, p, ul, strong).
 
-REGLAS ESTRICTAS DE NOMENCLATURA que debes usar en tus explicaciones:
-- Mano Izquierda: Dedos 1 (índice), 2 (medio), 3 (anular), 4 (meñique), T/P (pulgar). ¡REGLA DE ORO: JAMÁS asignes el mismo dedo a diferentes cuerdas en distintos trastes (salvo cejillas)! Cada dedo pisa un traste distinto.
-- Mano Derecha: p (pulgar), i (índice), m (medio), a (anular), e (meñique).
-- Cuerdas: 1 a 6 (1 fina, 6 gruesa).
-- Acordes: Mencionar O (al aire) o X (no tocar).
-- ES OBLIGATORIO Y CRÍTICO que TODOS los esquemas ASCII empiecen por la fila de trastes ("TS      Ⅰ   Ⅱ   Ⅲ"). ¡NO LA OMITAS NUNCA!
+NOMENCLATURA OBLIGATORIA:
+- Mano izquierda: dedos 1 (índice), 2 (medio), 3 (anular), 4 (meñique). REGLA: cada dedo pisa UN traste (salvo cejilla).
+- Mano derecha: p (pulgar), i (índice), m (medio), a (anular), e (meñique).
+- Cuerdas: 1 (fina) a 6 (gruesa). O = al aire, X = silenciada.
+- Acordes: siempre en ambas nomenclaturas (ej. "Do Mayor (C)").
 
-El HTML debe contener:
-- Una introducción motivadora.
-- Explicaciones muy claras sobre qué son y cómo pisar los trastes correctamente.
-- MENCIONA SIEMPRE las notas y acordes en ambas nomenclaturas a la vez (Latina y Anglo. Ej: "Do Mayor (C)", "Sol (G)").
-- Cuando enseñes un acorde o posición, DEBES incluir su esquema ASCII (6 cuerdas) envuelto en la etiqueta <pre class="ascii-schema">. Dibuja SIEMPRE las 6 cuerdas y pon SIEMPRE el número de traste en la primera fila. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste, y EMPIEZA ESA FILA con la palabra 'TS' seguida de 6 espacios vacíos. Ejemplo:
+ESQUEMAS ASCII - FORMATO (cada acorde debe tener su propio esquema con sus trastes REALES):
 <pre class="ascii-schema">
-TS      Ⅰ   Ⅱ   Ⅲ
-E (1) |---|---|---
-B (2) |-1-|---|---
-G (3) |---|-2-|---
-D (4) |---|-3-|---
-A (5) X---|---|---
-E (6) O---|---|---
+TS      <traste_real>   <traste_real+1>   <traste_real+2>
+E (1) <O/X/1-4>---|---|---
+B (2) ...
+G (3) ...
+D (4) ...
+A (5) ...
+E (6) ...
 </pre>
-- JUSTO DEBAJO de cada esquema ASCII, DEBES incluir obligatoriamente un botón para reproducir el acorde. Debes usar exactamente este formato HTML, asegurándote de que data-notes contiene un array JSON válido con las notas reales de Tone.js (ej. "C3", "E3", "G3"):
-<button class="btn primary-btn play-chord-btn" data-notes='["E2", "B2", "E3", "G#3", "B3", "E4"]'>🔊 Escuchar</button>
-- Un ejemplo de ejercicio práctico.
-- No uses la etiqueta \`\`\`html ni Markdown, sólo las etiquetas HTML crudas.
-`;
 
-  const content = await callGroq(apiKey, prompt, 0.5);
+EJEMPLOS de trastes reales (NO copies, genera los que correspondan al nivel):
+- Mi menor (Em): TS Ⅰ Ⅱ Ⅲ (acorde abierto en trastes 1-3)
+- Fa Mayor (F): TS Ⅰ Ⅱ Ⅲ (cejilla en traste I)
+- Si menor (Bm): TS Ⅱ Ⅲ Ⅳ (cejilla en traste II)
+- La Mayor barre: TS Ⅴ Ⅵ Ⅶ (cejilla en traste V)
+- Do# menor: TS Ⅳ Ⅴ Ⅵ (cejilla en traste IV)
+- Mi Mayor traste VII: TS Ⅶ Ⅷ Ⅸ (cejilla en traste VII)
+
+JUSTO DEBAJO de cada esquema, incluye un botón con las notas reales de Tone.js:
+<button class="btn primary-btn play-chord-btn" data-notes='["<nota1>", "<nota2>", ...]'>🔊 Escuchar</button>
+
+CONTENIDO:
+- Introducción motivadora
+- Explicaciones claras de cómo pisar los trastes
+- Mínimo 2 acordes con esquemas ASCII completos (con trastes REALES de cada acorde)
+- Un ejercicio práctico
+- Solo HTML crudo, sin markdown ni backticks`;
+
+  const content = await callGroq(apiKey, prompt, 0.5, 3500, systemMsg);
   let cleanContent = content;
   if (cleanContent.startsWith('```html')) cleanContent = cleanContent.substring(7);
   if (cleanContent.startsWith('```')) cleanContent = cleanContent.substring(3);
@@ -135,49 +134,34 @@ E (6) O---|---|---
 export async function expandTheoryCourse(apiKey, level, previousContent) {
   if (!apiKey) throw new Error("No API Key provided");
   
-  // Convertimos el HTML a texto plano para ahorrar una cantidad brutal de tokens
-  // Así le pasamos todo el historial para que no repita NADA de lo enseñado
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = previousContent;
   let textHistory = tempDiv.innerText || tempDiv.textContent || "";
   
-  // Mantenemos hasta ~15000 caracteres de texto puro (muchísimas páginas de lectura)
   if (textHistory.length > 15000) {
       textHistory = "..." + textHistory.substring(textHistory.length - 15000);
   }
 
+  const systemMsg = `Eres un profesor de guitarra experto. Generas clases con esquemas ASCII que SIEMPRE muestran los trastes REALES de cada acorde. Nunca repites contenido ya enseñado.`;
+
   const prompt = `
-Eres un profesor experto de guitarra en la academia QGHERO.
-El usuario está en el nivel de teoría: "${level}".
-Aquí tienes el historial completo (en texto plano) de TODO lo que ya le has enseñado al alumno en este cuaderno:
+Continúa la clase de guitarra nivel "${level}". 
+Historial de lo ya enseñado (NO repitas nada de esto):
 """
 ${textHistory}
 """
 
-El usuario quiere AMPLIAR la clase. Genera la CONTINUACIÓN de la clase en formato HTML básico (usando etiquetas <h3>, <p>, <ul>, <strong>). No repitas NINGÚN concepto, acorde o ejercicio que ya esté en el historial de arriba. Simplemente sigue directamente con un NUEVO subtítulo <h3> y un concepto más avanzado o un nuevo acorde que siga el hilo.
+Genera la CONTINUACIÓN con un nuevo concepto/acorde más avanzado.
 
-REGLAS ESTRICTAS DE NOMENCLATURA:
-- Mano Izquierda: Dedos 1 (índice), 2 (medio), 3 (anular), 4 (meñique), T/P (pulgar). ¡REGLA DE ORO: JAMÁS asignes el mismo dedo a diferentes cuerdas en distintos trastes (salvo cejillas)! Cada dedo pisa un traste distinto.
-- Mano Derecha: p (pulgar), i (índice), m (medio), a (anular), e (meñique).
-- Explicaciones muy claras sobre qué son y cómo pisar los trastes correctamente.
-- MENCIONA SIEMPRE las notas y acordes en ambas nomenclaturas a la vez (Latina y Anglo. Ej: "Do Mayor (C)", "Sol (G)").
-- ES OBLIGATORIO Y CRÍTICO que TODOS los esquemas ASCII empiecen por la fila de trastes ("TS      Ⅰ   Ⅱ   Ⅲ"). ¡NO LA OMITAS NUNCA!
-- Cuando enseñes un acorde o posición, DEBES incluir su esquema ASCII (6 cuerdas) envuelto en la etiqueta <pre class="ascii-schema">. Dibuja SIEMPRE las 6 cuerdas y pon SIEMPRE el número de traste en la primera fila. Utiliza caracteres Unicode de ancho simple (Ⅰ, Ⅱ, Ⅲ, Ⅳ) perfectamente alineados sobre el guion central de cada traste, y EMPIEZA ESA FILA con la palabra 'TS' seguida de 6 espacios vacíos. Ejemplo:
-<pre class="ascii-schema">
-TS      Ⅰ   Ⅱ   Ⅲ
-E (1) |---|---|---
-B (2) |-1-|---|---
-G (3) |---|-2-|---
-D (4) |---|-3-|---
-A (5) X---|---|---
-E (6) O---|---|---
-</pre>
-- JUSTO DEBAJO de cada esquema ASCII, DEBES incluir obligatoriamente un botón para reproduciro. Usa exactamente este HTML con las notas reales de Tone.js en el array (ej. "C3", "E3"):
-<button class="btn primary-btn play-chord-btn" data-notes='["E2", "B2", "E3", "G#3", "B3", "E4"]'>🔊 Escuchar</button>
-- No uses la etiqueta \`\`\`html ni Markdown, sólo las etiquetas HTML crudas.
-`;
+REGLAS:
+- Nomenclatura: dedos 1-4, p/i/m/a/e, cuerdas 1-6, O/X.
+- Acordes en ambas nomenclaturas (ej. "Sol Mayor (G)").
+- Cada esquema ASCII en <pre class="ascii-schema"> con 8 líneas: cabecera TS con trastes REALES + 6 cuerdas.
+- Si enseñas un acorde con cejilla en traste V, la fila TS es "TS      Ⅴ   Ⅵ   Ⅶ". NO uses siempre Ⅰ Ⅱ Ⅲ.
+- Debajo de cada esquema, botón: <button class="btn primary-btn play-chord-btn" data-notes='["<notas_reales>"]'>🔊 Escuchar</button>
+- Solo HTML crudo. Sin markdown. Sin repetir conceptos del historial.`;
 
-  const content = await callGroq(apiKey, prompt, 0.5);
+  const content = await callGroq(apiKey, prompt, 0.5, 3500, systemMsg);
   let cleanContent = content;
   if (cleanContent.startsWith('```html')) cleanContent = cleanContent.substring(7);
   if (cleanContent.startsWith('```')) cleanContent = cleanContent.substring(3);
@@ -189,110 +173,126 @@ E (6) O---|---|---
 export async function fetchPracticeLevel(apiKey, style, level) {
   if (!apiKey) throw new Error("No API Key provided");
   
-  const prompt = `
-Eres el profesor virtual de guitarra acústica de QGHERO.
-El usuario está aprendiendo el estilo "${style}" y acaba de llegar al NIVEL ${level}.
-Si el nivel es 1, enséñale lo más básico. Si es mayor, sube progresivamente la dificultad de los acordes (ej. introduciendo cejillas en niveles altos).
+  const fretGuidance = level <= 2
+    ? `Nivel ${level}: usa acordes abiertos (trastes I-III) y algún acorde con cejilla simple.`
+    : level <= 5
+    ? `Nivel ${level}: DEBES incluir al menos 1 acorde con cejilla en trastes altos (III-VII). Mezcla abiertos con barre chords.`
+    : `Nivel ${level}: DEBES usar acordes avanzados con cejillas en trastes V-XII. Incluye power chords, acordes con séptima, o posiciones avanzadas.`;
 
-Devuelve un JSON estricto con la siguiente estructura:
+  const systemMsg = `Eres el profesor de guitarra de QGHERO. Generas lecciones con trastes REALES y correctos para cada acorde. ${fretGuidance}`;
+
+  const prompt = `
+Genera la lección de ${style.toUpperCase()} NIVEL ${level} para guitarra acústica.
+${fretGuidance}
+
+FORMATO JSON obligatorio (rellena con acordes REALES del estilo ${style}, NO copies los valores del ejemplo):
 {
-  "title": "Nombre del nivel (ej. Rock Nivel 2: Power Chords Avanzados)",
-  "desc": "Descripción motivadora de lo que aprenderá en este nivel.",
-  "rightHand": "Técnica de mano derecha esperada para este nivel. (Usa nomenclatura p,i,m,a,e)",
+  "title": "<Nombre creativo del nivel>",
+  "desc": "<Descripción motivadora>",
+  "rightHand": "<Técnica de mano derecha para este nivel, usa p/i/m/a/e>",
   "chords": [
     {
-      "name": "Nombre Acorde (ej. Fa Mayor)",
-      "notes": ["F2", "C3", "F3", "A3", "C4", "F4"], 
-      "finger": "Explicación de dedos (usa 1,2,3,4). ¡REGLA DE ORO: JAMÁS repitas el mismo dedo para distintas cuerdas en distintos trastes!",
+      "name": "<nombre real del acorde>",
+      "notes": ["<notas reales de Tone.js>"],
+      "finger": "<explicación real de dedos 1-4>",
       "schema": [
-        "Array de strings (una línea por string) para el esquema ASCII. Ejemplo:",
-        "TS      Ⅰ   Ⅱ   Ⅲ",
-        "E (1) |---|---|---",
-        "B (2) |-1-|---|---",
-        "G (3) |---|-2-|---",
-        "D (4) |---|-3-|---",
-        "A (5) X---|---|---",
-        "E (6) X---|---|---"
+        "<Nombre acorde> [posición real]:",
+        "TS      <trastes reales en romanos>",
+        "E (1) <posición real>",
+        "B (2) <posición real>",
+        "G (3) <posición real>",
+        "D (4) <posición real>",
+        "A (5) <posición real>",
+        "E (6) <posición real>"
       ]
     }
   ],
   "examples": [
     {
-      "song": "Título de la canción - Artista",
-      "rhythm": "Cómo es el rasgueo para esta canción",
-      "progression": "Los acordes de arriba que se usan (ej. Am -> C -> G)"
+      "song": "<canción famosa REAL que use estos acordes>",
+      "rhythm": "<patrón rítmico real>",
+      "progression": "<progresión real de la canción>"
     }
   ]
 }
 
-- Genera de 2 a 4 acordes por nivel.
-- notes: Array estricto de notas de Tone.js (ej. "C3", "E3") para que el sintetizador pueda reproducirlo.
-- examples: 1 o 2 canciones famosas reales que usen EXACTAMENTE los acordes enseñados en este nivel.
+REFERENCIA de trastes (NO copies, usa los que correspondan a cada acorde):
+- Acordes abiertos (Am, Em, C, G, D): TS con Ⅰ Ⅱ Ⅲ
+- Fa Mayor (F) cejilla traste I: TS con Ⅰ Ⅱ Ⅲ
+- Si menor (Bm) cejilla traste II: TS con Ⅱ Ⅲ Ⅳ
+- Do menor (Cm) cejilla traste III: TS con Ⅲ Ⅳ Ⅴ
+- La barre traste V: TS con Ⅴ Ⅵ Ⅶ
+- Power chord traste VII: TS con Ⅶ Ⅷ Ⅸ
 
-REGLAS ESTRICTAS PARA EL JSON:
-1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los valores de texto (desc, rightHand, etc)! Si necesitas saltos de línea, usa literalmente \\\\n.
-2. Devuelve SÓLO el JSON puro, sin bloques markdown de código.
-`;
+REGLAS:
+1. Genera 2-4 acordes DISTINTOS y apropiados para el estilo ${style} nivel ${level}.
+2. notes = notas de Tone.js REALES del acorde (ej. ["A2","E3","A3","C#4","E4"] para La Mayor).
+3. examples = 1-2 canciones famosas REALES que usen exactamente estos acordes.
+4. Sin saltos de línea reales en strings de texto. Sin markdown. Solo JSON puro.`;
 
-  return callGroq(apiKey, prompt, 0.4);
+  return callGroq(apiKey, prompt, 0.4, 3500, systemMsg);
 }
 
 export async function fetchPracticeSong(apiKey, songName) {
   if (!apiKey) throw new Error("No API Key provided");
   
+  const systemMsg = `Eres un profesor de guitarra experto. Cuando analizas una canción específica, proporcionas los acordes REALES con los trastes EXACTOS donde se tocan.`;
+
   const prompt = `
-Eres el profesor virtual de guitarra acústica de QGHERO.
-El usuario quiere aprender a tocar esta canción específica: "${songName}".
+Analiza la canción "${songName}" y enséñale al usuario los acordes REALES para tocarla en guitarra.
 
-Enséñale los acordes exactos y el ritmo necesario para tocarla, usando nuestra nomenclatura estricta.
-
-Devuelve un JSON estricto con la siguiente estructura:
+FORMATO JSON obligatorio (rellena con los acordes REALES de "${songName}", NO copies valores genéricos):
 {
-  "title": "A la Carta: Nombre Canción",
-  "desc": "Breve descripción de la canción y por qué es interesante tocarla.",
-  "rightHand": "Técnica de mano derecha esperada para tocarla (Usa p,i,m,a,e y patrón de rasgueo).",
+  "title": "A la Carta: ${songName}",
+  "desc": "<por qué esta canción es interesante para aprender>",
+  "rightHand": "<técnica de mano derecha REAL de esta canción: rasgueo, punteo, arpegio... con p/i/m/a/e>",
   "chords": [
     {
-      "name": "Nombre Acorde (ej. Fa Mayor)",
-      "notes": ["F2", "C3", "F3", "A3", "C4", "F4"], 
-      "finger": "Explicación de dedos (usa 1,2,3,4). ¡REGLA DE ORO: JAMÁS repitas el mismo dedo para distintas cuerdas en distintos trastes!",
+      "name": "<acorde real de la canción>",
+      "notes": ["<notas reales de Tone.js>"],
+      "finger": "<explicación real de dedos 1-4>",
       "schema": [
-        "Array de strings (una línea por string) para el esquema ASCII. Ejemplo:",
-        "TS      Ⅰ   Ⅱ   Ⅲ",
-        "E (1) |---|---|---",
-        "B (2) |-1-|---|---",
-        "G (3) |---|-2-|---",
-        "D (4) |---|-3-|---",
-        "A (5) X---|---|---",
-        "E (6) X---|---|---"
+        "<Nombre acorde real> [posición real]:",
+        "TS      <trastes reales romanos>",
+        "E (1) <pos real>",
+        "B (2) <pos real>",
+        "G (3) <pos real>",
+        "D (4) <pos real>",
+        "A (5) <pos real>",
+        "E (6) <pos real>"
       ]
     }
   ],
   "examples": [
     {
-      "song": "Estructura de la canción (Intro, Verso, Estribillo)",
-      "rhythm": "Patrón rítmico sugerido",
-      "progression": "Progresión de acordes (ej. Intro: Am -> C -> G)"
+      "song": "<parte de la canción: Intro / Verso / Estribillo>",
+      "rhythm": "<patrón rítmico real de esa parte>",
+      "progression": "<progresión de acordes real de esa parte>"
     }
   ]
 }
 
-- notes: Array estricto de notas de Tone.js para el sintetizador.
-- examples: Usa este array para describir la progresión de las diferentes partes de la canción.
+REGLAS:
+1. TRASTES REALES: Cada acorde debe tener sus trastes correctos. Si "${songName}" usa un Fa# menor con cejilla en traste II → "TS      Ⅱ   Ⅲ   Ⅳ". Si usa La Mayor barre en traste V → "TS      Ⅴ   Ⅵ   Ⅶ". Analiza la canción REAL.
+2. Genera TODOS los acordes distintos que usa la canción (típicamente 3-6).
+3. examples: describe la estructura real (intro usa X→Y, verso usa Y→Z, estribillo...).
+4. notes = notas de Tone.js REALES de cada acorde.
+5. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
 
-REGLAS ESTRICTAS PARA EL JSON:
-1. ¡PROHIBIDO usar saltos de línea físicos (Enter) dentro de los valores de texto (desc, rightHand, etc)! Si necesitas saltos de línea, usa literalmente \\\\n.
-2. Devuelve SÓLO el JSON puro, sin bloques markdown de código.
-`;
-
-  return callGroq(apiKey, prompt, 0.4);
+  return callGroq(apiKey, prompt, 0.4, 3500, systemMsg);
 }
 
-async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500) {
+async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, systemMsg = '') {
   try {
+    const messages = [];
+    if (systemMsg) {
+      messages.push({ role: 'system', content: systemMsg });
+    }
+    messages.push({ role: 'user', content: prompt });
+
     const body = {
         model: 'llama-3.1-8b-instant',
-        messages: [{ role: 'user', content: prompt }],
+        messages: messages,
         temperature: temperature,
         max_tokens: maxTokens
     };
