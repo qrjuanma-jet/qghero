@@ -287,52 +287,83 @@ REGLAS:
 }
 
 async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, systemMsg = '') {
-  try {
-    const messages = [];
-    if (systemMsg) {
-      messages.push({ role: 'system', content: systemMsg });
-    }
-    messages.push({ role: 'user', content: prompt });
+  let attempt = 0;
+  const maxRetries = 3;
 
-    const body = {
-        model: 'llama3-8b-8192',
-        messages: messages,
-        temperature: temperature,
-        max_tokens: maxTokens
-    };
-    if (temperature !== 0.5) {
-        body.response_format = { type: "json_object" };
-    }
+  while (attempt < maxRetries) {
+    try {
+      const messages = [];
+      if (systemMsg) {
+        messages.push({ role: 'system', content: systemMsg });
+      }
+      messages.push({ role: 'user', content: prompt });
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
+      const body = {
+          model: 'llama-3.1-8b-instant',
+          messages: messages,
+          temperature: temperature,
+          max_tokens: maxTokens
+      };
+      if (temperature !== 0.5) {
+          body.response_format = { type: "json_object" };
+      }
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Groq Error Response:", errText);
-      throw new Error(`API Error ${response.status}: ${errText}`);
-    }
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
 
-    const data = await response.json();
-    let content = data.choices[0].message.content.trim();
-    
-    // Clean JSON markdown if model outputs it
-    if (content.startsWith('```json')) content = content.substring(7);
-    if (content.startsWith('```')) content = content.substring(3);
-    if (content.endsWith('```')) content = content.substring(0, content.length - 3);
-    
-    if (temperature !== 0.5) { // 0.5 is HTML for Theory Course
-        return JSON.parse(content);
+      if (response.status === 429) {
+        const errText = await response.text();
+        const match = errText.match(/try again in ([\d\.]+)s/);
+        const waitMs = match ? Math.ceil(parseFloat(match[1])) * 1000 + 1000 : 15000;
+        console.warn(`[Groq API] Límite alcanzado (429). Esperando ${waitMs}ms antes de reintentar... (Intento ${attempt + 1}/${maxRetries})`);
+        
+        // Disparar evento para que la UI pueda mostrar que estamos esperando
+        const event = new CustomEvent('ai-waiting', { detail: { waitMs } });
+        window.dispatchEvent(event);
+
+        await new Promise(r => setTimeout(r, waitMs));
+        attempt++;
+        continue;
+      }
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error("Groq Error Response:", errText);
+        throw new Error(`API Error ${response.status}: ${errText}`);
+      }
+
+      const data = await response.json();
+      let content = data.choices[0].message.content.trim();
+      
+      // Clean JSON markdown if model outputs it
+      if (content.startsWith('```json')) content = content.substring(7);
+      if (content.startsWith('```')) content = content.substring(3);
+      if (content.endsWith('```')) content = content.substring(0, content.length - 3);
+      
+      // Avisar a la UI que ya hemos reanudado
+      if (attempt > 0) {
+        window.dispatchEvent(new CustomEvent('ai-resumed'));
+      }
+
+      if (temperature !== 0.5) { // 0.5 is HTML for Theory Course
+          return JSON.parse(content);
+      }
+      return content;
+    } catch (error) {
+      if (attempt >= maxRetries - 1) {
+        console.error("Groq API Error after retries:", error);
+        throw error;
+      }
+      // Si es un error de red u otro, esperar un poco y reintentar
+      await new Promise(r => setTimeout(r, 2000));
+      attempt++;
     }
-    return content;
-  } catch (error) {
-    console.error("Groq API Error:", error);
-    throw error;
   }
+  throw new Error("Límite de reintentos superado al contactar con la IA.");
 }

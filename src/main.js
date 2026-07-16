@@ -93,9 +93,32 @@ function initApp() {
     checkSharedUrl();
     renderSavedSongs();
   } else {
-    showScreen('login', false);
   }
   
+  // Event listeners para la tasa de límite de Groq (Rate Limit)
+  window.addEventListener('ai-waiting', (e) => {
+    const loadingText = document.getElementById('loading-indicator');
+    if (loadingText && !loadingText.classList.contains('hidden')) {
+       const span = loadingText.querySelector('span');
+       if (span) span.textContent = `Pausando por límite de la IA... (${Math.round(e.detail.waitMs/1000)}s)`;
+    }
+    const statusEl = document.getElementById('auto-expand-status');
+    if (statusEl) {
+       statusEl.textContent = `⏳ Límite de IA alcanzado... Esperando ${Math.round(e.detail.waitMs/1000)}s`;
+    }
+  });
+  window.addEventListener('ai-resumed', () => {
+    const loadingText = document.getElementById('loading-indicator');
+    if (loadingText && !loadingText.classList.contains('hidden')) {
+       const span = loadingText.querySelector('span');
+       if (span) span.textContent = 'Analizando canción con IA...';
+    }
+    const statusEl = document.getElementById('auto-expand-status');
+    if (statusEl) {
+       statusEl.textContent = `⚙️ IA reanudada, generando esquemas...`;
+    }
+  });
+
   // Login
   const keyInput = document.getElementById('groq-api-key');
   document.getElementById('toggle-key-visibility').addEventListener('click', (e) => {
