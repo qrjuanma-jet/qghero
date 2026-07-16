@@ -17,7 +17,7 @@ FORMATO OBLIGATORIO del JSON (rellena con los datos REALES de "${songName}", NO 
     "rhythm": "<patrón rítmico real: rasgueo, punteo, arpegio...>",
     "effects": "<efectos reales: distorsión, limpio, palm mute...>",
     "schema": [
-      "<nombre acorde 1> [posición real]:",
+      "<Latina (Anglo)> [posición real]:",
       "TS      <traste_inicio>   <traste_inicio+1>   <traste_inicio+2>",
       "E (1) <posición real en esta cuerda>",
       "B (2) <posición real>",
@@ -28,7 +28,7 @@ FORMATO OBLIGATORIO del JSON (rellena con los datos REALES de "${songName}", NO 
     ]
   },
   "notes": [
-    { "time": <segundos>, "duration": <seg>, "string": <1-6>, "fret": <TRASTE REAL 0-24>, "finger": <1-4>, "latin": "<nombre latino puro>", "anglo": "<nombre anglo puro>", "lyric": "<palabra o sílaba cantada en este instante, o vacío>" }
+    { "time": <segundos>, "duration": <seg>, "fingering": [{"string": 1, "fret": <traste>, "finger": <0-4>}, {"string": 2, "fret": <traste>, "finger": <0-4>}, {"string": 3, "fret": <traste>, "finger": <0-4>}, {"string": 4, "fret": <traste>, "finger": <0-4>}, {"string": 5, "fret": <traste>, "finger": <0-4>}, {"string": 6, "fret": <traste>, "finger": <0-4>}], "right_hand": "<↓, ↑, P, o X>", "latin": "<Latina>", "anglo": "<Anglo>", "lyric": "<palabra o vacío>" }
   ]
 }
 
@@ -42,10 +42,10 @@ REFERENCIA DE FORMATO (esto es solo para que entiendas la estructura, NO copies 
 INSTRUCCIONES CRÍTICAS, BAJO PENA DE FALLO:
 1. TRASTES: Analiza "${songName}" y usa los trastes donde REALMENTE se toca. ¡ES OBLIGATORIO usar trastes altos si la canción los lleva! Por ejemplo, "Entre Dos Tierras" DEBE usar power chords en trastes 5 y 7. El fret del array notes DEBE coincidir numéricamente con los trastes romanos del esquema (ej: fret: 7 -> TS Ⅶ Ⅷ Ⅸ).
 2. NÚMEROS ROMANOS EN TS: La fila TS siempre debe empezar con "TS" y usar NÚMEROS ROMANOS para indicar los trastes (Ⅰ, Ⅱ, Ⅲ, Ⅳ, Ⅴ, Ⅵ, Ⅶ, Ⅷ, Ⅸ, Ⅹ). ¡NUNCA uses números decimales en la fila TS!
-3. SCHEMA CRONOLÓGICO: El array 'schema' sigue el orden de 'notes'. Primera aparición de un acorde = esquema completo. Repeticiones = solo "Nombre (X) - Repetición".
-4. NOTAS: Genera mínimo 16 notas (4 compases de intro). El BPM debe ser el real de la canción.
+3. SCHEMA CRONOLÓGICO: El array 'schema' sigue el orden de 'notes'. OBLIGATORIO usar el formato "Latina (Anglo)" SIEMPRE, por ejemplo "Sol Mayor (G)". PROHIBIDO mezclar letra de la canción en este esquema.
+4. NOTAS: Genera mínimo 16 notas (4 compases de intro). El BPM debe ser el real de la canción. "fingering" DEBE contener las 6 cuerdas con sus trastes reales y el dedo (0=al aire, -1=no tocar). "right_hand" debe ser ↓ (rasgueo abajo), ↑ (rasgueo arriba), P (punteo/arpegio) o X (muteo).
 5. STRINGS: hands/rhythm/effects son strings simples, sin saltos de línea reales. Usa \\\\n si necesitas separar.
-6. LETRAS: PROHIBIDO mezclar la letra de la canción en los campos latin o anglo. Pon la letra en el campo "lyric".
+6. LETRAS: PROHIBIDÍSIMO escribir partes de la canción dentro del campo schema, latin o anglo. Pon la letra en el campo "lyric".
 7. Devuelve SÓLO JSON puro, sin markdown.`;
 
   return callGroq(apiKey, prompt, 0.1, 3500, systemMsg);
@@ -63,11 +63,11 @@ Genera la SIGUIENTE sección (al menos 16 notas, 4 compases más) con los acorde
 FORMATO JSON obligatorio (rellena con datos REALES, NO copies estos valores):
 {
   "new_schemas": [
-    "<si el acorde ya apareció antes>: Nombre (X) - Repetición",
+    "<si ya apareció>: Latina (Anglo) - Repetición",
     "<si es nuevo, esquema completo de 8 líneas con trastes reales>"
   ],
   "notes": [
-    { "time": <mayor que ${lastTime}>, "duration": <seg>, "string": <1-6>, "fret": <TRASTE REAL>, "finger": <1-4>, "latin": "<nota pura>", "anglo": "<nota pura>", "lyric": "<palabra cantada>" }
+    { "time": <mayor que ${lastTime}>, "duration": <seg>, "fingering": [{"string": 1, "fret": <traste>, "finger": <0-4>}, {"string": 2, "fret": <traste>, "finger": <0-4>}, {"string": 3, "fret": <traste>, "finger": <0-4>}, {"string": 4, "fret": <traste>, "finger": <0-4>}, {"string": 5, "fret": <traste>, "finger": <0-4>}, {"string": 6, "fret": <traste>, "finger": <0-4>}], "right_hand": "<↓, ↑, P, o X>", "latin": "<Latina>", "anglo": "<Anglo>", "lyric": "<palabra cantada>" }
   ]
 }
 
@@ -75,9 +75,10 @@ REGLAS ESTRICTAS:
 1. Los "time" DEBEN ser estrictamente mayores que ${lastTime} y ascendentes.
 2. TRASTES REALES: Los "fret" en notes deben ser los trastes REALES de la canción. Si la siguiente sección usa un acorde en traste 5, pon fret:5. ¡NO pongas siempre 1, 2, 3!
 3. NÚMEROS ROMANOS EN TS: La fila "TS" del esquema debe usar NÚMEROS ROMANOS (ej. "TS      Ⅴ   Ⅵ   Ⅶ" para un acorde en traste 5). ¡NUNCA uses decimales ahí!
-4. Acordes ya vistos = solo "Nombre - Repetición". Acordes nuevos = esquema ASCII completo de 8 líneas.
-5. LETRAS: PROHIBIDO poner la letra de la canción en latin o anglo. Solo en el campo "lyric".
-6. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
+4. Acordes: OBLIGATORIO usar el formato "Latina (Anglo)" SIEMPRE (ej. "Sol Mayor (G)"). Acordes ya vistos = "Sol Mayor (G) - Repetición". Acordes nuevos = esquema completo.
+5. MANO DERECHA: "right_hand" debe ser estrictamente un símbolo (↓, ↑, P, X).
+6. LETRAS: PROHIBIDÍSIMO escribir fragmentos de la canción en latin, anglo o en los schemas. Usa el campo "lyric".
+7. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
 
   return callGroq(apiKey, prompt, 0.1, 2500, systemMsg);
 }

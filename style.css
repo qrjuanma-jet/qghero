@@ -341,5 +341,67 @@ header { display: flex; justify-content: space-between; align-items: center; mar
     font-weight: bold;
   }
 }
-. l y r i c s - b a r   {   t e x t - a l i g n :   c e n t e r ;   f o n t - s i z e :   1 . 5 r e m ;   f o n t - w e i g h t :   6 0 0 ;   c o l o r :   v a r ( - - n e o n - c y a n ) ;   m a r g i n :   1 r e m   a u t o ;   p a d d i n g :   0 . 5 r e m   1 r e m ;   m i n - h e i g h t :   2 . 5 r e m ;   b a c k g r o u n d :   r g b a ( 0 ,   0 ,   0 ,   0 . 4 ) ;   b o r d e r - r a d i u s :   0 . 5 r e m ;   b o r d e r :   1 p x   s o l i d   r g b a ( 0 ,   2 2 9 ,   2 5 5 ,   0 . 1 ) ;   w i d t h :   1 0 0 % ;   m a x - w i d t h :   8 0 0 p x ;   t e x t - s h a d o w :   0   0   1 0 p x   r g b a ( 0 ,   2 2 9 ,   2 5 5 ,   0 . 3 ) ;   t r a n s i t i o n :   a l l   0 . 2 s ;   }  
- 
+
+.lyrics-bar {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--neon-cyan);
+  margin: 1rem auto;
+  padding: 0.5rem 1rem;
+  min-height: 2.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 229, 255, 0.1);
+  width: 100%;
+  max-width: 800px;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+  transition: all 0.2s;
+}
+
+.right-hand-bar {
+  position: absolute;
+  right: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--neon-magenta);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: var(--neon-magenta);
+  text-shadow: 0 0 15px var(--neon-magenta);
+  box-shadow: 0 0 20px rgba(255, 45, 120, 0.4);
+  opacity: 0;
+  transition: all 0.1s ease-out;
+  z-index: 10;
+}
+
+.right-hand-bar.active {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.3);
+}
+
+.mini-fret-line {
+  position: absolute;
+  width: 2px;
+  height: 100%;
+  top: 0;
+  background: linear-gradient(180deg, #444, #888, #444);
+  box-shadow: 1px 0 2px rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+.mini-fret-num {
+  position: absolute;
+  top: -15px;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.6);
+  z-index: 2;
+}

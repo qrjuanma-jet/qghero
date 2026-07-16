@@ -17,6 +17,7 @@ export class GameEngine {
     this.container = document.getElementById('note-cards-container');
     this.viewport = document.getElementById('note-cards-viewport');
     this.lyricsBar = document.getElementById('lyrics-bar');
+    this.rightHandBar = document.getElementById('right-hand-bar');
     this.progressFill = document.getElementById('game-progress-fill');
     this.progressText = document.getElementById('game-progress-text');
 
@@ -76,12 +77,19 @@ export class GameEngine {
       // Card footer
       const footer = document.createElement('div');
       footer.className = 'card-footer';
-      const fingerText = note.finger > 0 ? `Dedo ${note.finger}` : '';
-      const fretText = note.fret >= 0 ? `Traste ${this.toRoman(note.fret)}` : '';
-      footer.innerHTML = `
-        <span class="card-finger">${fingerText}</span>
-        <span class="card-fret">${fretText}</span>
-      `;
+      
+      let baseFret = -1;
+      if (note.fingering && note.fingering.length > 0) {
+        const frets = note.fingering.map(f => f.fret).filter(fr => fr > 0);
+        if (frets.length > 0) {
+          baseFret = Math.min(...frets);
+        }
+      } else if (note.fret > 0) {
+        baseFret = note.fret;
+      }
+      
+      const fretText = baseFret > 0 ? `Traste Base ${this.toRoman(baseFret)}` : 'Traste Base I';
+      footer.innerHTML = `<span class="card-fret">${fretText}</span>`;
 
       card.appendChild(check);
       card.appendChild(header);
@@ -111,31 +119,93 @@ export class GameEngine {
     const fb = document.createElement('div');
     fb.className = 'mini-fretboard';
 
+    // Get fingering array or fallback to single note logic
+    const fingerings = note.fingering || [{ string: note.string, fret: note.fret, finger: note.finger }];
+    
+    // Find min and max fret for rendering scale
+    let minFret = 999;
+    let maxFret = -999;
+    for (const f of fingerings) {
+      if (f.fret > 0) {
+        minFret = Math.min(minFret, f.fret);
+        maxFret = Math.max(maxFret, f.fret);
+      }
+    }
+    
+    // If no fretted notes, default to 1-3
+    if (minFret === 999) { minFret = 1; maxFret = 3; }
+    
+    // Expand window to at least 3 frets
+    if (maxFret - minFret < 2) maxFret = minFret + 2;
+
+    const numFrets = maxFret - minFret + 1;
+
+    // Draw horizontal fret lines
+    for (let i = 0; i <= numFrets; i++) {
+      const relPos = i / numFrets;
+      const pos = 20 + (relPos * 70);
+
+      const line = document.createElement('div');
+      line.className = 'mini-fret-line';
+      line.style.left = `${pos}%`;
+      fb.appendChild(line);
+
+      // Add roman numeral above the fret
+      const currentFret = minFret + i;
+      const numLabel = document.createElement('div');
+      numLabel.className = 'mini-fret-num';
+      numLabel.style.left = `${pos}%`;
+      numLabel.textContent = this.toRoman(currentFret);
+      fb.appendChild(numLabel);
+    }
+
     // Build 6 strings
     for (let s = 1; s <= 6; s++) {
       const stringLine = document.createElement('div');
       stringLine.className = 'mini-string';
 
-      // If this note is on this string, add a fret dot
-      if (note.string === s) {
-        const dot = document.createElement('div');
-        dot.className = `mini-fret-dot str-${s}`;
-        dot.textContent = this.toRoman(note.fret);
-        // Position: map fret 0-24 to 5%-95% of width
-        const pos = note.fret === 0 ? 3 : Math.min(5 + (note.fret / 24) * 90, 95);
-        dot.style.left = `${pos}%`;
-        dot.style.color = s <= 1 || s >= 6 ? '#fff' : '#000';
-        stringLine.appendChild(dot);
+      const fNote = fingerings.find(f => f.string === s);
+      if (fNote) {
+        if (fNote.fret === -1 || fNote.fret === 'X') {
+          // Muted string
+          const cross = document.createElement('div');
+          cross.className = `mini-fret-dot str-${s}`;
+          cross.textContent = 'X';
+          cross.style.left = '5%';
+          cross.style.background = 'transparent';
+          cross.style.color = '#ff4444';
+          stringLine.appendChild(cross);
+        } else if (fNote.fret === 0) {
+          // Open string
+          const circle = document.createElement('div');
+          circle.className = `mini-fret-dot str-${s}`;
+          circle.textContent = 'O';
+          circle.style.left = '5%';
+          circle.style.background = 'transparent';
+          circle.style.color = 'var(--neon-cyan)';
+          stringLine.appendChild(circle);
+        } else {
+          // Fretted note
+          const dot = document.createElement('div');
+          dot.className = `mini-fret-dot str-${s}`;
+          dot.textContent = fNote.finger && fNote.finger > 0 ? fNote.finger : this.toRoman(fNote.fret);
+          // Position relative to the [minFret, maxFret] window
+          const relPos = (fNote.fret - minFret) / (maxFret - minFret);
+          const pos = 20 + (relPos * 70); // From 20% to 90%
+          dot.style.left = `${pos}%`;
+          dot.style.color = s <= 1 || s >= 6 ? '#fff' : '#000';
+          stringLine.appendChild(dot);
+        }
       }
 
       fb.appendChild(stringLine);
     }
 
-    // Fret label in corner
-    if (note.fret > 0) {
+    // Fret label in corner (base fret)
+    if (minFret > 0) {
       const label = document.createElement('div');
       label.className = 'mini-fret-label';
-      label.textContent = `T${this.toRoman(note.fret)}`;
+      label.textContent = `T${this.toRoman(minFret)}`;
       fb.appendChild(label);
     }
 
@@ -224,14 +294,23 @@ export class GameEngine {
     this.activeIndex = newActive;
 
     if (this.activeIndex >= 0 && this.activeIndex < this.notes.length) {
-      const currentLyric = this.notes[this.activeIndex].lyric;
+      const currentNote = this.notes[this.activeIndex];
+      const currentLyric = currentNote.lyric;
       if (this.lyricsBar) {
         if (currentLyric && currentLyric.trim().length > 0) {
           this.lyricsBar.textContent = currentLyric;
         }
       }
+      if (this.rightHandBar && currentNote.right_hand) {
+        this.rightHandBar.textContent = currentNote.right_hand;
+        // Trigger animation
+        this.rightHandBar.classList.remove('active');
+        void this.rightHandBar.offsetWidth; // trigger reflow
+        this.rightHandBar.classList.add('active');
+      }
     } else {
       if (this.lyricsBar) this.lyricsBar.textContent = '';
+      if (this.rightHandBar) this.rightHandBar.classList.remove('active');
     }
 
     // Update card classes

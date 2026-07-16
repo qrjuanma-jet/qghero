@@ -407,50 +407,7 @@ function setupEventListeners() {
     }
   });
   
-  const expandBtn = document.getElementById('expand-game-song-btn');
-  if (expandBtn) {
-    expandBtn.addEventListener('click', async () => {
-      if (!currentSongData || !currentSongData.notes || currentSongData.notes.length === 0) return;
-      expandBtn.disabled = true;
-      expandBtn.textContent = "⏳ Escuchando siguientes compases...";
-      
-      try {
-        const latestTime = Math.max(...currentSongData.notes.map(n => n.time));
-        const newSongData = await expandGameSong(groqApiKey, currentSongData.title || "Canción", latestTime);
-        
-        if (newSongData.notes && newSongData.notes.length > 0) {
-          currentSongData.notes = currentSongData.notes.concat(newSongData.notes);
-          
-          if (newSongData.new_schemas && newSongData.new_schemas.length > 0) {
-             if (!currentSongData.technique.schema) {
-                currentSongData.technique.schema = [];
-             } else if (!Array.isArray(currentSongData.technique.schema)) {
-                currentSongData.technique.schema = [currentSongData.technique.schema];
-             }
-             currentSongData.technique.schema = currentSongData.technique.schema.concat(["", "--- Acordes Añadidos ---", ""], newSongData.new_schemas);
-             const schemaEl = document.getElementById('tech-schema');
-             if (schemaEl) schemaEl.textContent = currentSongData.technique.schema.join('\n');
-          }
-          
-          gameEngine.loadSong(currentSongData);
-          alert(`¡Genial! Se han añadido ${newSongData.notes.length} notas/acordes más a la partitura.`);
-        }
-        expandBtn.disabled = false;
-        expandBtn.textContent = "➕ Seguir Aprendiendo (Alargar Canción)";
-      } catch (err) {
-        expandBtn.disabled = false;
-        expandBtn.textContent = "➕ Seguir Aprendiendo (Alargar Canción)";
-        if (err.message.includes('429')) {
-            const match = err.message.match(/try again in ([\d\.]+)s/);
-            const waitTime = match ? Math.ceil(parseFloat(match[1])) : 40;
-            alert(`¡Uf! La IA va muy rápido. Por usar la versión gratuita, necesitamos dejarla respirar. Por favor, espera ${waitTime} segundos y vuelve a darle al botón.`);
-        } else {
-            alert("Error ampliando la canción: " + err.message);
-        }
-      }
-    });
-  }
-  
+
   let isPreviewPlaying = false;
   const previewBtn = document.getElementById('preview-audio-btn');
   previewBtn.addEventListener('click', async () => {
@@ -569,7 +526,7 @@ function buildChronologicalSchema(notes, rawSchemaArray) {
   let lastChordKey = null;
 
   for (const note of notes) {
-    const chordName = note.latin || note.anglo || '?';
+    const chordName = (note.latin && note.anglo) ? `${note.latin} (${note.anglo})` : (note.latin || note.anglo || '?');
     if (chordName === lastChordKey) continue; // skip if same chord as previous note
     lastChordKey = chordName;
 
@@ -579,12 +536,16 @@ function buildChronologicalSchema(notes, rawSchemaArray) {
     } else {
       shownChords.add(chordName);
       // Find the matching schema block
-      const blockKey = Object.keys(schemaBlocks).find(k =>
-        k.toLowerCase().includes(chordName.toLowerCase()) ||
-        (note.anglo && k.toLowerCase().includes(note.anglo.toLowerCase()))
-      );
+      const blockKey = Object.keys(schemaBlocks).find(k => {
+        const lowerK = k.toLowerCase();
+        return (note.latin && lowerK.includes(note.latin.toLowerCase())) ||
+               (note.anglo && lowerK.includes(note.anglo.toLowerCase()));
+      });
       if (blockKey) {
-        lines.push(...schemaBlocks[blockKey]);
+        // First line of block is usually the title, let's keep it but ensure it's clean
+        const blockLines = [...schemaBlocks[blockKey]];
+        blockLines[0] = `🎸 ${chordName} [Posición]:`;
+        lines.push(...blockLines);
       } else {
         lines.push(`🎸 ${chordName}`);
       }
