@@ -63,6 +63,8 @@ export function strumChord(notes, speed = 0.05) {
   if (!Array.isArray(notes)) notes = [notes];
 
   notes.forEach((note, index) => {
+    if (!note) return;
+    
     let pitch = note;
     if (typeof note === 'object') {
       pitch = note.note || note.pitch || note.latin || note.anglo;

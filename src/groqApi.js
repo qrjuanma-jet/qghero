@@ -97,8 +97,8 @@ EJEMPLOS de trastes reales (NO copies, genera los que correspondan al nivel):
 - Do# menor: TS Ⅳ Ⅴ Ⅵ (cejilla en traste IV)
 - Mi Mayor traste VII: TS Ⅶ Ⅷ Ⅸ (cejilla en traste VII)
 
-JUSTO DEBAJO de cada esquema, incluye un botón con las notas reales de Tone.js:
-<button class="btn primary-btn play-chord-btn" data-notes='["<nota1>", "<nota2>", ...]'>🔊 Escuchar</button>
+OBLIGATORIO: Debajo de cada esquema ASCII, debes poner un botón para reproducir el acorde. Usa este formato exacto, reemplazando el array con las notas reales del acorde en formato anglosajón (ejemplo para Mi Mayor):
+<button class="btn primary-btn play-chord-btn" data-notes='["E2", "B2", "E3", "G#3", "B3", "E4"]'>🔊 Escuchar</button>
 
 CONTENIDO:
 - Introducción motivadora
@@ -143,7 +143,8 @@ REGLAS:
 - Acordes en ambas nomenclaturas (ej. "Sol Mayor (G)").
 - Cada esquema ASCII en <pre class="ascii-schema"> con 8 líneas: cabecera TS con trastes REALES + 6 cuerdas.
 - Si enseñas un acorde con cejilla en traste V, la fila TS es "TS      Ⅴ   Ⅵ   Ⅶ". NO uses siempre Ⅰ Ⅱ Ⅲ.
-- Debajo de cada esquema, botón: <button class="btn primary-btn play-chord-btn" data-notes='["<notas_reales>"]'>🔊 Escuchar</button>
+- OBLIGATORIO: Debajo de cada esquema ASCII, debes poner un botón para reproducir el acorde. Usa este formato exacto, reemplazando el array con las notas reales del acorde en formato anglosajón (ejemplo para Mi Mayor):
+<button class="btn primary-btn play-chord-btn" data-notes='["E2", "B2", "E3", "G#3", "B3", "E4"]'>🔊 Escuchar</button>
 - Solo HTML crudo. Sin markdown. Sin repetir conceptos del historial.`;
 
   const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg);
