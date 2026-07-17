@@ -199,7 +199,7 @@ function setupEventListeners() {
           <h3>Configurar Partida</h3>
           <p>Tienes dos formas de jugar:</p>
           <ul>
-              <li><strong>Buscar por Nombre:</strong> Escribe "Smells Like Teen Spirit" y la IA deducirá los acordes (sonará con audio sintetizado interno).</li>
+              <li><strong>Buscar por Nombre:</strong> Escribe "Smells Like Teen Spirit" y la IA deducirá los acordes (sonará con audio sintetizado interno). Si luego le das a buscar en YouTube, la app copiará automáticamente el nombre en el portapapeles de tu móvil para que solo tengas que pegarlo en el buscador de YouTube.</li>
               <li><strong>Enlace de YouTube (Recomendado):</strong> Pega un link de YouTube. La IA extraerá los acordes y el vídeo sonará de fondo sincronizado con las notas del juego.</li>
           </ul>`,
       game: `
@@ -429,9 +429,14 @@ function setupEventListeners() {
     }
   });
   // YouTube Prompt Modal Logic
-  document.getElementById('youtube-prompt-search-btn').addEventListener('click', () => {
+  document.getElementById('youtube-prompt-search-btn').addEventListener('click', async () => {
     const songName = currentSongData ? (currentSongData.title || document.getElementById('current-song-title').textContent) : "";
     if (songName) {
+      try {
+        await navigator.clipboard.writeText(songName);
+      } catch (err) {
+        console.warn("No se pudo copiar al portapapeles:", err);
+      }
       window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(songName)}`, '_blank');
     }
   });
