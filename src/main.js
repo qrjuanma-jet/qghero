@@ -5,6 +5,7 @@ import { GameEngine } from './gameEngine.js';
 import { initShareButtons } from './share.js';
 import { initPracticeMode } from './practiceMode.js';
 import { initTheoryMode } from './theoryMode.js';
+import { initDictionaryMode } from './dictionaryMode.js';
 import { initAudio, strumChord, playNote, playPreviewSequence, stopPreviewSequence } from './audioSynth.js';
 
 if ('serviceWorker' in navigator) {
@@ -34,7 +35,8 @@ const screens = {
   setup: document.getElementById('game-setup-screen'),
   practice: document.getElementById('practice-screen'),
   theory: document.getElementById('theory-screen'),
-  game: document.getElementById('game-screen')
+  game: document.getElementById('game-screen'),
+  dictionary: document.getElementById('dictionary-screen')
 };
 
 const modals = {

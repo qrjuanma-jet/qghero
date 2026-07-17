@@ -146,7 +146,11 @@ export async function fetchPracticeLevel(apiKey, style, level) {
     ? `Nivel ${level}: DEBES incluir al menos 1 acorde con cejilla en trastes altos (III-VII). Mezcla abiertos con barre chords.`
     : `Nivel ${level}: DEBES usar acordes avanzados con cejillas en trastes V-XII. Incluye power chords, acordes con séptima, o posiciones avanzadas.`;
 
-  const systemMsg = `Eres el profesor de guitarra de QGHERO. Generas lecciones con trastes REALES y correctos para cada acorde. ${fretGuidance}`;
+  const styleGuidance = style.toLowerCase() === 'clásico' 
+    ? "ESTILO CLÁSICO: Fomenta el uso de arpegios (p-i-m-a), acordes complejos como maj7, dim, m7b5 o aug, y progresiones armónicas de música clásica o jazz." 
+    : "";
+
+  const systemMsg = `Eres el profesor de guitarra de QGHERO. Generas lecciones con trastes REALES y correctos para cada acorde. ${fretGuidance} ${styleGuidance}`;
 
   const prompt = `
 Genera la lección de ${style.toUpperCase()} NIVEL ${level} para guitarra acústica.
@@ -309,4 +313,27 @@ async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, sys
     }
   }
   throw new Error("Límite de reintentos superado al contactar con la IA.");
+}
+
+export async function parseNaturalChordQuery(apiKey, query) {
+  if (!apiKey) throw new Error("No API Key provided");
+
+  const systemMsg = `Eres un asistente experto en teoría musical. Tu ÚNICO objetivo es extraer o inferir el nombre del acorde de guitarra que el usuario pide en lenguaje natural.`;
+
+  const prompt = `
+El usuario ha dicho lo siguiente: "${query}"
+
+Extrae el acorde que quiere aprender.
+Devuelve ÚNICAMENTE el nombre del acorde en formato anglosajón estándar, sin espacios, sin comillas, sin signos de puntuación extra.
+Ejemplos de lo que debes devolver: C, Dm7, F#maj7, Gaug, Bdim.
+Si el usuario dice "do mayor séptima", devuelve: Cmaj7
+Si el usuario dice "el acorde triste de mi", devuelve: Em
+Si el usuario dice "sol séptima", devuelve: G7
+
+Si pide algo que no es un acorde en absoluto, devuelve: UNKNOWN
+
+Devuelve SOLO la cadena corta (ej: "Am7"). Ni una palabra más.`;
+
+  const response = await callGroq(apiKey, prompt, 0.1, 10, systemMsg);
+  return response.trim();
 }

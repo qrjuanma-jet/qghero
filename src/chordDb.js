@@ -194,10 +194,129 @@ const CHORDS = {
       "E (6) O---|----|----"
     ]
   },
-
   // ═══════════════════════════════════════
-  // ACORDES CON CEJILLA
+  // ACORDES DE SÉPTIMA (7)
   // ═══════════════════════════════════════
+  "Dm7": {
+    latin: "Re menor séptima", anglo: "Dm7",
+    fingering: [
+      { string: 1, fret: 1, finger: 1 },
+      { string: 2, fret: 1, finger: 1 },
+      { string: 3, fret: 2, finger: 2 },
+      { string: 4, fret: 0, finger: 0 },
+      { string: 5, fret: -1, finger: -1 },
+      { string: 6, fret: -1, finger: -1 }
+    ],
+    notes: ["D3", "A3", "C4", "F4"]
+  },
+  "G7": {
+    latin: "Sol séptima", anglo: "G7",
+    fingering: [
+      { string: 1, fret: 1, finger: 1 },
+      { string: 2, fret: 0, finger: 0 },
+      { string: 3, fret: 0, finger: 0 },
+      { string: 4, fret: 0, finger: 0 },
+      { string: 5, fret: 2, finger: 2 },
+      { string: 6, fret: 3, finger: 3 }
+    ],
+    notes: ["G2", "B2", "D3", "G3", "B3", "F4"]
+  },
+  "C7": {
+    latin: "Do séptima", anglo: "C7",
+    fingering: [
+      { string: 1, fret: 0, finger: 0 },
+      { string: 2, fret: 1, finger: 1 },
+      { string: 3, fret: 3, finger: 4 },
+      { string: 4, fret: 2, finger: 2 },
+      { string: 5, fret: 3, finger: 3 },
+      { string: 6, fret: -1, finger: -1 }
+    ],
+    notes: ["C3", "E3", "Bb3", "C4", "E4"]
+  },
+  "D7": {
+    latin: "Re séptima", anglo: "D7",
+    fingering: [
+      { string: 1, fret: 2, finger: 3 },
+      { string: 2, fret: 1, finger: 1 },
+      { string: 3, fret: 2, finger: 2 },
+      { string: 4, fret: 0, finger: 0 },
+      { string: 5, fret: -1, finger: -1 },
+      { string: 6, fret: -1, finger: -1 }
+    ],
+    notes: ["D3", "A3", "C4", "F#4"]
+  },
+  "E7": {
+    latin: "Mi séptima", anglo: "E7",
+    fingering: [
+      { string: 1, fret: 0, finger: 0 },
+      { string: 2, fret: 0, finger: 0 },
+      { string: 3, fret: 1, finger: 1 },
+      { string: 4, fret: 0, finger: 0 },
+      { string: 5, fret: 2, finger: 2 },
+      { string: 6, fret: 0, finger: 0 }
+    ],
+    notes: ["E2", "B2", "D3", "G#3", "B3", "E4"]
+  },
+  "A7": {
+    latin: "La séptima", anglo: "A7",
+    fingering: [
+      { string: 1, fret: 0, finger: 0 },
+      { string: 2, fret: 2, finger: 3 },
+      { string: 3, fret: 0, finger: 0 },
+      { string: 4, fret: 2, finger: 2 },
+      { string: 5, fret: 0, finger: 0 },
+      { string: 6, fret: -1, finger: -1 }
+    ],
+    notes: ["A2", "E3", "G3", "C#4", "E4"]
+  },
+  "B7": {
+    latin: "Si séptima", anglo: "B7",
+    fingering: [
+      { string: 1, fret: 2, finger: 4 },
+      { string: 2, fret: 0, finger: 0 },
+      { string: 3, fret: 2, finger: 3 },
+      { string: 4, fret: 1, finger: 1 },
+      { string: 5, fret: 2, finger: 2 },
+      { string: 6, fret: -1, finger: -1 }
+    ],
+    notes: ["B2", "D#3", "A3", "B3", "F#4"]
+  },
+  "Em7": {
+    latin: "Mi menor séptima", anglo: "Em7",
+    fingering: [
+      { string: 1, fret: 0, finger: 0 },
+      { string: 2, fret: 0, finger: 0 },
+      { string: 3, fret: 0, finger: 0 },
+      { string: 4, fret: 0, finger: 0 },
+      { string: 5, fret: 2, finger: 2 },
+      { string: 6, fret: 0, finger: 0 }
+    ],
+    notes: ["E2", "B2", "D3", "G3", "B3", "E4"]
+  },
+  "Am7": {
+    latin: "La menor séptima", anglo: "Am7",
+    fingering: [
+      { string: 1, fret: 0, finger: 0 },
+      { string: 2, fret: 1, finger: 1 },
+      { string: 3, fret: 0, finger: 0 },
+      { string: 4, fret: 2, finger: 2 },
+      { string: 5, fret: 0, finger: 0 },
+      { string: 6, fret: -1, finger: -1 }
+    ],
+    notes: ["A2", "E3", "G3", "C4", "E4"]
+  },
+  "Cmaj7": {
+    latin: "Do mayor séptima", anglo: "Cmaj7",
+    fingering: [
+      { string: 1, fret: 0, finger: 0 },
+      { string: 2, fret: 0, finger: 0 },
+      { string: 3, fret: 0, finger: 0 },
+      { string: 4, fret: 2, finger: 2 },
+      { string: 5, fret: 3, finger: 3 },
+      { string: 6, fret: -1, finger: -1 }
+    ],
+    notes: ["C3", "E3", "G3", "B3", "E4"]
+  },
   "F": {
     latin: "Fa Mayor", anglo: "F",
     fingering: [
@@ -779,6 +898,16 @@ const ALIASES = {
   "am": "Am", "em": "Em", "dm": "Dm", "bm": "Bm",
   "fm": "Fm", "cm": "Cm", "gm": "Gm",
   "Bbm": "Bb",
+  "dm7": "Dm7", "D-7": "Dm7",
+  "G7": "G7", "g7": "G7",
+  "C7": "C7", "c7": "C7",
+  "D7": "D7", "d7": "D7",
+  "E7": "E7", "e7": "E7",
+  "A7": "A7", "a7": "A7",
+  "B7": "B7", "b7": "B7",
+  "Em7": "Em7", "e-7": "Em7",
+  "Am7": "Am7", "a-7": "Am7",
+  "Cmaj7": "Cmaj7", "CM7": "Cmaj7"
 };
 
 /**

@@ -46,6 +46,26 @@ const SHAPE_TEMPLATES = {
   "m7": {
     "E-Shape": { offsets: [0, 2, 0, 0, 0, 0], fingers: [1, 3, 1, 1, 1, 1], type: "Menor 7", latinSuffix: "m7" },
     "A-Shape": { offsets: [-1, 0, 2, 0, 1, 0], fingers: [-1, 1, 3, 1, 2, 1], type: "Menor 7", latinSuffix: "m7" }
+  },
+  // Mayor Séptima
+  "maj7": {
+    "E-Shape": { offsets: [0, -1, 1, 1, 0, -1], fingers: [1, -1, 3, 4, 2, -1], type: "Mayor 7", latinSuffix: "maj7" },
+    "A-Shape": { offsets: [-1, 0, 2, 1, 2, -1], fingers: [-1, 1, 3, 2, 4, -1], type: "Mayor 7", latinSuffix: "maj7" }
+  },
+  // Semidisminuido (m7b5)
+  "m7b5": {
+    "E-Shape": { offsets: [0, -1, 0, 0, -1, -1], fingers: [2, -1, 3, 4, 1, -1], type: "Semidisminuido", latinSuffix: "m7b5" },
+    "A-Shape": { offsets: [-1, 0, 1, 0, 1, -1], fingers: [-1, 1, 3, 2, 4, -1], type: "Semidisminuido", latinSuffix: "m7b5" }
+  },
+  // Disminuido (dim7)
+  "dim": {
+    "E-Shape": { offsets: [0, -1, -1, 0, -1, -1], fingers: [2, -1, 1, 3, 1, -1], type: "Disminuido", latinSuffix: "dim" },
+    "A-Shape": { offsets: [-1, 0, 1, -1, 1, -1], fingers: [-1, 2, 3, 1, 4, -1], type: "Disminuido", latinSuffix: "dim" }
+  },
+  // Aumentado (aug)
+  "aug": {
+    "E-Shape": { offsets: [0, -1, 2, 1, 1, -1], fingers: [1, -1, 4, 2, 3, -1], type: "Aumentado", latinSuffix: "aug" },
+    "A-Shape": { offsets: [-1, 0, -1, -2, -2, -1], fingers: [-1, 3, 2, 1, 1, -1], type: "Aumentado", latinSuffix: "aug" }
   }
 };
 
@@ -100,11 +120,35 @@ function generateAsciiSchema(anglo, latin, baseFret, fingering) {
   return schema;
 }
 
-export function generateDynamicChord(chordName, baseFret) {
-  if (!baseFret || baseFret <= 0) return null; // We only dynamically generate barre chords
-  if (baseFret > 20) return null;
-
+export function generateDynamicChord(chordName, baseFret = 0) {
   const { root, quality } = parseChordParts(chordName);
+  
+  // Si no nos dan baseFret, buscamos el traste óptimo
+  if (baseFret <= 0) {
+    // Buscamos en la 6ª cuerda (E-Shape)
+    let fret6 = string6Notes.indexOf(root);
+    // Buscamos en la 5ª cuerda (A-Shape)
+    let fret5 = string5Notes.indexOf(root);
+    
+    // Elegimos la posición más baja (más cerca del clavijero)
+    if (fret6 > 0 && fret5 > 0) {
+      baseFret = Math.min(fret6, fret5);
+    } else if (fret6 > 0) {
+      baseFret = fret6;
+    } else if (fret5 > 0) {
+      baseFret = fret5;
+    } else {
+      return null;
+    }
+  }
+
+  if (baseFret > 12) {
+    // Si se pasa del traste 12, intentamos restarle 12
+    const lowerFret = baseFret - 12;
+    if (lowerFret > 0) baseFret = lowerFret;
+  }
+  
+  if (baseFret > 14) return null;
   
   // Check if we support this quality
   const template = SHAPE_TEMPLATES[quality];
@@ -156,11 +200,32 @@ export function generateDynamicChord(chordName, baseFret) {
 
   let schema = generateAsciiSchema(chordName, latin, baseFret, fingering);
 
+  // Calcular notas musicales reales para el sintetizador
+  const stringBaseMidi = {
+    1: 64, // E4
+    2: 59, // B3
+    3: 55, // G3
+    4: 50, // D3
+    5: 45, // A2
+    6: 40  // E2
+  };
+  const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  
+  let notes = [];
+  for (let f of fingering) {
+    if (f.fret >= 0) {
+      const midi = stringBaseMidi[f.string] + f.fret;
+      const octave = Math.floor(midi / 12) - 1;
+      const noteName = noteNames[midi % 12];
+      notes.push(`${noteName}${octave}`);
+    }
+  }
+
   return {
     latin: latin,
     anglo: chordName,
     fingering: fingering,
-    notes: [], // We don't bother calculating exact note pitches for the mini fretboard, it's not strictly necessary
+    notes: notes,
     schema: schema
   };
 }
