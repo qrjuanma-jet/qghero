@@ -67,7 +67,7 @@ REGLAS ESTRICTAS:
 export async function fetchTheoryCourse(apiKey, level) {
   if (!apiKey) throw new Error("No API Key provided");
   
-  const systemMsg = `Eres un profesor de guitarra experto. Generas clases con esquemas ASCII que SIEMPRE muestran los trastes REALES de cada acorde. Tienes una lógica perfecta: nunca repites el uso de los dedos 2, 3 o 4 en un mismo acorde. Solo el dedo 1 puede usarse en múltiples cuerdas si es cejilla.`;
+  const systemMsg = `Eres un maestro de guitarra experto con décadas de experiencia pedagógica. Tu enseñanza es rigurosa, absolutamente precisa y realista. NUNCA alucinas ni inventas acordes o posiciones imposibles de tocar. Sabes que un guitarrista real jamás pondría el mismo dedo en dos trastes a la vez, ni usaría posiciones físicamente imposibles. Tienes una lógica musical perfecta: nunca repites el uso de los dedos 2, 3 o 4 en un mismo acorde. Solo el dedo 1 puede usarse en múltiples cuerdas si es cejilla. Te ciñes estrictamente a la teoría musical real.`;
 
   const prompt = `
 Genera una clase magistral de guitarra para el nivel "${level}" en HTML básico (h3, p, ul, strong).
@@ -78,15 +78,21 @@ NOMENCLATURA OBLIGATORIA:
 - Cuerdas: 1 (fina) a 6 (gruesa). O = al aire, X = silenciada.
 - Acordes: siempre en ambas nomenclaturas (ej. "Do Mayor (C)").
 
-ESQUEMAS ASCII - FORMATO (cada acorde debe tener su propio esquema con sus trastes REALES):
+ESQUEMAS ASCII - REGLAS ESTRICTAS DE FORMATO:
+- Cada cuerda solo puede tener UN DEDO pisándola. NUNCA pongas varios números en la misma cuerda.
+- NUNCA uses el mismo número de dedo (2, 3 o 4) en dos cuerdas distintas.
+- Si la cuerda suena al aire o no suena, pon O o X a la izquierda, y guiones en los trastes.
+- Si la cuerda se pisa, pon un guión a la izquierda, y el NÚMERO DEL DEDO (1,2,3,4) exactamente en la columna del traste correspondiente.
+
+Ejemplo Perfecto para Do Mayor (C) (Trastes I, II, III):
 <pre class="ascii-schema">
-TS      <traste_real>   <traste_real+1>   <traste_real+2>
-E (1) <O/X/1-4>---|---|---
-B (2) ...
-G (3) ...
-D (4) ...
-A (5) ...
-E (6) ...
+TS       Ⅰ       Ⅱ       Ⅲ
+E (1) O-------|-------|-------
+B (2) --------|---1---|-------
+G (3) O-------|-------|-------
+D (4) --------|-------|---2---
+A (5) --------|-------|---3---
+E (6) X-------|-------|-------
 </pre>
 
 EJEMPLOS de trastes reales (NO copies, genera los que correspondan al nivel):
@@ -127,7 +133,7 @@ export async function expandTheoryCourse(apiKey, level, previousContent) {
       textHistory = "..." + textHistory.substring(textHistory.length - 15000);
   }
 
-  const systemMsg = `Eres un profesor de guitarra experto. Generas clases con esquemas ASCII que SIEMPRE muestran los trastes REALES de cada acorde. Tienes una lógica perfecta: nunca repites el uso de los dedos 2, 3 o 4 en un mismo acorde. Solo el dedo 1 puede usarse en múltiples cuerdas si es cejilla. Nunca repites contenido ya enseñado.`;
+  const systemMsg = `Eres un maestro de guitarra experto con décadas de experiencia pedagógica. Tu enseñanza es rigurosa, absolutamente precisa y realista. NUNCA alucinas ni inventas acordes o posiciones imposibles de tocar. Sabes que un guitarrista real jamás pondría el mismo dedo en dos trastes a la vez, ni usaría posiciones físicamente imposibles. Tienes una lógica musical perfecta: nunca repites el uso de los dedos 2, 3 o 4 en un mismo acorde. Solo el dedo 1 puede usarse en múltiples cuerdas si es cejilla. Nunca repites contenido ya enseñado y te ciñes estrictamente a la teoría musical real.`;
 
   const prompt = `
 Continúa la clase de guitarra nivel "${level}". 
@@ -141,7 +147,7 @@ Genera la CONTINUACIÓN con un nuevo concepto/acorde más avanzado.
 REGLAS:
 - Nomenclatura: dedos 1-4, p/i/m/a/e, cuerdas 1-6, O/X.
 - Acordes en ambas nomenclaturas (ej. "Sol Mayor (G)").
-- Cada esquema ASCII en <pre class="ascii-schema"> con 8 líneas: cabecera TS con trastes REALES + 6 cuerdas.
+- Cada esquema ASCII en <pre class="ascii-schema">. Sigue el formato estricto: O/X a la izquierda y el NÚMERO DE DEDO alineado en la columna del traste correspondiente. ¡NUNCA pongas varios números en la misma cuerda!
 - Si enseñas un acorde con cejilla en traste V, la fila TS es "TS      Ⅴ   Ⅵ   Ⅶ". NO uses siempre Ⅰ Ⅱ Ⅲ.
 - OBLIGATORIO: Debajo de cada esquema ASCII, debes poner un botón para reproducir el acorde. Usa este formato exacto, reemplazando el array con las notas reales del acorde en formato anglosajón (ejemplo para Mi Mayor):
 <button class="btn primary-btn play-chord-btn" data-notes='["E2", "B2", "E3", "G#3", "B3", "E4"]'>🔊 Escuchar</button>
