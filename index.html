@@ -85,7 +85,11 @@
         <!-- NUEVA PANTALLA: Modo Teoría -->
         <section id="theory-screen" class="screen hidden">
             <header style="display: flex; justify-content: space-between; align-items: center;">
-                <button id="back-from-theory-btn" class="btn icon-btn">⬅️ Volver</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="back-from-theory-btn" class="btn icon-btn">⬅️ Volver</button>
+                    <button onclick="location.reload()" class="btn icon-btn" title="Actualizar">🔄</button>
+                    <button onclick="history.forward()" class="btn icon-btn" title="Adelante">➡️</button>
+                </div>
                 <h2 class="logo-title-small">Modo <span class="neon-text" style="color: var(--neon-cyan);">Teoría</span></h2>
                 <button class="btn icon-btn help-btn" data-help="theory" title="Ayuda">❔</button>
             </header>
@@ -153,7 +157,11 @@
         <!-- PANTALLA 3: Configuración de Juego -->
         <section id="game-setup-screen" class="screen hidden">
             <header style="display: flex; justify-content: space-between; align-items: center;">
-                <button id="back-from-setup-btn" class="btn icon-btn">⬅️ Volver</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="back-from-setup-btn" class="btn icon-btn">⬅️ Volver</button>
+                    <button onclick="location.reload()" class="btn icon-btn" title="Actualizar">🔄</button>
+                    <button onclick="history.forward()" class="btn icon-btn" title="Adelante">➡️</button>
+                </div>
                 <h2 class="logo-title-small">Modo <span class="neon-text">Juego</span></h2>
                 <button class="btn icon-btn help-btn" data-help="setup" title="Ayuda">❔</button>
             </header>
@@ -230,7 +238,11 @@
     <!-- PANTALLA 4: Modo Práctica -->
         <section id="practice-screen" class="screen hidden">
             <header style="display: flex; justify-content: space-between; align-items: center;">
-                <button id="back-from-practice-btn" class="btn icon-btn">⬅️ Volver</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="back-from-practice-btn" class="btn icon-btn">⬅️ Volver</button>
+                    <button onclick="location.reload()" class="btn icon-btn" title="Actualizar">🔄</button>
+                    <button onclick="history.forward()" class="btn icon-btn" title="Adelante">➡️</button>
+                </div>
                 <h2 class="logo-title-small">Modo <span class="neon-text">Práctica</span></h2>
                 <button class="btn icon-btn help-btn" data-help="practice" title="Ayuda">❔</button>
             </header>
@@ -294,7 +306,11 @@
         <!-- PANTALLA 5: Juego (Viñetas) -->
         <section id="game-screen" class="screen hidden">
             <div class="game-header">
-                <button id="back-to-menu-btn" class="btn icon-btn">⬅️</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="back-to-menu-btn" class="btn icon-btn">⬅️</button>
+                    <button onclick="location.reload()" class="btn icon-btn" title="Actualizar">🔄</button>
+                    <button onclick="history.forward()" class="btn icon-btn" title="Adelante">➡️</button>
+                </div>
                 <div class="song-info">
                     <h3 id="current-song-title">Cargando...</h3>
                 </div>

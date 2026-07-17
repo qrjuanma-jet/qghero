@@ -32,6 +32,8 @@ body {
 .screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); display: none; }
 .screen.active { opacity: 1; pointer-events: all; transform: scale(1); display: flex; }
 
+.hidden { display: none !important; }
+
 .glass-panel, .content-panel {
   background: var(--panel-bg);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);

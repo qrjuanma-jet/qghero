@@ -13,6 +13,15 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+window.onerror = function(msg, url, line, col, error) {
+   alert("Global Error: " + msg + "\nLine: " + line);
+   return false;
+};
+
+window.addEventListener('unhandledrejection', function(event) {
+  alert("Unhandled Promise Rejection: " + event.reason);
+});
+
 // App State
 let groqApiKey = localStorage.getItem('qghero_groq_key') || '';
 let currentSongData = null;
@@ -84,6 +93,7 @@ function checkSharedUrl() {
 }
 
 function initApp() {
+  try {
   gameEngine = new GameEngine();
   initShareButtons('');
   initPracticeMode(getApiKey);
@@ -149,6 +159,9 @@ function initApp() {
   });
 
   setupEventListeners();
+  } catch(e) {
+    alert("Error en initApp: " + e.stack);
+  }
 }
 
 function setupEventListeners() {
