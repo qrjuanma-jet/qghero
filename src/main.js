@@ -217,9 +217,9 @@ function setupEventListeners() {
               <li>Si el ritmo o los efectos no tienen nada que ver, prueba a buscar con más detalle: "artista - nombre de la canción".</li>
           </ul>
 
-          <h4>📊 El Esquema de Mástil (tablatura ASCII)</h4>
-          <p>Cada bloque de líneas es como una foto del mástil de tu guitarra girada 90°. La primera línea indica los <strong>trastes</strong> (Ⅰ, Ⅱ, Ⅲ = traste 1, 2, 3; Ⅴ = traste 5, etc.).</p>
-          <p>Cada fila es una <strong>cuerda</strong>, de más fina (E arriba, número 1) a más gruesa (E abajo, número 6):</p>
+          <h4>📊 El Esquema de Acorde (Viñeta Gráfica)</h4>
+          <p>Cada caja gráfica es una "foto" del mástil de tu guitarra. Las líneas verticales indican las <strong>cuerdas</strong> (de más gruesa a la izquierda a más fina a la derecha), y las horizontales son los <strong>trastes</strong>.</p>
+          <p>El número romano a un lado o arriba (ej. TⅠ, TⅤ) te indica en qué traste base debes colocar la mano.</p>
           <ul>
               <li><strong>O</strong> = cuerda <em>al aire</em> (suénala sin pisar ningún traste).</li>
               <li><strong>X</strong> = cuerda <em>silenciada</em> (no la toques, apágala con algún dedo).</li>

@@ -75,36 +75,12 @@ Genera una clase magistral de guitarra para el nivel "${level}" en HTML básico 
 NOMENCLATURA OBLIGATORIA:
 - Mano izquierda: dedos 1 (índice), 2 (medio), 3 (anular), 4 (meñique). REGLA: cada dedo pisa UN traste (salvo cejilla).
 - Mano derecha: p (pulgar), i (índice), m (medio), a (anular), e (meñique).
-- Cuerdas: 1 (fina) a 6 (gruesa). O = al aire, X = silenciada.
-- Acordes: siempre en ambas nomenclaturas (ej. "Do Mayor (C)").
-
-ESQUEMAS ASCII - REGLAS ESTRICTAS DE FORMATO:
-- Cada cuerda solo puede tener UN DEDO pisándola. NUNCA pongas varios números en la misma cuerda.
-- NUNCA uses el mismo número de dedo (2, 3 o 4) en dos cuerdas distintas.
-- Si la cuerda suena al aire o no suena, pon O o X a la izquierda, y guiones en los trastes.
-- Si la cuerda se pisa, pon un guión a la izquierda, y el NÚMERO DEL DEDO (1,2,3,4) exactamente en la columna del traste correspondiente.
-
-Ejemplo Perfecto para Do Mayor (C) (Trastes I, II, III):
-<pre class="ascii-schema">
-TS       Ⅰ       Ⅱ       Ⅲ
-E (1) O-------|-------|-------
-B (2) --------|---1---|-------
-G (3) O-------|-------|-------
-D (4) --------|-------|---2---
-A (5) --------|-------|---3---
-E (6) X-------|-------|-------
-</pre>
-
-EJEMPLOS de trastes reales (NO copies, genera los que correspondan al nivel):
-- Mi menor (Em): TS Ⅰ Ⅱ Ⅲ (acorde abierto en trastes 1-3)
-- Fa Mayor (F): TS Ⅰ Ⅱ Ⅲ (cejilla en traste I)
-- Si menor (Bm): TS Ⅱ Ⅲ Ⅳ (cejilla en traste II)
-- La Mayor barre: TS Ⅴ Ⅵ Ⅶ (cejilla en traste V)
-- Do# menor: TS Ⅳ Ⅴ Ⅵ (cejilla en traste IV)
-- Mi Mayor traste VII: TS Ⅶ Ⅷ Ⅸ (cejilla en traste VII)
-
-OBLIGATORIO: Debajo de cada esquema ASCII, debes poner un botón para reproducir el acorde. Usa este formato exacto, reemplazando el array con las notas reales del acorde en formato anglosajón (ejemplo para Mi Mayor):
-<button class="btn primary-btn play-chord-btn" data-notes='["E2", "B2", "E3", "G#3", "B3", "E4"]'>🔊 Escuchar</button>
+ESQUEMAS DE ACORDES - REGLAS ESTRICTAS:
+- NUNCA intentes dibujar esquemas ASCII.
+- OBLIGATORIO: Cuando quieras enseñar un acorde (ej. Do Mayor, Sol, Re menor, Fa#), inserta EXACTAMENTE este código HTML para que el sistema dibuje la viñeta perfecta:
+<div class="theory-chord-card" data-chord="C"></div>
+- SUSTITUYE "C" por el nombre del acorde en formato anglosajón o latino (ej. "Dm", "G", "Do Mayor", "Fa#m").
+- ¡ESTO ES MUY IMPORTANTE! Si no pones este <div>, el alumno no podrá ver ni escuchar el acorde. No pongas ningún botón "Escuchar" a mano, el sistema lo generará automáticamente.
 
 CONTENIDO:
 - Introducción motivadora
@@ -145,12 +121,10 @@ ${textHistory}
 Genera la CONTINUACIÓN con un nuevo concepto/acorde más avanzado.
 
 REGLAS:
-- Nomenclatura: dedos 1-4, p/i/m/a/e, cuerdas 1-6, O/X.
+- Nomenclatura: dedos 1-4, p/i/m/a/e.
 - Acordes en ambas nomenclaturas (ej. "Sol Mayor (G)").
-- Cada esquema ASCII en <pre class="ascii-schema">. Sigue el formato estricto: O/X a la izquierda y el NÚMERO DE DEDO alineado en la columna del traste correspondiente. ¡NUNCA pongas varios números en la misma cuerda!
-- Si enseñas un acorde con cejilla en traste V, la fila TS es "TS      Ⅴ   Ⅵ   Ⅶ". NO uses siempre Ⅰ Ⅱ Ⅲ.
-- OBLIGATORIO: Debajo de cada esquema ASCII, debes poner un botón para reproducir el acorde. Usa este formato exacto, reemplazando el array con las notas reales del acorde en formato anglosajón (ejemplo para Mi Mayor):
-<button class="btn primary-btn play-chord-btn" data-notes='["E2", "B2", "E3", "G#3", "B3", "E4"]'>🔊 Escuchar</button>
+- NUNCA dibujes esquemas ASCII. Para mostrar un acorde, inserta EXACTAMENTE esto: <div class="theory-chord-card" data-chord="C"></div> (cambiando "C" por el acorde correspondiente).
+- ¡Prohibido poner botones de Escuchar! El sistema los crea solos.
 - Solo HTML crudo. Sin markdown. Sin repetir conceptos del historial.`;
 
   const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg);

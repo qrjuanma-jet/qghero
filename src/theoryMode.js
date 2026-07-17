@@ -1,5 +1,7 @@
 import { fetchTheoryCourse, expandTheoryCourse } from './groqApi.js';
 import { initAudio, strumChord } from './audioSynth.js';
+import { lookupChord } from './chordDb.js';
+import { buildMiniFretboard } from './chordUI.js';
 
 let currentLevel = 'Principiante';
 
@@ -12,28 +14,41 @@ export function initTheoryMode(getApiKeyFn) {
   const expandBtnContainer = document.getElementById('theory-expand-container');
   const expandBtn = document.getElementById('expand-course-btn');
 
-  function bindAudioButtons() {
-    resultContainer.querySelectorAll('.play-chord-btn').forEach(btn => {
-      if (btn.dataset.bound) return;
-      btn.dataset.bound = "true";
+  function renderTheoryChords() {
+    resultContainer.querySelectorAll('.theory-chord-card').forEach(container => {
+      if (container.dataset.rendered) return;
+      container.dataset.rendered = "true";
       
-      btn.addEventListener('click', async (e) => {
-        try {
-          const notesRaw = btn.getAttribute('data-notes');
-          let notes;
+      const chordName = container.getAttribute('data-chord');
+      if (!chordName) return;
+
+      const chord = lookupChord(chordName);
+      
+      if (chord) {
+        // Build graphical fretboard
+        const fb = buildMiniFretboard(chord);
+        container.appendChild(fb);
+        
+        // Build audio button
+        const btn = document.createElement('button');
+        btn.className = 'btn primary-btn play-chord-btn';
+        btn.innerHTML = '🔊 Escuchar';
+        btn.style.marginTop = '10px';
+        btn.style.display = 'block';
+        
+        btn.addEventListener('click', async () => {
           try {
-            notes = JSON.parse(notesRaw);
+            await initAudio();
+            strumChord(chord.notes, 0.05);
           } catch(err) {
-            // Fallback robusto por si la IA genera comillas simples o formato inválido
-            const matches = notesRaw.match(/[A-G][#b]?[0-9]/g);
-            notes = matches ? matches : [];
+            console.error("Error reproduciendo acorde:", err);
           }
-          await initAudio();
-          strumChord(notes, 0.05);
-        } catch(err) {
-          console.error("Error reproduciendo acorde:", err);
-        }
-      });
+        });
+        
+        container.appendChild(btn);
+      } else {
+        container.innerHTML = `<p style="color:red; font-size:12px;">[Acorde no encontrado en DB: ${chordName}]</p>`;
+      }
     });
   }
 
@@ -41,7 +56,7 @@ export function initTheoryMode(getApiKeyFn) {
     const cachedHTML = localStorage.getItem(`qghero_theory_course_${level}`);
     if (cachedHTML) {
       resultContainer.innerHTML = cachedHTML;
-      bindAudioButtons();
+      renderTheoryChords();
       resultContainer.classList.remove('hidden');
       expandBtnContainer.classList.remove('hidden');
       return true;
@@ -81,7 +96,7 @@ export function initTheoryMode(getApiKeyFn) {
       resultContainer.innerHTML = courseHtml;
       saveCourse(currentLevel, courseHtml);
       
-      bindAudioButtons();
+      renderTheoryChords();
 
       resultContainer.classList.remove('hidden');
       expandBtnContainer.classList.remove('hidden');
@@ -121,7 +136,7 @@ export function initTheoryMode(getApiKeyFn) {
       // Guardar completo
       saveCourse(currentLevel, resultContainer.innerHTML);
       
-      bindAudioButtons();
+      renderTheoryChords();
     } catch (error) {
       alert("Hubo un error al ampliar el curso: " + error.message);
     } finally {

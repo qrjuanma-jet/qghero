@@ -1,5 +1,6 @@
 import { fetchPracticeLevel, fetchPracticeSong } from './groqApi.js';
 import { initAudio, strumChord } from './audioSynth.js';
+import { buildMiniFretboard } from './chordUI.js';
 
 let currentStyle = 'rock';
 let isGenerating = false;
@@ -191,11 +192,22 @@ function renderDataToUI(data, customSongQuery = null) {
         card.innerHTML = `
           <h4>${chord.name}</h4>
           <p><strong>Dedo:</strong> ${chord.finger}</p>
-          ${chord.schema ? `<pre class="ascii-schema">${Array.isArray(chord.schema) ? chord.schema.join('\n') : chord.schema}</pre>` : ''}
+          <div class="chord-ui-container"></div>
           <button class="btn primary-btn play-chord-btn" data-notes='${JSON.stringify(chord.notes)}'>
             🔊 Escuchar
           </button>
         `;
+        
+        // Check if chord has a fingering to build the UI
+        if (chord.fingering) {
+          const uiContainer = card.querySelector('.chord-ui-container');
+          const fb = buildMiniFretboard(chord);
+          uiContainer.appendChild(fb);
+        } else if (chord.schema) {
+          const uiContainer = card.querySelector('.chord-ui-container');
+          uiContainer.innerHTML = `<pre class="ascii-schema">${Array.isArray(chord.schema) ? chord.schema.join('\n') : chord.schema}</pre>`;
+        }
+        
         styleChords.appendChild(card);
       });
     }
