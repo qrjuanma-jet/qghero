@@ -34,22 +34,44 @@ export function playChord(notes, duration = "2n") {
 /**
  * Arpegia un acorde imitando un rasgueo hacia abajo
  */
+const LATIN_TO_ANGLO = {
+  'do': 'C', 're': 'D', 'mi': 'E', 'fa': 'F', 'sol': 'G', 'la': 'A', 'si': 'B',
+  'do#': 'C#', 're#': 'D#', 'fa#': 'F#', 'sol#': 'G#', 'la#': 'A#',
+  'reb': 'Db', 'mib': 'Eb', 'solb': 'Gb', 'lab': 'Ab', 'sib': 'Bb'
+};
+
+function formatPitchForTone(rawPitch) {
+  let p = String(rawPitch).trim().toLowerCase();
+  let octave = p.match(/[0-9]/);
+  octave = octave ? octave[0] : "4";
+  let noteName = p.replace(/[0-9]/g, '');
+  
+  if (LATIN_TO_ANGLO[noteName]) {
+    noteName = LATIN_TO_ANGLO[noteName];
+  } else {
+    noteName = noteName.charAt(0).toUpperCase() + noteName.slice(1);
+  }
+  
+  if (!/^[A-G][#b]?$/.test(noteName)) return null;
+  return noteName + octave;
+}
+
 export function strumChord(notes, speed = 0.05) {
   if (!isLoaded || !synth) return;
   
   const now = Tone.now();
+  if (!Array.isArray(notes)) notes = [notes];
+
   notes.forEach((note, index) => {
     let pitch = note;
     if (typeof note === 'object') {
       pitch = note.note || note.pitch || note.latin || note.anglo;
     }
-    if (pitch) {
-      // Ensure pitch has an octave number to avoid Tone.js errors
-      if (!/[0-9]/.test(pitch)) {
-        pitch += "4"; // default to 4th octave
-      }
-      // Using explicit 2 seconds duration instead of "1m" to avoid Transport dependency
-      synth.triggerAttackRelease(pitch, 2, now + (index * speed));
+    
+    let validPitch = formatPitchForTone(pitch);
+    
+    if (validPitch) {
+      synth.triggerAttackRelease(validPitch, 2, now + (index * speed));
     }
   });
 }
