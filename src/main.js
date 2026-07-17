@@ -5,7 +5,7 @@ import { GameEngine } from './gameEngine.js';
 import { initShareButtons } from './share.js';
 import { initPracticeMode } from './practiceMode.js';
 import { initTheoryMode } from './theoryMode.js';
-import { initAudio, strumChord, playNote, playPreviewSequence, stopPreviewSequence } from './audioSynth.js';
+import { initAudio, strumChord, playNote, playPreviewSequence, stopPreviewSequence, stopAllAudio } from './audioSynth.js';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -42,6 +42,7 @@ const modals = {
 };
 
 function showScreen(screenName, pushHistory = true) {
+  stopAllAudio();
   Object.values(screens).forEach(s => {
     s.classList.remove('active');
     s.classList.add('hidden');

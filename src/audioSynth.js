@@ -21,6 +21,12 @@ export async function initAudio() {
   isLoaded = true;
 }
 
+export function stopAllAudio() {
+  if (synth) {
+    synth.releaseAll();
+  }
+}
+
 /**
  * Reproduce un acorde simultáneamente
  * @param {string[]} notes - Ej: ["E2", "A2", "D3", "G3", "B3", "E4"] (Mi mayor)

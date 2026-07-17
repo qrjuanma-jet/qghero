@@ -1,5 +1,5 @@
 import { fetchTheoryCourse, expandTheoryCourse } from './groqApi.js';
-import { initAudio, strumChord } from './audioSynth.js';
+import { initAudio, strumChord, stopAllAudio } from './audioSynth.js';
 
 let currentLevel = 'Principiante';
 
@@ -12,6 +12,20 @@ export function initTheoryMode(getApiKeyFn) {
   const expandBtnContainer = document.getElementById('theory-expand-container');
   const expandBtn = document.getElementById('expand-course-btn');
 
+  function resetAudioButton(btn) {
+    if (btn.classList.contains('playing')) {
+      btn.classList.remove('playing');
+      btn.style.backgroundColor = '';
+      btn.style.borderColor = '';
+      btn.innerHTML = '🔊 Escuchar';
+      clearTimeout(btn.dataset.timeoutId);
+    }
+  }
+
+  function resetAllAudioButtons() {
+    document.querySelectorAll('.play-chord-btn.playing').forEach(btn => resetAudioButton(btn));
+  }
+
   function bindAudioButtons() {
     resultContainer.querySelectorAll('.play-chord-btn').forEach(btn => {
       // Remove previous event listeners by cloning if necessary, but since we just append, 
@@ -21,9 +35,33 @@ export function initTheoryMode(getApiKeyFn) {
       
       btn.addEventListener('click', async (e) => {
         try {
-          const notes = JSON.parse(e.target.getAttribute('data-notes'));
+          if (btn.classList.contains('playing')) {
+            // Stop playing
+            stopAllAudio();
+            resetAllAudioButtons();
+            return;
+          }
+
+          const notes = JSON.parse(btn.getAttribute('data-notes'));
           await initAudio();
+          
+          // Stop any currently playing chord from other buttons
+          stopAllAudio();
+          resetAllAudioButtons();
+          
+          // Change UI to playing state (red)
+          btn.classList.add('playing');
+          btn.style.backgroundColor = '#ff4444';
+          btn.style.borderColor = '#ff4444';
+          btn.innerHTML = '🛑 Parar';
+          
           strumChord(notes, 0.05);
+          
+          // Auto-reset after a reasonable duration (e.g. 3 seconds)
+          btn.dataset.timeoutId = setTimeout(() => {
+             resetAudioButton(btn);
+          }, 3500);
+
         } catch(err) {
           console.error("Error reproduciendo acorde:", err);
         }
