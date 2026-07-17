@@ -19,7 +19,15 @@ export function initTheoryMode(getApiKeyFn) {
       
       btn.addEventListener('click', async (e) => {
         try {
-          const notes = JSON.parse(btn.getAttribute('data-notes'));
+          const notesRaw = btn.getAttribute('data-notes');
+          let notes;
+          try {
+            notes = JSON.parse(notesRaw);
+          } catch(err) {
+            // Fallback robusto por si la IA genera comillas simples o formato inválido
+            const matches = notesRaw.match(/[A-G][#b]?[0-9]/g);
+            notes = matches ? matches : [];
+          }
           await initAudio();
           strumChord(notes, 0.05);
         } catch(err) {
