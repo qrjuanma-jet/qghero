@@ -686,6 +686,7 @@ function renderSavedSongs() {
     container.style.display = 'block';
     list.innerHTML = '';
     
+    saved.forEach((song, idx) => {
       const wrapper = document.createElement('div');
       wrapper.style.cssText = 'display: flex; gap: 0.5rem; align-items: stretch; margin-bottom: 0.5rem;';
       
