@@ -44,6 +44,10 @@ export function strumChord(notes, speed = 0.05) {
       pitch = note.note || note.pitch || note.latin || note.anglo;
     }
     if (pitch) {
+      // Ensure pitch has an octave number to avoid Tone.js errors
+      if (!/[0-9]/.test(pitch)) {
+        pitch += "4"; // default to 4th octave
+      }
       // Using explicit 2 seconds duration instead of "1m" to avoid Transport dependency
       synth.triggerAttackRelease(pitch, 2, now + (index * speed));
     }
