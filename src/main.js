@@ -170,21 +170,30 @@ function setupEventListeners() {
   const helpContents = {
       main: `
           <h3>Bienvenido a QGHERO</h3>
-          <p>Esta aplicación te ayuda a aprender guitarra usando Inteligencia Artificial. Tienes 3 modos:</p>
+          <p>Esta aplicación te ayuda a aprender guitarra usando Inteligencia Artificial. Tienes 4 secciones principales:</p>
           <ul>
-              <li><strong>Modo Teoría:</strong> Genera lecciones y esquemas técnicos según tu nivel, usando nomenclatura oficial (dedos 1,2,3,4).</li>
-              <li><strong>Modo Práctica:</strong> Elige un estilo musical y la IA te enseñará acordes y ejercicios progresivos.</li>
-              <li><strong>Modo Juego:</strong> El modo principal. Pega un enlace de YouTube y la IA extraerá los acordes para que los toques al estilo Guitar Hero.</li>
+              <li><strong>Modo Teoría:</strong> Genera clases magistrales según tu nivel con viñetas de acordes generadas de forma autónoma.</li>
+              <li><strong>Modo Práctica:</strong> Selecciona un estilo musical (Rock, Pop, Clásico, etc.) y la IA te enseñará de forma progresiva.</li>
+              <li><strong>Buscador de Acordes:</strong> Usa tu voz o teclado para pedirle un acorde en lenguaje natural y la IA te lo dibujará al instante.</li>
+              <li><strong>Modo Juego:</strong> El modo principal. Pega un enlace de YouTube y toca la canción al estilo Guitar Hero sincronizado con el vídeo.</li>
           </ul>`,
       theory: `
           <h3>Modo Teoría</h3>
           <p>Aquí la IA actúa como tu profesor particular.</p>
-          <p>Usa los botones de nivel ("Básico", "Intermedio", "Avanzado") para generar una clase magistral desde cero. Si quieres profundizar en el mismo tema sin repetir conceptos, usa el botón "Avanzar Temario".</p>
-          <p><strong>Interpretación de Acordes:</strong><br>Las "X" significan "no tocar esa cuerda". La "O" significa "cuerda al aire". Los números (1, 2, 3, 4) indican qué dedo usar.</p>`,
+          <p>Usa los botones de nivel para generar una clase magistral desde cero. Si quieres profundizar en el mismo tema sin repetir conceptos, usa el botón "Avanzar Temario".</p>
+          <p><strong>Las Viñetas Gráficas:</strong><br>Cada acorde va acompañado de un esquema visual. Las líneas horizontales son las cuerdas (arriba la más fina, abajo la más gruesa) y las verticales son los trastes. El número romano te indica dónde colocar la mano. El punto brillante indica el número del dedo a utilizar.</p>`,
       practice: `
           <h3>Modo Práctica</h3>
-          <p>Selecciona un estilo musical en la barra lateral para recibir una lección enfocada en ese género.</p>
-          <p>Cada vez que dominas un nivel, pulsa "Subir de Nivel" para que la IA genere acordes y ritmos más complejos del mismo estilo. Si buscas una canción concreta, usa el buscador "A la Carta".</p>`,
+          <p>Selecciona un estilo musical en la barra lateral para recibir una lección enfocada en ese género. Soporta estilos desde Rock y Pop, hasta acordes de jazz y arpegios de música Clásica.</p>
+          <p>Cada vez que dominas un nivel, pulsa "Subir de Nivel" para que la IA genere progresiones y acordes más complejos, basándose en la biblioteca de acordes dinámicos. Si buscas una canción concreta, usa "A la Carta".</p>`,
+      dictionary: `
+          <h3>Buscador Inteligente de Acordes</h3>
+          <p>Esta sección usa el motor de procesamiento natural de la IA para entender tus dudas musicales.</p>
+          <ul>
+              <li><strong>Búsqueda por Voz (🎤):</strong> Haz clic en el micrófono, dale permiso en tu navegador y di algo como <em>"Enséñame el Do Mayor séptima"</em>. La IA extraerá matemáticamente el acorde y lo dibujará.</li>
+              <li><strong>Búsqueda por Texto:</strong> Puedes escribir en lenguaje natural, como <em>"acorde triste de Mi"</em> o <em>"F#m7"</em>.</li>
+          </ul>
+          <p>La viñeta gráfica y el botón de audio se generan de forma automática basándose en la geometría del mástil.</p>`,
       setup: `
           <h3>Configurar Partida</h3>
           <p>Tienes dos formas de jugar:</p>
@@ -220,32 +229,31 @@ function setupEventListeners() {
           </ul>
 
           <h4>📊 El Esquema de Acorde (Viñeta Gráfica)</h4>
-          <p>Cada caja gráfica es una "foto" del mástil de tu guitarra. Las líneas verticales indican las <strong>cuerdas</strong> (de más gruesa a la izquierda a más fina a la derecha), y las horizontales son los <strong>trastes</strong>.</p>
-          <p>El número romano a un lado o arriba (ej. TⅠ, TⅤ) te indica en qué traste base debes colocar la mano.</p>
+          <p>Cada caja gráfica es una "foto" del mástil de tu guitarra. Las líneas <strong>horizontales</strong> indican las cuerdas (la más fina arriba, la más gruesa abajo), y las <strong>verticales</strong> separan los trastes.</p>
+          <p>El número romano arriba de los trastes (ej. Ⅰ, Ⅴ) te indica en qué traste base debes colocar la mano.</p>
           <ul>
-              <li><strong>O</strong> = cuerda <em>al aire</em> (suénala sin pisar ningún traste).</li>
-              <li><strong>X</strong> = cuerda <em>silenciada</em> (no la toques, apágala con algún dedo).</li>
-              <li><strong>1, 2, 3, 4</strong> = el <em>dedo</em> que debes usar (1=índice, 2=medio, 3=anular, 4=meñique).</li>
+              <li><strong>O (cyan):</strong> cuerda <em>al aire</em> (suénala sin pisar ningún traste).</li>
+              <li><strong>X (rojo):</strong> cuerda <em>silenciada</em> (no la toques, apágala con algún dedo).</li>
+              <li><strong>1, 2, 3, 4:</strong> el <em>dedo</em> que debes usar (1=índice, 2=medio, 3=anular, 4=meñique). El punto cae justo en medio del traste que tienes que pisar.</li>
           </ul>
 
           <h4>🤚 ¿Qué es una Cejilla?</h4>
-          <p>Una <strong>cejilla</strong> es cuando usas el dedo índice (dedo 1) para presionar <em>todas</em> las cuerdas en un mismo traste a la vez, como si fuera una pequeña ceja o puente. En los esquemas se indica con el número 1 repetido en todas las cuerdas del mismo traste.</p>
-          <p>Por ejemplo, una cejilla en el traste V significa que pones el índice tumbado en el traste 5 y el resto de dedos forman el acorde encima. Esto te permite tocar acordes de bar en cualquier posición del mástil.</p>
+          <p>Una <strong>cejilla</strong> es cuando usas el dedo índice (dedo 1) para presionar <em>todas</em> las cuerdas en un mismo traste a la vez. En los esquemas verás el número 1 repetido verticalmente en varias cuerdas.</p>
 
           <h4>🎵 Mapa Cronológico de Acordes</h4>
-          <p>El mapa muestra los acordes en el orden <em>exacto</em> en que suenan en la canción. La primera vez que aparece un acorde se dibuja su esquema completo. Si se repite, aparece <strong>↩️ Sol (Repetición)</strong> para no repetir el dibujo. El mapa va creciendo automáticamente mientras la IA construye la canción.</p>
+          <p>El mapa muestra los acordes en el orden <em>exacto</em> en que suenan en la canción. La primera vez que aparece un acorde se dibuja su esquema completo. Si se repite, aparece su nombre en diminuto para ahorrar espacio. El mapa va creciendo automáticamente mientras la IA analiza la canción.</p>
 
           <h4>🔊 Botones de esta pantalla</h4>
           <ul>
-              <li><strong>Escuchar Pista Sintetizada:</strong> Reproduce en orden todos los acordes del mapa. Púlsalo de nuevo para parar.</li>
-              <li><strong>➕ Seguir Aprendiendo:</strong> Fuerza a la IA a añadir más compases manualmente si quieres acelerar el proceso.</li>
-              <li><strong>▶️ Iniciar Juego:</strong> ¡Empieza a tocar! Espera primero a que aparezca <strong>✅ Canción construida</strong> si quieres jugar con la canción completa.</li>
+              <li><strong>Escuchar Pista Sintetizada:</strong> Reproduce en orden todos los acordes del mapa para que te hagas una idea de cómo sonará.</li>
+              <li><strong>➕ Seguir Aprendiendo:</strong> Fuerza a la IA a seguir escuchando y añadiendo acordes a la lista.</li>
+              <li><strong>▶️ Iniciar Juego:</strong> ¡Empieza a tocar!</li>
           </ul>`,
       score: `
           <h3>¿Cómo leer la partitura / tablatura?</h3>
           <p>Esta es una tablatura de guitarra (tab) generada automáticamente por la IA a partir de las notas de la canción.</p>
           <ul style="margin-bottom: 1rem;">
-              <li><strong>Las 6 líneas:</strong> Representan las cuerdas de la guitarra. La línea de arriba es la primera cuerda (e, la más fina), y la de abajo es la sexta (E, la más gruesa).</li>
+              <li><strong>Las 6 líneas horizontales:</strong> Representan las cuerdas de la guitarra. La línea de arriba es la primera cuerda (e, la más fina), y la de abajo es la sexta (E, la más gruesa).</li>
               <li><strong>Los números (en azul):</strong> Indican en qué <strong>traste</strong> debes poner el dedo en esa cuerda específica. Si hay varios números apilados en la misma vertical, se tocan a la vez (es un acorde).</li>
               <li><strong>Nombre del acorde (en rosa):</strong> Aparece arriba de cada columna de notas indicando el nombre del acorde que estás tocando (ej: Am, G).</li>
               <li><strong>Guiones (–):</strong> Significan que esa cuerda no se toca en ese momento.</li>
@@ -253,8 +261,7 @@ function setupEventListeners() {
           <h4>Controles del visor</h4>
           <ul>
               <li><strong>⬅️ / ➡️:</strong> Pasa a la página anterior o siguiente de la partitura.</li>
-              <li><strong>▶️ Auto:</strong> Activa el modo de avance automático. La partitura pasará de página sola cada 4 segundos para que puedas tocar sin soltar la guitarra.</li>
-              <li><strong>✖️:</strong> Cierra el visor y vuelve a la pantalla anterior.</li>
+              <li><strong>▶️ Auto:</strong> Activa el avance automático para que puedas tocar sin usar las manos.</li>
           </ul>`
   };
 
