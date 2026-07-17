@@ -937,11 +937,14 @@ export function lookupChord(chordName, baseFret = 0) {
     if (ALIASES[key] && CHORDS[ALIASES[key]]) return { ...CHORDS[ALIASES[key]] };
   }
 
-  // 4. Primera parte antes de espacio o /
   const firstPart = clean.split(/[\s\/]/)[0];
   if (CHORDS[firstPart]) return { ...CHORDS[firstPart] };
   if (ALIASES[firstPart] && CHORDS[ALIASES[firstPart]]) return { ...CHORDS[ALIASES[firstPart]] };
   
+  // 5. Fallback a generación dinámica si no está en la base de datos estática
+  const dynamicFallback = generateDynamicChord(firstPart, 0);
+  if (dynamicFallback) return dynamicFallback;
+
   return null;
 }
 

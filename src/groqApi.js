@@ -160,7 +160,7 @@ FORMATO JSON obligatorio (rellena con acordes REALES del estilo ${style}):
 {
   "title": "<Nombre creativo del nivel>",
   "desc": "<Descripción motivadora>",
-  "rightHand": "<Técnica de mano derecha para este nivel, usa p/i/m/a/e>",
+  "rightHand": "<Técnica de mano derecha, usa púa (↓/↑/Palm Mute) o dedos (p/i/m/a)>",
   "chords": [
     {
       "name": "<nombre real del acorde en formato anglosajón, ej: C, Dm, G7>"
