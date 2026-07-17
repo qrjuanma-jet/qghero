@@ -2,6 +2,8 @@
  * Card-based Game Engine for QGHERO
  * Replaces the old Canvas-based scrolling engine with interactive note cards.
  */
+import { buildMiniFretboard } from './chordUI.js';
+
 export class GameEngine {
   constructor() {
     this.notes = [];
