@@ -73,6 +73,7 @@ export async function fetchTheoryCourse(apiKey, level) {
 Genera una clase magistral de guitarra para el nivel "${level}" en HTML básico (h3, p, ul, strong).
 
 NOMENCLATURA OBLIGATORIA:
+- Equivalencia de Acordes: Es OBLIGATORIO que SIEMPRE que menciones una nota o acorde expliques su equivalencia entre la nomenclatura latina y la anglosajona (ej. "Do Mayor, que se representa con la letra C", "Sol Mayor (G)", "Re menor (Dm)"). ¡El alumno no sabe qué significa G por sí sola!
 - Mano izquierda: dedos 1 (índice), 2 (medio), 3 (anular), 4 (meñique). REGLA: cada dedo pisa UN traste (salvo cejilla).
 - Mano derecha: p (pulgar), i (índice), m (medio), a (anular), e (meñique).
 ESQUEMAS DE ACORDES - REGLAS ESTRICTAS:
@@ -85,7 +86,7 @@ ESQUEMAS DE ACORDES - REGLAS ESTRICTAS:
 CONTENIDO:
 - Introducción motivadora
 - Explicaciones claras de cómo pisar los trastes
-- Mínimo 2 acordes con esquemas ASCII completos (con trastes REALES de cada acorde)
+- Mínimo 2 acordes explicados, insertando su respectivo <div class="theory-chord-card" data-chord="..."></div>
 - Un ejercicio práctico
 - Solo HTML crudo, sin markdown ni backticks`;
 
@@ -122,7 +123,7 @@ Genera la CONTINUACIÓN con un nuevo concepto/acorde más avanzado.
 
 REGLAS:
 - Nomenclatura: dedos 1-4, p/i/m/a/e.
-- Acordes en ambas nomenclaturas (ej. "Sol Mayor (G)").
+- Equivalencia de Acordes: Es OBLIGATORIO que siempre incluyas la nomenclatura latina y anglosajona juntas (ej. "Sol Mayor (G)", "La menor (Am)"). ¡Nunca pongas solo la letra!
 - NUNCA dibujes esquemas ASCII. Para mostrar un acorde, inserta EXACTAMENTE esto: <div class="theory-chord-card" data-chord="C"></div> (cambiando "C" por el acorde correspondiente).
 - ¡Prohibido poner botones de Escuchar! El sistema los crea solos.
 - Solo HTML crudo. Sin markdown. Sin repetir conceptos del historial.`;
@@ -158,8 +159,7 @@ FORMATO JSON obligatorio (rellena con acordes REALES del estilo ${style}):
   "rightHand": "<Técnica de mano derecha para este nivel, usa p/i/m/a/e>",
   "chords": [
     {
-      "name": "<nombre real del acorde en formato anglosajón, ej: C, Dm, G7>",
-      "finger": "<explicación real de dedos 1-4>"
+      "name": "<nombre real del acorde en formato anglosajón, ej: C, Dm, G7>"
     }
   ],
   "examples": [

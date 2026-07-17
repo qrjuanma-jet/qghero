@@ -193,8 +193,8 @@ function renderDataToUI(data, customSongQuery = null) {
         if (dbInfo) {
           chord.fingering = dbInfo.fingering;
           chord.notes = dbInfo.notes;
-          if (!chord.name.includes(dbInfo.anglo)) {
-            chord.name = `${dbInfo.latin || chord.name} (${dbInfo.anglo})`;
+          if (dbInfo.latin && dbInfo.anglo) {
+            chord.name = `${dbInfo.latin} (${dbInfo.anglo})`;
           }
         } else if (!chord.notes) {
           // Fallback mínimo por si no está en la DB
@@ -205,7 +205,6 @@ function renderDataToUI(data, customSongQuery = null) {
         card.className = 'chord-card';
         card.innerHTML = `
           <h4>${chord.name}</h4>
-          <p><strong>Dedo:</strong> ${chord.finger || "Posición estándar"}</p>
           <div class="chord-ui-container"></div>
           <button class="btn primary-btn play-chord-btn" data-notes='${JSON.stringify(chord.notes)}'>
             🔊 Escuchar
