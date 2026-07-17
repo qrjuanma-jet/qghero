@@ -151,26 +151,15 @@ export async function fetchPracticeLevel(apiKey, style, level) {
 Genera la lección de ${style.toUpperCase()} NIVEL ${level} para guitarra acústica.
 ${fretGuidance}
 
-FORMATO JSON obligatorio (rellena con acordes REALES del estilo ${style}, NO copies los valores del ejemplo, respeta la regla de que un dedo no pisa dos cuerdas salvo cejilla):
+FORMATO JSON obligatorio (rellena con acordes REALES del estilo ${style}):
 {
   "title": "<Nombre creativo del nivel>",
   "desc": "<Descripción motivadora>",
   "rightHand": "<Técnica de mano derecha para este nivel, usa p/i/m/a/e>",
   "chords": [
     {
-      "name": "<nombre real del acorde>",
-      "notes": ["<notas reales de Tone.js>"],
-      "finger": "<explicación real de dedos 1-4>",
-      "schema": [
-        "<Nombre acorde> [posición real]:",
-        "TS      <trastes reales en romanos>",
-        "E (1) <posición real>",
-        "B (2) <posición real>",
-        "G (3) <posición real>",
-        "D (4) <posición real>",
-        "A (5) <posición real>",
-        "E (6) <posición real>"
-      ]
+      "name": "<nombre real del acorde en formato anglosajón, ej: C, Dm, G7>",
+      "finger": "<explicación real de dedos 1-4>"
     }
   ],
   "examples": [
@@ -182,19 +171,10 @@ FORMATO JSON obligatorio (rellena con acordes REALES del estilo ${style}, NO cop
   ]
 }
 
-REFERENCIA de trastes (NO copies, usa los que correspondan a cada acorde):
-- Acordes abiertos (Am, Em, C, G, D): TS con Ⅰ Ⅱ Ⅲ
-- Fa Mayor (F) cejilla traste I: TS con Ⅰ Ⅱ Ⅲ
-- Si menor (Bm) cejilla traste II: TS con Ⅱ Ⅲ Ⅳ
-- Do menor (Cm) cejilla traste III: TS con Ⅲ Ⅳ Ⅴ
-- La barre traste V: TS con Ⅴ Ⅵ Ⅶ
-- Power chord traste VII: TS con Ⅶ Ⅷ Ⅸ
-
 REGLAS:
 1. Genera 2-4 acordes DISTINTOS y apropiados para el estilo ${style} nivel ${level}.
-2. notes = notas de Tone.js REALES del acorde (ej. ["A2","E3","A3","C#4","E4"] para La Mayor).
-3. examples = 1-2 canciones famosas REALES que usen exactamente estos acordes.
-4. Sin saltos de línea reales en strings de texto. Sin markdown. Solo JSON puro.`;
+2. examples = 1-2 canciones famosas REALES que usen exactamente estos acordes.
+3. Sin saltos de línea reales en strings de texto. Sin markdown. Solo JSON puro.`;
 
   return callGroq(apiKey, prompt, 0.4, 2500, systemMsg);
 }

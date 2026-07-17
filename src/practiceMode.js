@@ -1,6 +1,7 @@
 import { fetchPracticeLevel, fetchPracticeSong } from './groqApi.js';
 import { initAudio, strumChord } from './audioSynth.js';
 import { buildMiniFretboard } from './chordUI.js';
+import { lookupChord } from './chordDb.js';
 
 let currentStyle = 'rock';
 let isGenerating = false;
@@ -187,11 +188,24 @@ function renderDataToUI(data, customSongQuery = null) {
     styleChords.innerHTML = '';
     if (data.chords && data.chords.length > 0) {
       data.chords.forEach(chord => {
+        // Enriquecer el acorde con chordDb para obtener digitación y notas reales
+        const dbInfo = lookupChord(chord.name);
+        if (dbInfo) {
+          chord.fingering = dbInfo.fingering;
+          chord.notes = dbInfo.notes;
+          if (!chord.name.includes(dbInfo.anglo)) {
+            chord.name = `${dbInfo.latin || chord.name} (${dbInfo.anglo})`;
+          }
+        } else if (!chord.notes) {
+          // Fallback mínimo por si no está en la DB
+          chord.notes = ["C4"]; 
+        }
+
         const card = document.createElement('div');
         card.className = 'chord-card';
         card.innerHTML = `
           <h4>${chord.name}</h4>
-          <p><strong>Dedo:</strong> ${chord.finger}</p>
+          <p><strong>Dedo:</strong> ${chord.finger || "Posición estándar"}</p>
           <div class="chord-ui-container"></div>
           <button class="btn primary-btn play-chord-btn" data-notes='${JSON.stringify(chord.notes)}'>
             🔊 Escuchar
@@ -203,9 +217,6 @@ function renderDataToUI(data, customSongQuery = null) {
           const uiContainer = card.querySelector('.chord-ui-container');
           const fb = buildMiniFretboard(chord);
           uiContainer.appendChild(fb);
-        } else if (chord.schema) {
-          const uiContainer = card.querySelector('.chord-ui-container');
-          uiContainer.innerHTML = `<pre class="ascii-schema">${Array.isArray(chord.schema) ? chord.schema.join('\n') : chord.schema}</pre>`;
         }
         
         styleChords.appendChild(card);
