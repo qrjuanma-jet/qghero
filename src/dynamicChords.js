@@ -5,7 +5,7 @@ const string6Notes = ["E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D",
 const string5Notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A"];
 
 // Parse a chord name like "C#m7" into Root="C#" and Quality="m7"
-function parseChordParts(chordName) {
+export function parseChordParts(chordName) {
   let root = chordName;
   let quality = "";
   if (chordName.length > 1 && (chordName[1] === '#' || chordName[1] === 'b')) {
@@ -66,6 +66,21 @@ const SHAPE_TEMPLATES = {
   "aug": {
     "E-Shape": { offsets: [0, -1, 2, 1, 1, -1], fingers: [1, -1, 4, 2, 3, -1], type: "Aumentado", latinSuffix: "aug" },
     "A-Shape": { offsets: [-1, 0, -1, -2, -2, -1], fingers: [-1, 3, 2, 1, 1, -1], type: "Aumentado", latinSuffix: "aug" }
+  },
+  // Novena (9)
+  "9": {
+    "E-Shape": { offsets: [0, -1, 0, 1, 0, 2], fingers: [1, -1, 1, 2, 1, 4], type: "Novena", latinSuffix: "9" },
+    "A-Shape": { offsets: [-1, 0, -1, 0, 0, -1], fingers: [-1, 2, 1, 3, 4, -1], type: "Novena", latinSuffix: "9" }
+  },
+  // Mayor Novena (maj9)
+  "maj9": {
+    "E-Shape": { offsets: [0, -1, 1, 1, 0, -1], fingers: [1, -1, 3, 4, 2, -1], type: "Mayor 9", latinSuffix: "maj9" }, // Degrada a maj7 por facilidad
+    "A-Shape": { offsets: [-1, 0, -1, 1, 0, -1], fingers: [-1, 2, 1, 4, 3, -1], type: "Mayor 9", latinSuffix: "maj9" }
+  },
+  // Menor Novena (m9)
+  "m9": {
+    "E-Shape": { offsets: [0, -1, 0, 0, 0, -1], fingers: [1, -1, 1, 1, 1, -1], type: "Menor 9", latinSuffix: "m9" }, // Degrada a m7 en 6a cuerda
+    "A-Shape": { offsets: [-1, 0, -2, 0, 0, -1], fingers: [-1, 2, 1, 3, 4, -1], type: "Menor 9", latinSuffix: "m9" }
   }
 };
 
@@ -120,17 +135,42 @@ function generateAsciiSchema(anglo, latin, baseFret, fingering) {
   return schema;
 }
 
+import { generateAlgorithmicChord } from './algorithmicChords.js';
+
 export function generateDynamicChord(chordName, baseFret = 0) {
   const { root, quality } = parseChordParts(chordName);
+
+  // 1. Intento de Generación Algorítmica Geométrica Pura
+  const algorithmic = generateAlgorithmicChord(chordName, root, quality, baseFret);
   
-  // Si no nos dan baseFret, buscamos el traste óptimo
+  // Degradación inteligente de cualidades complejas no mapeadas
+  let effectiveQuality = quality;
+  if (!SHAPE_TEMPLATES[effectiveQuality]) {
+    if (quality.includes("m11") || quality.includes("m13")) effectiveQuality = "m7";
+    else if (quality.includes("maj11") || quality.includes("maj13")) effectiveQuality = "maj7";
+    else if (quality.includes("11") || quality.includes("13")) effectiveQuality = "7";
+    else if (quality.includes("sus") || quality.includes("add") || quality.includes("6")) effectiveQuality = quality.startsWith("m") ? "m" : "";
+  }
+
+  // Check if we support this quality
+  const template = SHAPE_TEMPLATES[effectiveQuality];
+  if (!template) {
+    if (algorithmic) return buildFinalDynamicObject(chordName, root, algorithmic.fingering, algorithmic.baseFret, quality);
+    return null;
+  }
+
+  let shapeName = "";
+  let shapeObj = null;
+
+  // Evaluamos disponibilidad de formas
+  let hasE = !!template["E-Shape"];
+  let hasA = !!template["A-Shape"];
+
+  // Si no nos dan baseFret, buscamos el traste óptimo considerando las formas disponibles
   if (baseFret <= 0) {
-    // Buscamos en la 6ª cuerda (E-Shape)
-    let fret6 = string6Notes.indexOf(root);
-    // Buscamos en la 5ª cuerda (A-Shape)
-    let fret5 = string5Notes.indexOf(root);
+    let fret6 = hasE ? string6Notes.indexOf(root) : -1;
+    let fret5 = hasA ? string5Notes.indexOf(root) : -1;
     
-    // Elegimos la posición más baja (más cerca del clavijero)
     if (fret6 > 0 && fret5 > 0) {
       baseFret = Math.min(fret6, fret5);
     } else if (fret6 > 0) {
@@ -143,39 +183,27 @@ export function generateDynamicChord(chordName, baseFret = 0) {
   }
 
   if (baseFret > 12) {
-    // Si se pasa del traste 12, intentamos restarle 12
     const lowerFret = baseFret - 12;
     if (lowerFret > 0) baseFret = lowerFret;
   }
   
   if (baseFret > 14) return null;
-  
-  // Check if we support this quality
-  const template = SHAPE_TEMPLATES[quality];
-  if (!template) return null; // Fallback to database or nothing
 
-  let shapeName = "";
-  let shapeObj = null;
-
-  // Is the root on the 6th string at baseFret?
-  if (string6Notes[baseFret] === root) {
+  // Seleccionamos la forma según la cuerda donde cae la raíz
+  if (string6Notes[baseFret] === root && hasE) {
     shapeName = "E-Shape";
     shapeObj = template["E-Shape"];
-  } 
-  // Is the root on the 5th string at baseFret?
-  else if (string5Notes[baseFret] === root) {
+  } else if (string5Notes[baseFret] === root && hasA) {
     shapeName = "A-Shape";
     shapeObj = template["A-Shape"];
   } else {
-    // If the root doesn't match the base fret on 6th or 5th, we can't reliably generate a standard shape.
-    // For example, an inversion. We fallback.
+    // Si la raíz no coincide o no hay forma disponible
+    if (algorithmic) return buildFinalDynamicObject(chordName, root, algorithmic.fingering, algorithmic.baseFret, quality);
     return null;
   }
 
-  // Construct the fingering array
+  // Si tenemos plantilla, construimos el fingering array
   let fingering = [];
-  // shapeObj.offsets order is 6th, 5th, 4th, 3rd, 2nd, 1st
-  // But our fingering array wants string 1 to 6
   let offsets = shapeObj.offsets;
   let fingers = shapeObj.fingers;
 
@@ -191,16 +219,18 @@ export function generateDynamicChord(chordName, baseFret = 0) {
     });
   }
 
-  // Find a latin name based on root
+  return buildFinalDynamicObject(chordName, root, fingering, baseFret, shapeObj.latinSuffix);
+}
+
+function buildFinalDynamicObject(chordName, root, fingering, baseFret, latinSuffix) {
   let rootLatinMap = {
     "C": "Do", "C#": "Do#", "D": "Re", "D#": "Re#", "E": "Mi", "F": "Fa", "F#": "Fa#", "G": "Sol", "G#": "Sol#", "A": "La", "A#": "La#", "B": "Si"
   };
   let rootLatin = rootLatinMap[root] || root;
-  let latin = rootLatin + " " + shapeObj.latinSuffix;
+  let latin = rootLatin + (latinSuffix ? " " + latinSuffix : "");
 
   let schema = generateAsciiSchema(chordName, latin, baseFret, fingering);
 
-  // Calcular notas musicales reales para el sintetizador
   const stringBaseMidi = {
     1: 64, // E4
     2: 59, // B3

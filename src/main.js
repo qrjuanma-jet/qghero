@@ -181,19 +181,20 @@ function setupEventListeners() {
           <h3>Modo Teoría</h3>
           <p>Aquí la IA actúa como tu profesor particular.</p>
           <p>Usa los botones de nivel para generar una clase magistral desde cero. Si quieres profundizar en el mismo tema sin repetir conceptos, usa el botón "Avanzar Temario".</p>
-          <p><strong>Las Viñetas Gráficas:</strong><br>Cada acorde va acompañado de un esquema visual. Las líneas horizontales son las cuerdas (arriba la más fina, abajo la más gruesa) y las verticales son los trastes. El número romano te indica dónde colocar la mano. El punto brillante indica el número del dedo a utilizar.</p>`,
+          <p><strong>Las Viñetas Gráficas:</strong><br>Cada acorde va acompañado de un esquema visual. Las líneas horizontales son las cuerdas (arriba la más fina, abajo la más gruesa) y las verticales son los trastes. El número romano te indica dónde colocar la mano. El punto brillante indica el número del dedo a utilizar.</p>
+          <p>Si la IA menciona un acorde complejo, nuestro nuevo <strong>Motor Algorítmico Universal</strong> calculará en tiempo real la postura más cómoda basándose puramente en matemáticas e intervalos musicales.</p>`,
       practice: `
           <h3>Modo Práctica</h3>
           <p>Selecciona un estilo musical en la barra lateral para recibir una lección enfocada en ese género. Soporta estilos desde Rock y Pop, hasta acordes de jazz y arpegios de música Clásica.</p>
-          <p>Cada vez que dominas un nivel, pulsa "Subir de Nivel" para que la IA genere progresiones y acordes más complejos, basándose en la biblioteca de acordes dinámicos. Si buscas una canción concreta, usa "A la Carta".</p>`,
+          <p>Cada vez que dominas un nivel, pulsa "Subir de Nivel" para que la IA genere progresiones y acordes más complejos. Nuestro motor inteligente dibujará automáticamente cualquier acorde que la IA decida enseñarte.</p>`,
       dictionary: `
           <h3>Buscador Inteligente de Acordes</h3>
           <p>Esta sección usa el motor de procesamiento natural de la IA para entender tus dudas musicales.</p>
           <ul>
-              <li><strong>Búsqueda por Voz (🎤):</strong> Haz clic en el micrófono, dale permiso en tu navegador y di algo como <em>"Enséñame el Do Mayor séptima"</em>. La IA extraerá matemáticamente el acorde y lo dibujará.</li>
+              <li><strong>Búsqueda por Voz (🎤):</strong> Haz clic en el micrófono, dale permiso en tu navegador y di algo como <em>"Enséñame el Do Mayor séptima"</em> o <em>"Cómo se toca el Hendrix Chord"</em>.</li>
               <li><strong>Búsqueda por Texto:</strong> Puedes escribir en lenguaje natural, como <em>"acorde triste de Mi"</em> o <em>"F#m7"</em>.</li>
           </ul>
-          <p>La viñeta gráfica y el botón de audio se generan de forma automática basándose en la geometría del mástil.</p>`,
+          <p>La IA extraerá el acorde y el <strong>Motor Geométrico</strong> lo construirá matemáticamente desde cero, encontrando la postura más ergonómica en el mástil y generando el audio sintetizado al vuelo.</p>`,
       setup: `
           <h3>Configurar Partida</h3>
           <p>Tienes dos formas de jugar:</p>
