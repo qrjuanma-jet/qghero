@@ -21,12 +21,6 @@ export async function initAudio() {
   isLoaded = true;
 }
 
-export function stopAllAudio() {
-  if (synth) {
-    synth.releaseAll();
-  }
-}
-
 /**
  * Reproduce un acorde simultáneamente
  * @param {string[]} notes - Ej: ["E2", "A2", "D3", "G3", "B3", "E4"] (Mi mayor)
@@ -45,7 +39,14 @@ export function strumChord(notes, speed = 0.05) {
   
   const now = Tone.now();
   notes.forEach((note, index) => {
-    synth.triggerAttackRelease(note, "1m", now + (index * speed));
+    let pitch = note;
+    if (typeof note === 'object') {
+      pitch = note.note || note.pitch || note.latin || note.anglo;
+    }
+    if (pitch) {
+      // Using explicit 2 seconds duration instead of "1m" to avoid Transport dependency
+      synth.triggerAttackRelease(pitch, 2, now + (index * speed));
+    }
   });
 }
 
