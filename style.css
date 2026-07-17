@@ -252,20 +252,21 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 
 /* Mini Fretboard inside card */
 .mini-fretboard {
-  background: rgba(0,0,0,0.4); border-radius: 6px;
-  padding: 6px 8px; margin-bottom: 0.3rem; position: relative;
+  background: rgba(0,0,0,0.4); border-radius: 8px;
+  padding: 16px 12px; margin-bottom: 0.5rem; position: relative;
+  margin-top: 0.5rem;
 }
 .mini-string {
   height: 2px; background: rgba(255,255,255,0.15);
-  margin: 5px 0; position: relative; border-radius: 1px;
+  margin: 16px 0; position: relative; border-radius: 1px;
 }
 .mini-string:first-child { margin-top: 0; }
 .mini-string:last-child { margin-bottom: 0; }
 .mini-fret-dot {
   position: absolute; top: 50%; transform: translate(-50%, -50%);
-  width: 14px; height: 14px; border-radius: 50%;
+  width: 18px; height: 18px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.55rem; font-weight: 700; color: #fff;
+  font-size: 0.75rem; font-weight: 700; color: #fff;
   box-shadow: 0 0 6px currentColor;
 }
 .mini-fret-label {
@@ -402,9 +403,9 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 
 .mini-fret-num {
   position: absolute;
-  top: -15px;
+  top: -18px;
   transform: translateX(-50%);
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   font-weight: bold;
   color: rgba(255, 255, 255, 0.6);
   z-index: 2;
