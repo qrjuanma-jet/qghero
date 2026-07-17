@@ -94,7 +94,8 @@ export function buildMiniFretboard(note) {
         dot.className = `mini-fret-dot str-${s}`;
         dot.textContent = fNote.finger && fNote.finger > 0 ? fNote.finger : toRoman(fNote.fret);
         // Position relative to the [minFret, maxFret] window
-        const relPos = (fNote.fret - minFret) / (maxFret - minFret);
+        // Centered in the fret space
+        const relPos = (fNote.fret - minFret + 0.5) / numFrets;
         const pos = 20 + (relPos * 70); // From 20% to 90%
         dot.style.left = `${pos}%`;
         dot.style.color = s <= 1 || s >= 6 ? '#fff' : '#000';
