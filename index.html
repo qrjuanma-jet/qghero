@@ -225,8 +225,9 @@
         <div class="modal-content glass-panel" style="max-width: 500px; text-align: center;">
             <h2 style="color: var(--neon-cyan); margin-bottom: 1rem;">🎵 ¡Canción Generada!</h2>
             <p style="margin-bottom: 1.5rem;">La IA ha sacado los acordes. ¿Tienes un enlace de YouTube de esta canción para que suene de fondo mientras juegas?</p>
-            <div class="input-group" style="margin-bottom: 1.5rem;">
-                <input type="url" id="youtube-prompt-input" placeholder="Pega el enlace de YouTube aquí (Opcional)">
+            <div class="input-group" style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; justify-content: center;">
+                <input type="url" id="youtube-prompt-input" placeholder="Pega el enlace de YouTube aquí (Opcional)" style="flex: 1; max-width: 350px;">
+                <button id="youtube-prompt-search-btn" class="btn icon-btn" title="Buscar canción en YouTube" style="border-color: #ff0000; color: #ff0000; display: flex; align-items: center; gap: 0.3rem;">🔍 Buscar</button>
             </div>
             <div style="display: flex; gap: 1rem; justify-content: center;">
                 <button id="youtube-prompt-skip-btn" class="btn secondary-btn">No, jugar en silencio</button>

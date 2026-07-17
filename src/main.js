@@ -418,8 +418,13 @@ function setupEventListeners() {
       document.getElementById('loading-indicator').classList.add('hidden');
     }
   });
-
   // YouTube Prompt Modal Logic
+  document.getElementById('youtube-prompt-search-btn').addEventListener('click', () => {
+    const songName = currentSongData ? (currentSongData.title || document.getElementById('current-song-title').textContent) : "";
+    if (songName) {
+      window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(songName)}`, '_blank');
+    }
+  });
   document.getElementById('youtube-prompt-skip-btn').addEventListener('click', () => {
     document.getElementById('youtube-prompt-modal').classList.add('hidden');
     initShareButtons('');
