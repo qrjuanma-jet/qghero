@@ -382,33 +382,63 @@ function setupEventListeners() {
       // Enriquecer con la base de datos de acordes verificados
       currentSongData = enrichSongData(currentSongData);
       
-      if (videoId) {
-        currentSongData.originalVideoId = videoId;
-      }
-      
       // Setup Game UI
       document.getElementById('current-song-title').textContent = currentSongData.title || name;
       gameEngine.loadSong(currentSongData);
       
       if (videoId) {
+        currentSongData.originalVideoId = videoId;
         initShareButtons(url);
         document.getElementById('youtube-player').style.display = 'block';
         initYouTubePlayer(videoId);
+        showTechniqueModal(currentSongData);
       } else {
-        initShareButtons('');
-        document.getElementById('youtube-player').style.display = 'none';
-        // Arrancar el motor de juego manualmente ya que no hay video que le de al Play
-        setTimeout(() => gameEngine.play(), 1000);
+        // Show YouTube prompt modal
+        const ytInput = document.getElementById('youtube-prompt-input');
+        if (ytInput) ytInput.value = '';
+        document.getElementById('youtube-prompt-modal').classList.remove('hidden');
       }
-      
-      // Show Technique Modal before game
-      showTechniqueModal(currentSongData);
       
     } catch (err) {
       alert("Error analizando la canción: " + err.message);
     } finally {
       document.getElementById('loading-indicator').classList.add('hidden');
     }
+  });
+
+  // YouTube Prompt Modal Logic
+  document.getElementById('youtube-prompt-skip-btn').addEventListener('click', () => {
+    document.getElementById('youtube-prompt-modal').classList.add('hidden');
+    initShareButtons('');
+    document.getElementById('youtube-player').style.display = 'none';
+    setTimeout(() => gameEngine.play(), 1000);
+    showTechniqueModal(currentSongData);
+  });
+
+  document.getElementById('youtube-prompt-save-btn').addEventListener('click', () => {
+    const yUrl = document.getElementById('youtube-prompt-input').value.trim();
+    document.getElementById('youtube-prompt-modal').classList.add('hidden');
+    
+    if (yUrl) {
+      const vId = extractVideoId(yUrl);
+      if (vId) {
+        currentSongData.originalVideoId = vId;
+        initShareButtons(yUrl);
+        document.getElementById('youtube-player').style.display = 'block';
+        initYouTubePlayer(vId);
+      } else {
+        alert("Enlace inválido, se jugará en silencio.");
+        initShareButtons('');
+        document.getElementById('youtube-player').style.display = 'none';
+        setTimeout(() => gameEngine.play(), 1000);
+      }
+    } else {
+      initShareButtons('');
+      document.getElementById('youtube-player').style.display = 'none';
+      setTimeout(() => gameEngine.play(), 1000);
+    }
+    
+    showTechniqueModal(currentSongData);
   });
 
   // Technique Modal
@@ -428,7 +458,7 @@ function setupEventListeners() {
     modals.technique.classList.add('hidden');
     await initAudio(); // Start audio context on user gesture
     showScreen('game');
-    if (ytPlayer && ytPlayer.playVideo) {
+    if (ytPlayer && ytPlayer.playVideo && currentSongData.originalVideoId) {
       ytPlayer.playVideo();
     }
   });
@@ -643,10 +673,12 @@ function renderSavedSongs() {
     container.style.display = 'block';
     list.innerHTML = '';
     
-    saved.forEach((song, idx) => {
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'display: flex; gap: 0.5rem; align-items: stretch; margin-bottom: 0.5rem;';
+      
       const btn = document.createElement('button');
       btn.className = 'btn secondary-btn';
-      btn.style.cssText = 'text-align: left; padding: 0.8rem; display: flex; justify-content: space-between; align-items: center; border-color: rgba(255,255,255,0.1);';
+      btn.style.cssText = 'flex: 1; text-align: left; padding: 0.8rem; display: flex; justify-content: space-between; align-items: center; border-color: rgba(255,255,255,0.1); margin-bottom: 0;';
       
       const duration = song.notes && song.notes.length > 0 
         ? Math.round(Math.max(...song.notes.map(n => n.time))) 
@@ -656,9 +688,41 @@ function renderSavedSongs() {
         <span><strong>${song.title}</strong> <span style="color:var(--text-secondary); font-size:0.8rem; margin-left: 0.5rem;">${song.artist || ''}</span></span>
         <span style="color:var(--neon-cyan); font-size:0.8rem;">${duration}s</span>
       `;
-      
       btn.addEventListener('click', () => loadSavedSong(song));
-      list.appendChild(btn);
+      
+      const fixBtn = document.createElement('button');
+      fixBtn.className = 'btn icon-btn';
+      fixBtn.style.cssText = 'border-color: var(--neon-cyan); color: var(--neon-cyan); padding: 0 0.8rem; height: auto; border-radius: 8px;';
+      fixBtn.title = 'Arreglar Canción (Re-generar con IA)';
+      fixBtn.innerHTML = '✏️';
+      fixBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm(`¿Volver a generar '${song.title}' con la IA para arreglar posibles fallos?`)) {
+          // Trigger fetch but act as if we searched for it
+          const searchInput = document.getElementById('song-input');
+          if (searchInput) searchInput.value = song.originalVideoId ? `https://youtube.com/watch?v=${song.originalVideoId}` : song.title;
+          document.getElementById('load-song-btn').click();
+        }
+      });
+      
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn icon-btn';
+      delBtn.style.cssText = 'border-color: #ff4444; color: #ff4444; padding: 0 0.8rem; height: auto; border-radius: 8px;';
+      delBtn.title = 'Borrar Canción';
+      delBtn.innerHTML = '🗑️';
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm(`¿Seguro que quieres borrar '${song.title}'?`)) {
+          const newSaved = saved.filter(s => s.title !== song.title);
+          localStorage.setItem('qghero_saved_songs', JSON.stringify(newSaved));
+          renderSavedSongs();
+        }
+      });
+      
+      wrapper.appendChild(btn);
+      wrapper.appendChild(fixBtn);
+      wrapper.appendChild(delBtn);
+      list.appendChild(wrapper);
     });
   } catch (e) {
     console.error("Error rendering saved songs", e);

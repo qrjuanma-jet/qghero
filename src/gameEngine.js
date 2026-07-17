@@ -334,6 +334,11 @@ export class GameEngine {
       }
     });
 
+    // Ensure the active card is vertically centered in case the 3 cards are taller than the viewport on mobile
+    if (this.activeIndex >= 0 && this.cards[this.activeIndex]) {
+      const activeCard = this.cards[this.activeIndex];
+      activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   updateProgress() {

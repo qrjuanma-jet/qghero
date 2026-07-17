@@ -186,6 +186,12 @@ header { display: flex; justify-content: space-between; align-items: center; mar
   max-width: 960px; margin: 0 auto;
 }
 
+@media (max-width: 600px) and (orientation: portrait) {
+  #note-cards-container {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Individual Note Card */
 .note-card {
   background: rgba(15,15,30,0.8);

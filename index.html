@@ -212,7 +212,22 @@
             </div>
         </div>
 
-        <!-- PANTALLA 4: Modo Práctica -->
+    <!-- MODAL: Enlace YouTube opcional -->
+    <div id="youtube-prompt-modal" class="modal hidden">
+        <div class="modal-content glass-panel" style="max-width: 500px; text-align: center;">
+            <h2 style="color: var(--neon-cyan); margin-bottom: 1rem;">🎵 ¡Canción Generada!</h2>
+            <p style="margin-bottom: 1.5rem;">La IA ha sacado los acordes. ¿Tienes un enlace de YouTube de esta canción para que suene de fondo mientras juegas?</p>
+            <div class="input-group" style="margin-bottom: 1.5rem;">
+                <input type="url" id="youtube-prompt-input" placeholder="Pega el enlace de YouTube aquí (Opcional)">
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button id="youtube-prompt-skip-btn" class="btn secondary-btn">No, jugar en silencio</button>
+                <button id="youtube-prompt-save-btn" class="btn primary-btn">Guardar y Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA 4: Modo Práctica -->
         <section id="practice-screen" class="screen hidden">
             <header style="display: flex; justify-content: space-between; align-items: center;">
                 <button id="back-from-practice-btn" class="btn icon-btn">⬅️ Volver</button>
