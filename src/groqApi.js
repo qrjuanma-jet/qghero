@@ -78,6 +78,7 @@ NOMENCLATURA OBLIGATORIA:
 - Mano derecha: p (pulgar), i (índice), m (medio), a (anular), e (meñique).
 ESQUEMAS DE ACORDES - REGLAS ESTRICTAS:
 - NUNCA intentes dibujar esquemas ASCII.
+- NUNCA expliques con texto en qué cuerda o traste va cada dedo (sueles cometer errores al explicar la geometría). Céntrate en la teoría, de qué notas se compone y cómo debe sonar. Indica al alumno que se fije en la viñeta gráfica generada.
 - OBLIGATORIO: Cuando quieras enseñar un acorde (ej. Do Mayor, Sol, Re menor, Fa#), inserta EXACTAMENTE este código HTML para que el sistema dibuje la viñeta perfecta:
 <div class="theory-chord-card" data-chord="C"></div>
 - SUSTITUYE "C" por el nombre del acorde en formato anglosajón o latino (ej. "Dm", "G", "Do Mayor", "Fa#m").
@@ -124,6 +125,7 @@ Genera la CONTINUACIÓN con un nuevo concepto/acorde más avanzado.
 REGLAS:
 - Nomenclatura: dedos 1-4, p/i/m/a/e.
 - Equivalencia de Acordes: Es OBLIGATORIO que siempre incluyas la nomenclatura latina y anglosajona juntas (ej. "Sol Mayor (G)", "La menor (Am)"). ¡Nunca pongas solo la letra!
+- NUNCA expliques con texto en qué cuerda o traste va cada dedo. El motor lo dibuja solo.
 - NUNCA dibujes esquemas ASCII. Para mostrar un acorde, inserta EXACTAMENTE esto: <div class="theory-chord-card" data-chord="C"></div> (cambiando "C" por el acorde correspondiente).
 - ¡Prohibido poner botones de Escuchar! El sistema los crea solos.
 - Solo HTML crudo. Sin markdown. Sin repetir conceptos del historial.`;
