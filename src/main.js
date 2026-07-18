@@ -284,6 +284,26 @@ function setupEventListeners() {
       helpModal.classList.add('hidden');
   });
 
+  const linkPrivacy = document.getElementById('link-privacy');
+  if (linkPrivacy) {
+    linkPrivacy.addEventListener('click', (e) => {
+      e.preventDefault();
+      helpTitle.textContent = "Política de Privacidad";
+      helpContent.innerHTML = "<p>En QGHERO respetamos tu privacidad. Esta aplicación funciona de manera completamente local en tu navegador. Tu API Key de Groq se guarda exclusivamente en el almacenamiento interno de tu dispositivo y nunca es enviada a nuestros servidores. Las únicas conexiones externas son hacia la API de Groq para generar el contenido musical con IA y hacia YouTube para la reproducción de los vídeos del Modo Juego.</p>";
+      helpModal.classList.remove('hidden');
+    });
+  }
+
+  const linkTerms = document.getElementById('link-terms');
+  if (linkTerms) {
+    linkTerms.addEventListener('click', (e) => {
+      e.preventDefault();
+      helpTitle.textContent = "Términos de Uso";
+      helpContent.innerHTML = "<p>QGHERO es una aplicación educativa diseñada para aprender guitarra de forma interactiva e impulsada por Inteligencia Artificial. Al utilizarla, aceptas que el contenido generado (acordes, lecciones, técnicas, tablaturas) se proporciona \"tal cual\" y es fruto de modelos probabilísticos, por lo que podría no ser exacto en el 100% de las canciones. QGHERO no se hace responsable del uso de los vídeos incrustados, los cuales son mostrados a través de la API pública y oficial de YouTube bajo sus propios términos de servicio.</p>";
+      helpModal.classList.remove('hidden');
+    });
+  }
+
   const installBtn = document.getElementById('install-app-btn');
   if (installBtn) {
     installBtn.addEventListener('click', async () => {
@@ -326,11 +346,19 @@ function setupEventListeners() {
   document.getElementById('btn-game-mode').addEventListener('click', () => {
     showScreen('setup');
   });
+  const dictBtn = document.getElementById('btn-dictionary-mode');
+  if (dictBtn) {
+    dictBtn.addEventListener('click', () => {
+      showScreen('dictionary');
+    });
+  }
 
   // Back Buttons
   document.getElementById('back-from-setup-btn').addEventListener('click', () => showScreen('main'));
   document.getElementById('back-from-practice-btn').addEventListener('click', () => showScreen('main'));
   document.getElementById('back-from-theory-btn').addEventListener('click', () => showScreen('main'));
+  const backFromDictBtn = document.getElementById('back-from-dictionary-btn');
+  if (backFromDictBtn) backFromDictBtn.addEventListener('click', () => showScreen('main'));
 
   // Accessibility: Press Enter to submit inputs
   const bindEnterToClick = (inputId, btnId) => {

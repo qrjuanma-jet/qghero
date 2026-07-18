@@ -40,7 +40,7 @@
         <!-- PANTALLA 7: Buscador / Diccionario de Acordes -->
         <section id="dictionary-screen" class="screen hidden" style="display: flex; flex-direction: column; justify-content: flex-start;">
             <header style="position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 2rem; width: 100%;">
-                <button class="btn icon-btn back-to-main" style="position: absolute; left: 0;">⬅️ Volver</button>
+                <button id="back-from-dictionary-btn" class="btn icon-btn back-to-main" style="position: absolute; left: 0;">⬅️ Volver</button>
                 <h2 style="text-align: center; margin: 0; margin-top: 1rem;">Buscador de Acordes <span class="neon-text">IA</span></h2>
                 <button class="btn icon-btn help-btn" data-help="dictionary" style="position: absolute; right: 0; font-size: 1.5rem;" title="Ayuda">❔</button>
             </header>
@@ -79,7 +79,7 @@
                             <h4>Modo Teoría</h4>
                             <p>Aprende la nomenclatura oficial y genera cursos.</p>
                         </button>
-                        <button id="btn-practice-mode" class="btn secondary-btn mode-card">
+                        <button id="btn-practice-mode" class="btn secondary-btn mode-card" style="border-color: var(--neon-cyan);">
                             <h4>Modo Práctica</h4>
                             <p>Aprende técnicas y acordes por estilos musicales.</p>
                         </button>
@@ -105,8 +105,8 @@
             
             <footer style="margin-top: 3rem; padding: 2rem 0; text-align: center; border-top: 1px solid rgba(255,255,255,0.05);">
                 <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                    <a href="#" class="text-btn" style="font-size: 0.85rem; text-decoration: none;">Política de privacidad</a>
-                    <a href="#" class="text-btn" style="font-size: 0.85rem; text-decoration: none;">Términos de uso</a>
+                    <a href="#" id="link-privacy" class="text-btn" style="font-size: 0.85rem; text-decoration: none;">Política de privacidad</a>
+                    <a href="#" id="link-terms" class="text-btn" style="font-size: 0.85rem; text-decoration: none;">Términos de uso</a>
                     <a href="mailto:qghero@gmail.com" class="text-btn" style="font-size: 0.85rem; text-decoration: none;">Soporte: qghero@gmail.com</a>
                 </div>
                 <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">&copy; 2026 Todos los derechos reservados QGHERO</p>
