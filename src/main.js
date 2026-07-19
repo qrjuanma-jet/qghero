@@ -1,13 +1,13 @@
 // Estilos cargados en index.html
 import { fetchSongData, expandGameSong } from './groqApi.js';
-import { enrichSongData, enrichNotesWithChordDb } from './chordDb.js';
+import { enrichSongData, enrichNotesWithChordDb, lookupChord } from './chordDb.js';
 import { GameEngine } from './gameEngine.js';
 import { initShareButtons } from './share.js';
 import { initPracticeMode } from './practiceMode.js';
 import { initTheoryMode } from './theoryMode.js';
 import { initDictionaryMode } from './dictionaryMode.js';
 import { initAudio, strumChord, playNote, playPreviewSequence, stopPreviewSequence } from './audioSynth.js';
-
+import { buildMiniFretboard } from './chordUI.js';
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg error:', err));
@@ -100,6 +100,7 @@ function initApp() {
   initShareButtons('');
   initPracticeMode(getApiKey);
   initTheoryMode(getApiKey);
+  initDictionaryMode(getApiKey);
   
   if (groqApiKey) {
     showScreen('main', false);
@@ -628,6 +629,53 @@ function parseSchemaBlocks(rawSchemaArray) {
     blocks[currentKey] = currentLines;
   }
   return blocks;
+}
+
+/**
+ * Builds a chronological schema display using visual viñetas instead of ASCII art.
+ */
+function renderChronologicalViñetas(notes, container) {
+  if (!notes || notes.length === 0) return;
+
+  const shownChords = new Set();
+  let lastChordKey = null;
+
+  for (const note of notes) {
+    const chordName = (note.latin && note.anglo) ? `${note.latin} (${note.anglo})` : (note.latin || note.anglo || '?');
+    if (chordName === lastChordKey) continue;
+    lastChordKey = chordName;
+
+    const dbKey = note.anglo || note.latin;
+    const chordDbInfo = lookupChord(dbKey);
+
+    const card = document.createElement('div');
+    card.className = 'chord-card theory-chord-card';
+    card.style.margin = '0';
+    card.style.padding = '1rem';
+    card.style.display = 'flex';
+    card.style.flexDirection = 'column';
+    card.style.alignItems = 'center';
+    card.style.background = 'rgba(255, 255, 255, 0.05)';
+    card.style.borderRadius = '8px';
+
+    if (shownChords.has(chordName)) {
+      card.innerHTML = `<h5 style="margin:0; color:var(--text-secondary); font-size:1rem;">↩️ ${chordName}</h5>`;
+      card.style.padding = '0.5rem 1rem';
+      card.style.justifyContent = 'center';
+    } else {
+      shownChords.add(chordName);
+      card.innerHTML = `<h4 style="margin-top:0; margin-bottom:10px; color:var(--neon-cyan); text-align:center;">${chordName}</h4>`;
+      if (chordDbInfo) {
+        const fbContainer = document.createElement('div');
+        fbContainer.style.transform = 'scale(0.85)';
+        fbContainer.appendChild(buildMiniFretboard(chordDbInfo));
+        card.appendChild(fbContainer);
+      } else {
+        card.innerHTML += `<p style="color:var(--text-secondary); font-size:0.8rem;">(Esquema no disponible)</p>`;
+      }
+    }
+    container.appendChild(card);
+  }
 }
 
 /**
@@ -1219,11 +1267,15 @@ function showTechniqueModal(data) {
   });
   
   const schemaEl = document.getElementById('tech-schema');
+  schemaEl.innerHTML = '';
   if (data.notes && data.notes.length > 0) {
-    schemaEl.textContent = buildChronologicalSchema(data.notes, tech.schema);
+    renderChronologicalViñetas(data.notes, schemaEl);
     schemaEl.classList.remove('hidden');
   } else if (tech.schema) {
-    schemaEl.textContent = Array.isArray(tech.schema) ? tech.schema.join('\n') : tech.schema;
+    const pre = document.createElement('pre');
+    pre.className = 'ascii-schema';
+    pre.textContent = Array.isArray(tech.schema) ? tech.schema.join('\n') : tech.schema;
+    schemaEl.appendChild(pre);
     schemaEl.classList.remove('hidden');
   } else {
     schemaEl.classList.add('hidden');

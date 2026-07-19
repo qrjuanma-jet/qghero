@@ -3,7 +3,7 @@ import { buildMiniFretboard } from './chordUI.js';
 import { parseNaturalChordQuery } from './groqApi.js';
 import { strumChord } from './audioSynth.js';
 
-export function initDictionaryMode(apiKey) {
+export function initDictionaryMode(getApiKeyFn) {
     const dictScreen = document.getElementById('dictionary-screen');
     const inputField = document.getElementById('dict-query');
     const searchBtn = document.getElementById('dict-search-btn');
@@ -14,6 +14,7 @@ export function initDictionaryMode(apiKey) {
     // Manejo de la búsqueda
     const performSearch = async (query) => {
         if (!query.trim()) return;
+        const apiKey = getApiKeyFn();
         if (!apiKey) {
             alert('Falta la API Key');
             return;
