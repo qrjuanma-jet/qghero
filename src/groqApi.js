@@ -76,18 +76,21 @@ NOMENCLATURA OBLIGATORIA:
 - Equivalencia de Acordes: Es OBLIGATORIO que SIEMPRE que menciones una nota o acorde expliques su equivalencia entre la nomenclatura latina y la anglosajona (ej. "Do Mayor, que se representa con la letra C", "Sol Mayor (G)", "Re menor (Dm)"). ¡El alumno no sabe qué significa G por sí sola!
 - Mano izquierda: dedos 1 (índice), 2 (medio), 3 (anular), 4 (meñique). REGLA: cada dedo pisa UN traste (salvo cejilla).
 - Mano derecha: p (pulgar), i (índice), m (medio), a (anular), e (meñique).
-ESQUEMAS DE ACORDES - REGLAS ESTRICTAS:
+ESQUEMAS DE ACORDES Y PUNTEOS - REGLAS ESTRICTAS:
 - NUNCA intentes dibujar esquemas ASCII.
 - NUNCA expliques con texto en qué cuerda o traste va cada dedo (sueles cometer errores al explicar la geometría). Céntrate en la teoría, de qué notas se compone y cómo debe sonar. Indica al alumno que se fije en la viñeta gráfica generada.
-- OBLIGATORIO: Cuando quieras enseñar un acorde (ej. Do Mayor, Sol, Re menor, Fa#), inserta EXACTAMENTE este código HTML para que el sistema dibuje la viñeta perfecta:
+- OBLIGATORIO PARA ACORDES: Cuando quieras enseñar un acorde (ej. Do Mayor), inserta EXACTAMENTE este código HTML:
 <div class="theory-chord-card" data-chord="C"></div>
-- SUSTITUYE "C" por el nombre del acorde en formato anglosajón o latino (ej. "Dm", "G", "Do Mayor", "Fa#m").
-- ¡ESTO ES MUY IMPORTANTE! Si no pones este <div>, el alumno no podrá ver ni escuchar el acorde. No pongas ningún botón "Escuchar" a mano, el sistema lo generará automáticamente.
+(SUSTITUYE "C" por el acorde en formato anglosajón o latino).
+- OBLIGATORIO PARA PUNTEOS / NOTAS SUELTAS: Cuando quieras enseñar una nota suelta (ej. "Toca la sexta cuerda en el tercer traste"), inserta EXACTAMENTE este código HTML:
+<div class="theory-chord-card" data-note="6-3"></div>
+(SUSTITUYE "6-3" por "cuerda-traste", donde cuerda es 1-6 y traste es 0-24).
+- ¡ESTO ES MUY IMPORTANTE! Si no pones este <div>, el alumno no podrá ver ni escuchar la nota o acorde. No pongas ningún botón "Escuchar" a mano.
 
 CONTENIDO:
 - Introducción motivadora
 - Explicaciones claras de cómo pisar los trastes
-- Mínimo 2 acordes explicados, insertando su respectivo <div class="theory-chord-card" data-chord="..."></div>
+- Mínimo 2 acordes o punteos explicados, insertando su respectivo <div class="theory-chord-card"...></div>
 - Un ejercicio práctico
 - Solo HTML crudo, sin markdown ni backticks`;
 
@@ -124,9 +127,11 @@ Genera la CONTINUACIÓN con un nuevo concepto/acorde más avanzado.
 
 REGLAS:
 - Nomenclatura: dedos 1-4, p/i/m/a/e.
-- Equivalencia de Acordes: Es OBLIGATORIO que siempre incluyas la nomenclatura latina y anglosajona juntas (ej. "Sol Mayor (G)", "La menor (Am)"). ¡Nunca pongas solo la letra!
+- Equivalencia de Acordes: Es OBLIGATORIO que siempre incluyas la nomenclatura latina y anglosajona juntas (ej. "Sol Mayor (G)").
 - NUNCA expliques con texto en qué cuerda o traste va cada dedo. El motor lo dibuja solo.
-- NUNCA dibujes esquemas ASCII. Para mostrar un acorde, inserta EXACTAMENTE esto: <div class="theory-chord-card" data-chord="C"></div> (cambiando "C" por el acorde correspondiente).
+- NUNCA dibujes esquemas ASCII. Para mostrar acordes o punteos, inserta EXACTAMENTE esto: 
+  - Acordes: <div class="theory-chord-card" data-chord="C"></div> (cambiando "C").
+  - Punteos: <div class="theory-chord-card" data-note="6-3"></div> (cuerda-traste).
 - ¡Prohibido poner botones de Escuchar! El sistema los crea solos.
 - Solo HTML crudo. Sin markdown. Sin repetir conceptos del historial.`;
 

@@ -182,8 +182,8 @@ function setupEventListeners() {
           <h3>Modo Teoría</h3>
           <p>Aquí la IA actúa como tu profesor particular.</p>
           <p>Usa los botones de nivel para generar una clase magistral desde cero. Si quieres profundizar en el mismo tema sin repetir conceptos, usa el botón "Avanzar Temario".</p>
-          <p><strong>Las Viñetas Gráficas:</strong><br>Cada acorde va acompañado de un esquema visual. Las líneas horizontales son las cuerdas (arriba la más fina, abajo la más gruesa) y las verticales son los trastes. El número romano te indica dónde colocar la mano. El punto brillante indica el número del dedo a utilizar.</p>
-          <p>Si la IA menciona un acorde complejo, nuestro nuevo <strong>Motor Algorítmico Universal</strong> calculará en tiempo real la postura más cómoda basándose puramente en matemáticas e intervalos musicales.</p>`,
+          <p><strong>Las Viñetas Gráficas:</strong><br>La IA dibujará tanto <strong>Acordes Completos</strong> como <strong>Punteos (Notas Sueltas)</strong>. Las líneas horizontales son las cuerdas (arriba la más fina, abajo la más gruesa) y las verticales son los trastes. El número romano te indica dónde colocar la mano. El punto brillante indica el número del dedo a utilizar.</p>
+          <p>Si la IA menciona un acorde complejo o un traste específico para un punteo, nuestro nuevo <strong>Motor Algorítmico Universal</strong> calculará en tiempo real la postura más cómoda basándose puramente en matemáticas e intervalos musicales.</p>`,
       practice: `
           <h3>Modo Práctica</h3>
           <p>Selecciona un estilo musical en la barra lateral para recibir una lección enfocada en ese género. Soporta estilos desde Rock y Pop, hasta acordes de jazz y arpegios de música Clásica.</p>
@@ -230,25 +230,27 @@ function setupEventListeners() {
               <li>Si el ritmo o los efectos no tienen nada que ver, prueba a buscar con más detalle: "artista - nombre de la canción".</li>
           </ul>
 
-          <h4>📊 El Esquema de Acorde (Viñeta Gráfica)</h4>
+          <h4>📊 El Esquema de Acorde y Punteo (Viñeta Gráfica)</h4>
           <p>Cada caja gráfica es una "foto" del mástil de tu guitarra. Las líneas <strong>horizontales</strong> indican las cuerdas (la más fina arriba, la más gruesa abajo), y las <strong>verticales</strong> separan los trastes.</p>
           <p>El número romano arriba de los trastes (ej. Ⅰ, Ⅴ) te indica en qué traste base debes colocar la mano.</p>
           <ul>
               <li><strong>O (cyan):</strong> cuerda <em>al aire</em> (suénala sin pisar ningún traste).</li>
               <li><strong>X (rojo):</strong> cuerda <em>silenciada</em> (no la toques, apágala con algún dedo).</li>
-              <li><strong>1, 2, 3, 4:</strong> el <em>dedo</em> que debes usar (1=índice, 2=medio, 3=anular, 4=meñique). El punto cae justo en medio del traste que tienes que pisar.</li>
+              <li><strong>1, 2, 3, 4:</strong> el <em>dedo</em> que debes usar para los acordes.</li>
+              <li><strong>Punteos:</strong> Si ves un solo punto en todo el esquema, significa que es una nota melódica suelta que debes tocar individualmente.</li>
           </ul>
 
           <h4>🤚 ¿Qué es una Cejilla?</h4>
           <p>Una <strong>cejilla</strong> es cuando usas el dedo índice (dedo 1) para presionar <em>todas</em> las cuerdas en un mismo traste a la vez. En los esquemas verás el número 1 repetido verticalmente en varias cuerdas.</p>
 
-          <h4>🎵 Mapa Cronológico de Acordes</h4>
-          <p>El mapa muestra los acordes en el orden <em>exacto</em> en que suenan en la canción. La primera vez que aparece un acorde se dibuja su esquema completo. Si se repite, aparece su nombre en diminuto para ahorrar espacio. El mapa va creciendo automáticamente mientras la IA analiza la canción.</p>
+          <h4>🎵 Mapa Cronológico</h4>
+          <p>El mapa muestra todos los acordes y melodías sueltas en el orden <em>exacto</em> en que suenan en la canción. La primera vez que aparece un acorde se dibuja su esquema completo. Si se repite, aparece su nombre en diminuto. El mapa va creciendo automáticamente mientras la IA analiza la canción.</p>
 
           <h4>🔊 Botones de esta pantalla</h4>
           <ul>
-              <li><strong>Escuchar Pista Sintetizada:</strong> Reproduce en orden todos los acordes del mapa para que te hagas una idea de cómo sonará.</li>
-              <li><strong>➕ Seguir Aprendiendo:</strong> Fuerza a la IA a seguir escuchando y añadiendo acordes a la lista.</li>
+              <li><strong>🔊 Escuchar (Viñeta):</strong> Reproduce un acorde o un punteo para que escuches su sonoridad aislada.</li>
+              <li><strong>Escuchar Pista Sintetizada:</strong> Reproduce en orden todo el mapa cronológico.</li>
+              <li><strong>➕ Seguir Aprendiendo:</strong> Fuerza a la IA a seguir escuchando y añadiendo música a la lista.</li>
               <li><strong>▶️ Iniciar Juego:</strong> ¡Empieza a tocar!</li>
           </ul>`,
       score: `
@@ -631,6 +633,21 @@ function parseSchemaBlocks(rawSchemaArray) {
   return blocks;
 }
 
+function getPitchFromStringFret(stringNum, fretNum) {
+  const openPitches = ["E4", "B3", "G3", "D3", "A2", "E2"];
+  const notesStr = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const openPitch = openPitches[stringNum - 1]; 
+  if (!openPitch) return "E2";
+  if (fretNum === 'X' || fretNum < 0) return null;
+  const baseNote = openPitch.slice(0, -1);
+  const baseOctave = parseInt(openPitch.slice(-1));
+  let baseIndex = notesStr.indexOf(baseNote);
+  let finalIndex = baseIndex + fretNum;
+  let finalOctave = baseOctave + Math.floor(finalIndex / 12);
+  finalIndex = finalIndex % 12;
+  return `${notesStr[finalIndex]}${finalOctave}`;
+}
+
 /**
  * Builds a chronological schema display using visual viñetas instead of ASCII art.
  */
@@ -647,17 +664,27 @@ function renderChronologicalViñetas(notes, container) {
   container.style.gap = '2rem';
 
   for (const note of notes) {
-    const chordName = (note.latin && note.anglo) ? `${note.latin} (${note.anglo})` : (note.latin || note.anglo || '?');
+    let chordName = "";
+    let isPunteo = !!note.single_note;
+    
+    if (isPunteo) {
+      chordName = `Punteo (Cuerda ${note.single_note.string}, Traste ${note.single_note.fret})`;
+    } else {
+      const fallbackName = note.name || note.chord || note.acorde;
+      chordName = (note.latin && note.anglo) 
+        ? `${note.latin} (${note.anglo})` 
+        : (note.latin || note.anglo || fallbackName);
+
+      if (!chordName) chordName = "DEBUG: " + JSON.stringify(note);
+    }
+
     if (chordName === lastChordKey) continue;
     lastChordKey = chordName;
-
-    const dbKey = note.anglo || note.latin;
-    const chordDbInfo = lookupChord(dbKey);
 
     const card = document.createElement('div');
     card.className = 'theory-chord-card';
     card.style.width = '100%';
-    card.style.maxWidth = '500px'; // Tamaño similar al de Teoría
+    card.style.maxWidth = '500px'; 
     card.style.background = 'rgba(255, 255, 255, 0.03)';
     card.style.border = '1px solid rgba(0, 229, 255, 0.2)';
     card.style.borderRadius = '12px';
@@ -670,30 +697,51 @@ function renderChronologicalViñetas(notes, container) {
     } else {
       shownChords.add(chordName);
       card.innerHTML = `<h3 style="margin-top:0; margin-bottom:1rem; color:var(--neon-cyan);">${chordName}</h3>`;
-      if (chordDbInfo) {
-        // Exactamente como en Theory Mode
-        const fb = buildMiniFretboard(chordDbInfo);
+      
+      let fb = null;
+      let playableNotes = null;
+
+      if (isPunteo) {
+        // Usa la misma lógica visual de chordUI pasando el single_note simulado
+        fb = buildMiniFretboard({ single_note: note.single_note });
+        const pitch = getPitchFromStringFret(note.single_note.string, note.single_note.fret);
+        if (pitch) playableNotes = [pitch];
+      } else {
+        const dbKey = note.anglo || note.latin || note.name || note.chord || note.acorde;
+        const chordDbInfo = lookupChord(dbKey);
+        if (chordDbInfo) {
+          fb = buildMiniFretboard(chordDbInfo);
+          playableNotes = chordDbInfo.notes;
+        }
+      }
+
+      if (fb) {
         card.appendChild(fb);
         
-        // Botón de audio como en el modo teoría
-        const btn = document.createElement('button');
-        btn.className = 'btn primary-btn play-chord-btn';
-        btn.innerHTML = '🔊 Escuchar';
-        btn.style.marginTop = '15px';
-        btn.style.display = 'inline-block';
-        
-        btn.addEventListener('click', async () => {
-          try {
-            await initAudio();
-            strumChord(chordDbInfo.notes, 0.05);
-          } catch(err) {
-            console.error("Error reproduciendo acorde:", err);
-          }
-        });
-        
-        card.appendChild(btn);
+        if (playableNotes) {
+          const btn = document.createElement('button');
+          btn.className = 'btn primary-btn play-chord-btn';
+          btn.innerHTML = '🔊 Escuchar';
+          btn.style.marginTop = '15px';
+          btn.style.display = 'inline-block';
+          
+          btn.addEventListener('click', async () => {
+            try {
+              await initAudio();
+              if (isPunteo) {
+                playNote(playableNotes[0], 0, "4n");
+              } else {
+                strumChord(playableNotes, 0.05);
+              }
+            } catch(err) {
+              console.error("Error reproduciendo audio:", err);
+            }
+          });
+          
+          card.appendChild(btn);
+        }
       } else {
-        card.innerHTML += `<p style="color:#ff4444; font-size:1rem;">(Esquema no disponible para este acorde)</p>`;
+        card.innerHTML += `<p style="color:#ff4444; font-size:1rem;">(Esquema no disponible)</p>`;
       }
     }
     container.appendChild(card);

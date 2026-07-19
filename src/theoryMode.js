@@ -20,34 +20,74 @@ export function initTheoryMode(getApiKeyFn) {
       container.dataset.rendered = "true";
       
       const chordName = container.getAttribute('data-chord');
-      if (!chordName) return;
+      const noteName = container.getAttribute('data-note'); // Format: "string-fret" e.g. "6-3"
 
-      const chord = lookupChord(chordName);
-      
-      if (chord) {
-        // Build graphical fretboard
-        const fb = buildMiniFretboard(chord);
+      let fb = null;
+      let playableNotes = null;
+
+      if (noteName) {
+        // Es un punteo
+        const [str, frt] = noteName.split('-');
+        if (str && frt) {
+          const stringNum = parseInt(str, 10);
+          const fretNum = parseInt(frt, 10);
+          fb = buildMiniFretboard({ single_note: { string: stringNum, fret: fretNum } });
+          
+          // Import/use getPitchFromStringFret logic here, or we can just import playNote
+          // Let's rely on a helper or just define it here to calculate pitch
+          const openPitches = ["E4", "B3", "G3", "D3", "A2", "E2"];
+          const notesStr = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+          const openPitch = openPitches[stringNum - 1]; 
+          if (openPitch && fretNum >= 0) {
+            const baseNote = openPitch.slice(0, -1);
+            const baseOctave = parseInt(openPitch.slice(-1));
+            let baseIndex = notesStr.indexOf(baseNote);
+            let finalIndex = baseIndex + fretNum;
+            let finalOctave = baseOctave + Math.floor(finalIndex / 12);
+            playableNotes = [`${notesStr[finalIndex % 12]}${finalOctave}`];
+          }
+        }
+      } else if (chordName) {
+        // Es un acorde
+        const chord = lookupChord(chordName);
+        if (chord) {
+          fb = buildMiniFretboard(chord);
+          playableNotes = chord.notes;
+        } else {
+          container.innerHTML = `<p style="color:red; font-size:12px;">[Acorde no encontrado en DB: ${chordName}]</p>`;
+          return;
+        }
+      } else {
+        return;
+      }
+
+      if (fb) {
         container.appendChild(fb);
         
-        // Build audio button
-        const btn = document.createElement('button');
-        btn.className = 'btn primary-btn play-chord-btn';
-        btn.innerHTML = '🔊 Escuchar';
-        btn.style.marginTop = '10px';
-        btn.style.display = 'block';
-        
-        btn.addEventListener('click', async () => {
-          try {
-            await initAudio();
-            strumChord(chord.notes, 0.05);
-          } catch(err) {
-            console.error("Error reproduciendo acorde:", err);
-          }
-        });
-        
-        container.appendChild(btn);
-      } else {
-        container.innerHTML = `<p style="color:red; font-size:12px;">[Acorde no encontrado en DB: ${chordName}]</p>`;
+        if (playableNotes) {
+          const btn = document.createElement('button');
+          btn.className = 'btn primary-btn play-chord-btn';
+          btn.innerHTML = '🔊 Escuchar';
+          btn.style.marginTop = '10px';
+          btn.style.display = 'block';
+          
+          btn.addEventListener('click', async () => {
+            try {
+              await initAudio();
+              // Si es punteo (1 nota) strumChord lo toca igual si le pasas array o usa playNote
+              if (noteName) {
+                // we need playNote, but wait, strumChord with speed 0.05 on [note] works fine!
+                strumChord(playableNotes, 0.05);
+              } else {
+                strumChord(playableNotes, 0.05);
+              }
+            } catch(err) {
+              console.error("Error reproduciendo audio:", err);
+            }
+          });
+          
+          container.appendChild(btn);
+        }
       }
     });
   }
