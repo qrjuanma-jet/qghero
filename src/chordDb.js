@@ -915,8 +915,14 @@ const ALIASES = {
  */
 export function lookupChord(chordName, baseFret = 0) {
   if (!chordName) return null;
-  const clean = chordName.trim();
+  let clean = chordName.trim();
   
+  // Extraer la parte anglo si viene en formato "Latina (Anglo)" ej "Do Mayor (C)"
+  const angloMatch = clean.match(/\(([A-G][#b]?[a-z0-9]*)\)/i);
+  if (angloMatch) {
+    clean = angloMatch[1]; 
+  }
+
   // 1. Intento dinámico si baseFret > 0
   if (baseFret > 0) {
     const dynamic = generateDynamicChord(clean, baseFret);
@@ -929,21 +935,43 @@ export function lookupChord(chordName, baseFret = 0) {
   // 3. Alias
   if (ALIASES[clean] && CHORDS[ALIASES[clean]]) return { ...CHORDS[ALIASES[clean]] };
   
-  // 4. Extraer la parte anglo de "Latina (Anglo)"
-  const angloMatch = clean.match(/\(([A-G][#b]?[a-z0-9]*)\)/);
-  if (angloMatch) {
-    const key = angloMatch[1];
-    if (CHORDS[key]) return { ...CHORDS[key] };
-    if (ALIASES[key] && CHORDS[ALIASES[key]]) return { ...CHORDS[ALIASES[key]] };
+  // 4. Intentar traducir de Latino a Anglo por si la IA no trajo anglo
+  const LATIN_MAP = { "Do": "C", "Re": "D", "Mi": "E", "Fa": "F", "Sol": "G", "La": "A", "Si": "B" };
+  let angloAttempt = clean;
+  for (const [lat, ang] of Object.entries(LATIN_MAP)) {
+    if (angloAttempt.startsWith(lat)) {
+      angloAttempt = angloAttempt.replace(lat, ang);
+      break;
+    }
+  }
+  // Limpiar sufijos
+  angloAttempt = angloAttempt.replace(/ mayor/i, "")
+                 .replace(/ menor/i, "m")
+                 .replace(/ disminuido/i, "dim")
+                 .replace(/ aumentada/i, "aug")
+                 .replace(/\s+/g, ""); // "C m 7" -> "Cm7"
+
+  if (CHORDS[angloAttempt]) return { ...CHORDS[angloAttempt] };
+  if (ALIASES[angloAttempt] && CHORDS[ALIASES[angloAttempt]]) return { ...CHORDS[ALIASES[angloAttempt]] };
+
+  // 5. Fallback a generación dinámica
+  let dynamicFallback = generateDynamicChord(angloAttempt, 0);
+  if (dynamicFallback) {
+    // Si se generó a partir del intento anglo, aseguramos que devuelva el nombre original
+    dynamicFallback.latin = clean;
+    return dynamicFallback;
   }
 
+  dynamicFallback = generateDynamicChord(clean, 0);
+  if (dynamicFallback) return dynamicFallback;
+
+  // 6. Último recurso (cortar por espacio)
   const firstPart = clean.split(/[\s\/]/)[0];
   if (CHORDS[firstPart]) return { ...CHORDS[firstPart] };
   if (ALIASES[firstPart] && CHORDS[ALIASES[firstPart]]) return { ...CHORDS[ALIASES[firstPart]] };
   
-  // 5. Fallback a generación dinámica si no está en la base de datos estática
-  const dynamicFallback = generateDynamicChord(firstPart, 0);
-  if (dynamicFallback) return dynamicFallback;
+  const dynamicFirstPart = generateDynamicChord(firstPart, 0);
+  if (dynamicFirstPart) return dynamicFirstPart;
 
   return null;
 }
