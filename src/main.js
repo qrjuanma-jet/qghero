@@ -112,35 +112,46 @@ function initApp() {
     // Si estamos en la pantalla de login, preparar la intro musical en el primer clic
     const loginScreen = document.getElementById('login-screen');
     if (loginScreen) {
-        loginScreen.addEventListener('click', async function playIntro() {
+        loginScreen.addEventListener('click', function playIntro() {
           loginScreen.removeEventListener('click', playIntro);
           
           if (loginScreen.classList.contains('active')) {
-            try {
-              await initAudio();
-              
-              const imgClass = document.getElementById('img-classical');
-              const imgElec = document.getElementById('img-electric');
-              
-              // 0s: Tocar Acorde Clásico
-              strumChord(["C3", "E3", "G3", "C4", "E4"], 0.08, "clásico");
-              if (imgClass) imgClass.style.transform = "scale(1.05)"; // ligero zoom in
-              
-              // 2s: Comienza la transición visual y sonora al Rock
-              setTimeout(() => {
-                  if (imgClass) imgClass.style.opacity = "0";
-                  if (imgElec) {
-                      imgElec.style.opacity = "1";
-                      imgElec.style.transform = "scale(1)"; // asienta el zoom
-                  }
-                  
-                  // Tocar Acorde Eléctrico acompasado con el cambio visual
-                  strumChord(["E3", "B3", "E4"], 0.02, "rock");
-              }, 2000);
-              
-            } catch (err) {
-              console.error("Intro audio blocked", err);
-            }
+            const imgClass = document.getElementById('img-classical');
+            const imgElec = document.getElementById('img-electric');
+            
+            const overlay = document.getElementById('click-to-play-overlay');
+            if (overlay) overlay.style.opacity = "0";
+            
+            // 0s: Start Visual Transition
+            if (imgClass) imgClass.style.transform = "scale(1.05)";
+            
+            setTimeout(() => {
+                if (imgClass) imgClass.style.opacity = "0";
+                if (imgElec) {
+                    imgElec.style.opacity = "1";
+                    imgElec.style.transform = "scale(1)";
+                }
+            }, 2000);
+
+            // Audio Logic Async
+            (async () => {
+              try {
+                const startTime = performance.now();
+                await initAudio();
+                const loadTime = performance.now() - startTime;
+                
+                // 0s: Acorde Clásico
+                strumChord(["C3", "E3", "G3", "C4", "E4"], 0.08, "clásico");
+                
+                // 2s: Acorde Eléctrico
+                const timeToWait = Math.max(0, 2000 - loadTime);
+                setTimeout(() => {
+                    strumChord(["E3", "B3", "E4"], 0.02, "rock");
+                }, timeToWait);
+              } catch (err) {
+                console.error("Intro audio blocked", err);
+              }
+            })();
           }
         });
     }
