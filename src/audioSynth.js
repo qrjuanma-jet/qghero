@@ -17,7 +17,11 @@ export async function initAudio() {
   // Sintetizador Acústico (Tone.PluckSynth no es Monophonic, así que creamos un pequeño pool de voces manual)
   acousticSynth = new (class {
     constructor() {
-      this.synths = Array.from({length: 6}, () => new Tone.PluckSynth({ attackNoise: 1, dampening: 4000, resonance: 0.98 }));
+      this.synths = Array.from({length: 6}, () => new Tone.PluckSynth({ 
+        attackNoise: 1.5, 
+        dampening: 1500, // Frecuencia de corte baja para sonido más cálido (nylon)
+        resonance: 0.94 // Menos resonancia metálica
+      }));
       this.idx = 0;
       this.volume = { value: -2 };
     }
