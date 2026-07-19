@@ -39,8 +39,8 @@ export function initDictionaryMode(getApiKeyFn) {
             // 3. Renderizar el acorde
             const card = document.createElement('div');
             card.className = 'chord-card theory-chord-card';
-            card.style.transform = 'scale(1.5)';
-            card.style.margin = '20px 0';
+            card.style.margin = '20px auto';
+            card.style.maxWidth = '350px';
             
             const fullName = dbInfo.latin && dbInfo.anglo ? `${dbInfo.latin} (${dbInfo.anglo})` : dbInfo.latin || dbInfo.anglo;
 
