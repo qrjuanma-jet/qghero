@@ -14,14 +14,31 @@ export async function initAudio() {
   // Reverb para dar más realismo a ambas guitarras
   reverb = new Tone.Reverb({ decay: 2.5, preDelay: 0.1, wet: 0.3 }).toDestination();
   
-  // Sintetizador Acústico (Tone.PluckSynth simula muy bien la guitarra clásica)
-  acousticSynth = new Tone.PolySynth(Tone.PluckSynth, {
-    attackNoise: 1,
-    dampening: 4000,
-    resonance: 0.98
-  }).connect(reverb);
+  // Sintetizador Acústico (Tone.PluckSynth no es Monophonic, así que creamos un pequeño pool de voces manual)
+  acousticSynth = new (class {
+    constructor() {
+      this.synths = Array.from({length: 6}, () => new Tone.PluckSynth({ attackNoise: 1, dampening: 4000, resonance: 0.98 }));
+      this.idx = 0;
+      this.volume = { value: -2 };
+    }
+    connect(dest) {
+      this.synths.forEach(s => {
+        s.connect(dest);
+        s.volume.value = this.volume.value;
+      });
+      return this;
+    }
+    triggerAttackRelease(notes, duration, time) {
+      const nArray = Array.isArray(notes) ? notes : [notes];
+      nArray.forEach(note => {
+        this.synths[this.idx].triggerAttack(note, time);
+        this.idx = (this.idx + 1) % this.synths.length;
+      });
+    }
+    releaseAll() {}
+  })();
   
-  acousticSynth.volume.value = -2; // Ajustar volumen
+  acousticSynth.connect(reverb);
   
   // Efecto de Distorsión para Rock/Metal
   distortion = new Tone.Distortion(0.8).connect(reverb);
