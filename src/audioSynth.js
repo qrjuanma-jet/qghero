@@ -14,35 +14,25 @@ export async function initAudio() {
   // Reverb para dar más realismo a ambas guitarras
   reverb = new Tone.Reverb({ decay: 2.5, preDelay: 0.1, wet: 0.3 }).toDestination();
   
-  // Sintetizador Acústico (Tone.PluckSynth no es Monophonic, así que creamos un pequeño pool de voces manual)
-  acousticSynth = new (class {
-    constructor() {
-      this.synths = Array.from({length: 6}, () => new Tone.PluckSynth({ 
-        attackNoise: 1.5, 
-        dampening: 1500, // Frecuencia de corte baja para sonido más cálido (nylon)
-        resonance: 0.94 // Menos resonancia metálica
-      }));
-      this.idx = 0;
-      this.volume = { value: -2 };
+  // Sintetizador Acústico (Onda triangular pura + filtro pasa-bajos da un sonido cálido a madera/nylon, como arpa o guitarra clásica suave, eliminando todo el ruido "eléctrico")
+  acousticSynth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: "triangle" },
+    envelope: {
+      attack: 0.005,
+      decay: 1.5,
+      sustain: 0,
+      release: 1.5
     }
-    connect(dest) {
-      this.synths.forEach(s => {
-        s.connect(dest);
-        s.volume.value = this.volume.value;
-      });
-      return this;
-    }
-    triggerAttackRelease(notes, duration, time) {
-      const nArray = Array.isArray(notes) ? notes : [notes];
-      nArray.forEach(note => {
-        this.synths[this.idx].triggerAttack(note, time);
-        this.idx = (this.idx + 1) % this.synths.length;
-      });
-    }
-    releaseAll() {}
-  })();
-  
-  acousticSynth.connect(reverb);
+  });
+
+  const acousticFilter = new Tone.Filter({
+    type: "lowpass",
+    frequency: 1500, // Cortar cualquier agudo residual para máxima calidez
+    rolloff: -12
+  }).connect(reverb);
+
+  acousticSynth.connect(acousticFilter);
+  acousticSynth.volume.value = 4; // Subimos el volumen para compensar el filtro cálido
   
   // Efecto de Distorsión para Rock/Metal
   distortion = new Tone.Distortion(0.8).connect(reverb);
