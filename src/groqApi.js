@@ -92,6 +92,9 @@ CONTENIDO:
 - Explicaciones claras de cómo pisar los trastes
 - Mínimo 2 acordes o punteos explicados, insertando su respectivo <div class="theory-chord-card"...></div>
 - Un ejercicio práctico
+- AL FINAL: OBLIGATORIAMENTE incluye un "Resumen y Plan de Estudio". Debe ser un bloque HTML (ej. <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">) que contenga:
+  1. Un resumen rápido de lo aprendido (bullet points).
+  2. Tiempos recomendados de práctica diarios para dominar esta lección.
 - Solo HTML crudo, sin markdown ni backticks`;
 
   const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg, false);
@@ -133,6 +136,9 @@ REGLAS:
   - Acordes: <div class="theory-chord-card" data-chord="C"></div> (cambiando "C").
   - Punteos: <div class="theory-chord-card" data-note="6-3"></div> (cuerda-traste).
 - ¡Prohibido poner botones de Escuchar! El sistema los crea solos.
+- AL FINAL: OBLIGATORIAMENTE incluye un "Resumen y Plan de Estudio". Debe ser un bloque HTML (ej. <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">) que contenga:
+  1. Un resumen rápido de lo aprendido (bullet points).
+  2. Tiempos recomendados de práctica diarios para dominar esta lección.
 - Solo HTML crudo. Sin markdown. Sin repetir conceptos del historial.`;
 
   const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg, false);
@@ -331,16 +337,32 @@ export async function parseNaturalChordQuery(apiKey, query) {
 El usuario ha dicho lo siguiente: "${query}"
 
 Extrae el acorde que quiere aprender.
-Devuelve ÚNICAMENTE el nombre del acorde en formato anglosajón estándar, sin espacios, sin comillas, sin signos de puntuación extra.
-Ejemplos de lo que debes devolver: C, Dm7, F#maj7, Gaug, Bdim.
-Si el usuario dice "do mayor séptima", devuelve: Cmaj7
-Si el usuario dice "el acorde triste de mi", devuelve: Em
-Si el usuario dice "sol séptima", devuelve: G7
+Devuelve ÚNICAMENTE un JSON con la clave "chord" que contenga el nombre del acorde en formato anglosajón estándar.
+Ejemplos de lo que debes devolver: {"chord": "C"}, {"chord": "Dm7"}, {"chord": "F#maj7"}
+Si el usuario dice "do mayor séptima", devuelve: {"chord": "Cmaj7"}
+Si pide algo que no es un acorde, devuelve: {"chord": "UNKNOWN"}
 
-Si pide algo que no es un acorde en absoluto, devuelve: UNKNOWN
+Devuelve SOLO JSON puro.`;
 
-Devuelve SOLO la cadena corta (ej: "Am7"). Ni una palabra más.`;
+  const response = await callGroq(apiKey, prompt, 0.1, 50, systemMsg, true);
+  return response.chord ? response.chord.trim() : "UNKNOWN";
+}
 
-  const response = await callGroq(apiKey, prompt, 0.1, 10, systemMsg, false);
-  return response.trim();
+export async function fetchChordAdvice(apiKey, chordName) {
+  if (!apiKey) throw new Error("No API Key provided");
+
+  const systemMsg = `Eres un profesor de guitarra. El usuario quiere aprender el acorde ${chordName}. Dale un consejo rápido y muy útil.`;
+  const prompt = `
+Da un único consejo de 1 o 2 líneas sobre cómo colocar la mano, cómo hacer que suene bien, o un truco para el acorde ${chordName}.
+NO uses saludos. NO uses introducciones. Ve directo al consejo.
+Devuelve ÚNICAMENTE un JSON con la clave "advice" que contenga el consejo.
+Ejemplo: {"advice": "Acerca más el pulgar al centro del mástil para tener más fuerza en la cejilla."}`;
+
+  try {
+    const response = await callGroq(apiKey, prompt, 0.7, 100, systemMsg, true);
+    return response.advice ? response.advice : "";
+  } catch (err) {
+    console.error("Error fetching chord advice", err);
+    return "";
+  }
 }

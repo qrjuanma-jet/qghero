@@ -77,9 +77,9 @@ export function initTheoryMode(getApiKeyFn) {
               // Si es punteo (1 nota) strumChord lo toca igual si le pasas array o usa playNote
               if (noteName) {
                 // we need playNote, but wait, strumChord with speed 0.05 on [note] works fine!
-                strumChord(playableNotes, 0.05);
+                strumChord(playableNotes, 0.05, currentLevel);
               } else {
-                strumChord(playableNotes, 0.05);
+                strumChord(playableNotes, 0.05, currentLevel);
               }
             } catch(err) {
               console.error("Error reproduciendo audio:", err);

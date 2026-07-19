@@ -1,6 +1,6 @@
 import { lookupChord } from './chordDb.js';
 import { buildMiniFretboard } from './chordUI.js';
-import { parseNaturalChordQuery } from './groqApi.js';
+import { parseNaturalChordQuery, fetchChordAdvice } from './groqApi.js';
 import { strumChord } from './audioSynth.js';
 
 export function initDictionaryMode(getApiKeyFn) {
@@ -32,7 +32,7 @@ export function initDictionaryMode(getApiKeyFn) {
             loadingEl.classList.add('hidden');
 
             if (!dbInfo) {
-                resultContainer.innerHTML = `<p class="neon-text" style="color: #ff4444;">No pude entender qué acorde quieres o no existe: "${chordName}". Intenta ser más específico.</p>`;
+                resultContainer.innerHTML = `<p class="neon-text" style="color: #ff4444; overflow-wrap: break-word; word-break: break-word;">No pude entender qué acorde quieres o no existe: "${chordName}". Intenta ser más específico.</p>`;
                 return;
             }
 
@@ -63,7 +63,23 @@ export function initDictionaryMode(getApiKeyFn) {
                 }
             });
 
+            // 4. Pedir consejo a la IA de fondo y mostrarlo
+            const adviceContainer = document.createElement('div');
+            adviceContainer.style.marginTop = '15px';
+            adviceContainer.style.fontSize = '0.9rem';
+            adviceContainer.style.color = 'var(--text-secondary)';
+            adviceContainer.innerHTML = '<span class="spinner" style="width: 15px; height: 15px; display: inline-block; border-width: 2px;"></span> Generando consejo...';
+            card.appendChild(adviceContainer);
+
             resultContainer.appendChild(card);
+
+            fetchChordAdvice(apiKey, fullName).then(advice => {
+                if (advice) {
+                    adviceContainer.innerHTML = `💡 <i>${advice}</i>`;
+                } else {
+                    adviceContainer.innerHTML = '';
+                }
+            });
 
         } catch (error) {
             console.error(error);

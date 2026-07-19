@@ -268,6 +268,15 @@ function setupEventListeners() {
           <ul>
               <li><strong>⬅️ / ➡️:</strong> Pasa a la página anterior o siguiente de la partitura.</li>
               <li><strong>▶️ Auto:</strong> Activa el avance automático para que puedas tocar sin usar las manos.</li>
+          </ul>`,
+      dictionary: `
+          <h3>Buscador de Acordes IA</h3>
+          <p>Esta herramienta te permite buscar cualquier acorde usando lenguaje natural. La inteligencia artificial lo entenderá y te mostrará cómo tocarlo.</p>
+          <ul>
+              <li><strong>Búsqueda Flexible:</strong> Puedes escribir "Do mayor", "Cmaj7", o incluso "el acorde triste de Mi". La IA deducirá a qué te refieres.</li>
+              <li><strong>Viñeta Gráfica:</strong> Te mostrará la posición exacta de los dedos (1, 2, 3, 4), las cuerdas al aire (O), y las que no se tocan (X).</li>
+              <li><strong>Consejos de la IA:</strong> Al buscar un acorde, la IA generará en tiempo real un pequeño consejo o truco para ayudarte a colocar mejor la mano.</li>
+              <li><strong>Voz:</strong> Usa el botón de micrófono para pedir el acorde hablando, ideal cuando tienes la guitarra en las manos.</li>
           </ul>`
   };
 
@@ -550,10 +559,13 @@ function setupEventListeners() {
     if (currentSongData && currentSongData.notes && currentSongData.notes.length > 0) {
       isPreviewPlaying = true;
       previewBtn.textContent = "🛑 Detener Pista";
+      
+      const styleHint = (currentSongData.technique.effects || "") + " " + (currentSongData.technique.rhythm || "");
+
       playPreviewSequence(currentSongData.notes, () => {
           isPreviewPlaying = false;
           previewBtn.textContent = "🔊 Escuchar Pista Sintetizada";
-      });
+      }, styleHint);
     }
   });
 
@@ -736,10 +748,11 @@ function renderChronologicalViñetas(notes, container) {
           btn.addEventListener('click', async () => {
             try {
               await initAudio();
+              const styleHint = currentSongData ? ((currentSongData.technique.effects || "") + " " + (currentSongData.technique.rhythm || "")) : "";
               if (isPunteo) {
-                playNote(playableNotes[0], 0, "4n");
+                playNote(playableNotes[0], 0, "4n", styleHint);
               } else {
-                strumChord(playableNotes, 0.05);
+                strumChord(playableNotes, 0.05, styleHint);
               }
             } catch(err) {
               console.error("Error reproduciendo audio:", err);

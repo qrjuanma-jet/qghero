@@ -1,33 +1,61 @@
 import * as Tone from 'https://esm.sh/tone';
 
-let synth = null;
+let acousticSynth = null;
+let electricSynth = null;
 let isLoaded = false;
+let distortion = null;
+let reverb = null;
 
 export async function initAudio() {
   if (isLoaded) return;
   
   await Tone.start();
   
-  // Usaremos un PolySynth básico con un oscilador tipo 'triangle' o 'sine' 
-  // que simula vagamente una cuerda punteada si no hay samples grandes.
-  // Para una app de producción, se usaría un Tone.Sampler con archivos .mp3
+  // Reverb para dar más realismo a ambas guitarras
+  reverb = new Tone.Reverb({ decay: 2.5, preDelay: 0.1, wet: 0.3 }).toDestination();
   
-  synth = new Tone.PolySynth(Tone.Synth, {
-    oscillator: { type: "fatcustom", partials: [0.2, 1, 0, 0.5, 0.1] },
-    envelope: { attack: 0.01, decay: 1.5, sustain: 0.2, release: 1.2 }
-  }).toDestination();
+  // Sintetizador Acústico (Tone.PluckSynth simula muy bien la guitarra clásica)
+  acousticSynth = new Tone.PolySynth(Tone.PluckSynth, {
+    attackNoise: 1,
+    dampening: 4000,
+    resonance: 0.98
+  }).connect(reverb);
   
-  synth.volume.value = -8; // Bajar un poco el volumen
+  acousticSynth.volume.value = -5; // Ajustar volumen
+  
+  // Efecto de Distorsión para Rock/Metal
+  distortion = new Tone.Distortion(0.8).connect(reverb);
+  
+  // Sintetizador Eléctrico (Tone.FMSynth para un sonido más agresivo)
+  electricSynth = new Tone.PolySynth(Tone.FMSynth, {
+    harmonicity: 3,
+    modulationIndex: 10,
+    oscillator: { type: "square" },
+    envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 1.2 },
+    modulation: { type: "square" },
+    modulationEnvelope: { attack: 0.01, decay: 0.5, sustain: 1, release: 0.1 }
+  }).connect(distortion);
+  
+  electricSynth.volume.value = -12; // La distorsión sube el volumen, lo compensamos
+  
   isLoaded = true;
 }
+
+function getSynth(style = "") {
+    const isElectric = style.toLowerCase().includes("rock") || style.toLowerCase().includes("metal") || style.toLowerCase().includes("punk");
+    return isElectric ? electricSynth : acousticSynth;
+}
+
 
 /**
  * Reproduce un acorde simultáneamente
  * @param {string[]} notes - Ej: ["E2", "A2", "D3", "G3", "B3", "E4"] (Mi mayor)
  * @param {string} duration - Duración en notación de Tone (ej "2n")
  */
-export function playChord(notes, duration = "2n") {
-  if (!isLoaded || !synth) return;
+export function playChord(notes, duration = "2n", style = "") {
+  if (!isLoaded) return;
+  const synth = getSynth(style);
+  if (!synth) return;
   synth.triggerAttackRelease(notes, duration);
 }
 
@@ -56,8 +84,10 @@ function formatPitchForTone(rawPitch) {
   return noteName + octave;
 }
 
-export function strumChord(notes, speed = 0.05) {
-  if (!isLoaded || !synth) return;
+export function strumChord(notes, speed = 0.05, style = "") {
+  if (!isLoaded) return;
+  const synth = getSynth(style);
+  if (!synth) return;
   
   const now = Tone.now();
   if (!Array.isArray(notes)) notes = [notes];
@@ -81,15 +111,19 @@ export function strumChord(notes, speed = 0.05) {
 /**
  * Reproduce una nota individual en un tiempo específico
  */
-export function playNote(note, timeOffset = 0, duration = "8n") {
-  if (!isLoaded || !synth) return;
+export function playNote(note, timeOffset = 0, duration = "8n", style = "") {
+  if (!isLoaded) return;
+  const synth = getSynth(style);
+  if (!synth) return;
   synth.triggerAttackRelease(note, duration, Tone.now() + timeOffset);
 }
 
 let previewPart = null;
 
-export function playPreviewSequence(notesArray, onComplete = null) {
-  if (!isLoaded || !synth) return;
+export function playPreviewSequence(notesArray, onComplete = null, style = "") {
+  if (!isLoaded) return;
+  const synth = getSynth(style);
+  if (!synth) return;
   stopPreviewSequence();
   
   // Array of { time: note.time, pitch: "C4" }
@@ -121,5 +155,6 @@ export function stopPreviewSequence() {
   }
   Tone.Transport.stop();
   Tone.Transport.cancel();
-  if (synth) synth.releaseAll();
+  if (acousticSynth) acousticSynth.releaseAll();
+  if (electricSynth) electricSynth.releaseAll();
 }

@@ -6,6 +6,48 @@ import { lookupChord } from './chordDb.js';
 let currentStyle = 'rock';
 let isGenerating = false;
 
+const MAIN_CHORDS_BY_STYLE = {
+  rock: [
+    { chord: 'E5', type: 'Power Chord', desc: 'Base del rock. Potente y sin tercera.' },
+    { chord: 'A5', type: 'Power Chord', desc: 'Ideal para transiciones desde E5.' },
+    { chord: 'D5', type: 'Power Chord', desc: 'Da un tono más brillante al riff.' },
+    { chord: 'G5', type: 'Power Chord', desc: 'Común en punk y hard rock.' }
+  ],
+  blues: [
+    { chord: 'E7', type: 'Séptima Dominante', desc: 'El acorde fundamental del blues clásico.' },
+    { chord: 'A7', type: 'Séptima Dominante', desc: 'El acorde de subdominante en progresión 12-bar.' },
+    { chord: 'B7', type: 'Séptima Dominante', desc: 'El acorde de tensión (turnaround).' }
+  ],
+  metal: [
+    { chord: 'E5', type: 'Power Chord Muteado', desc: 'Tocado con Palm Mute para agresividad.' },
+    { chord: 'Drop D (D5)', type: 'Power Chord', desc: 'Típico en afinaciones graves.' },
+    { chord: 'F5', type: 'Power Chord', desc: 'Para riffs oscuros de medio tono.' }
+  ],
+  clásico: [
+    { chord: 'C', type: 'Mayor', desc: 'Alegre, brillante y base de la tonalidad.' },
+    { chord: 'G', type: 'Mayor', desc: 'Dominante de Do, muy frecuente.' },
+    { chord: 'Am', type: 'Menor', desc: 'Relativo menor, melancólico.' },
+    { chord: 'Em', type: 'Menor', desc: 'Oscuro pero suave.' }
+  ],
+  pop: [
+    { chord: 'C', type: 'Mayor', desc: 'Progresión I-V-vi-IV (ej. Let it Be).' },
+    { chord: 'G', type: 'Mayor', desc: 'El grado V, da movimiento.' },
+    { chord: 'Am', type: 'Menor', desc: 'El toque emotivo de la canción.' },
+    { chord: 'F', type: 'Mayor', desc: 'Resolución típica pop.' }
+  ],
+  flamenco: [
+    { chord: 'Am', type: 'Menor', desc: 'Inicio de la cadencia andaluza.' },
+    { chord: 'G', type: 'Mayor', desc: 'Paso descendente.' },
+    { chord: 'F', type: 'Mayor', desc: 'Tensión preparatoria.' },
+    { chord: 'E', type: 'Mayor (Frigio)', desc: 'Resolución típica flamenca.' }
+  ],
+  rancheras: [
+    { chord: 'G', type: 'Mayor', desc: 'Tónica muy usada en rancheras.' },
+    { chord: 'D7', type: 'Dominante', desc: 'Tensión para volver a Sol.' },
+    { chord: 'C', type: 'Mayor', desc: 'Acorde de paso.' }
+  ]
+};
+
 // Helpers para localStorage
 function getLevel(style) {
   return parseInt(localStorage.getItem(`qghero_level_${style}`)) || 1;
@@ -107,6 +149,46 @@ export function initPracticeMode(getApiKeyFn) {
     }
     await loadCustomSong(songName, apiKey);
   });
+
+  const mainChordsBtn = document.getElementById('main-chords-btn');
+  if (mainChordsBtn) {
+    mainChordsBtn.addEventListener('click', () => {
+      const modal = document.getElementById('global-help-modal');
+      const title = document.getElementById('help-title');
+      const content = document.getElementById('help-content');
+      
+      if (currentStyle === 'custom') {
+        alert('En el modo "A la carta", busca una canción primero para ver sus acordes.');
+        return;
+      }
+      
+      const chordsData = MAIN_CHORDS_BY_STYLE[currentStyle] || [];
+      title.textContent = `🎸 Acordes Principales: ${currentStyle.toUpperCase()}`;
+      
+      let html = `<p>Estos son los acordes más característicos del estilo <strong>${currentStyle}</strong>:</p>`;
+      html += `<table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--neon-cyan);">
+            <th style="padding: 10px; text-align: left; color: var(--neon-cyan);">Acorde</th>
+            <th style="padding: 10px; text-align: left; color: var(--neon-cyan);">Tipo</th>
+            <th style="padding: 10px; text-align: left; color: var(--neon-cyan);">Uso / Sonoridad</th>
+          </tr>
+        </thead>
+        <tbody>`;
+        
+      chordsData.forEach(c => {
+        html += `<tr style="border-bottom: 1px solid rgba(0, 255, 255, 0.2);">
+          <td style="padding: 10px; font-weight: bold; font-size: 1.2rem;">${c.chord}</td>
+          <td style="padding: 10px;">${c.type}</td>
+          <td style="padding: 10px;">${c.desc}</td>
+        </tr>`;
+      });
+      
+      html += `</tbody></table>`;
+      content.innerHTML = html;
+      modal.classList.remove('hidden');
+    });
+  }
 
   // Init
   const initialKey = getApiKeyFn();
@@ -262,7 +344,7 @@ function renderDataToUI(data, customSongQuery = null) {
       btn.addEventListener('click', async (e) => {
         const notes = JSON.parse(e.target.getAttribute('data-notes'));
         await initAudio();
-        strumChord(notes, 0.05);
+        strumChord(notes, 0.05, currentStyle);
       });
     });
 }

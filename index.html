@@ -23,8 +23,11 @@
     <div id="app">
         <!-- PANTALLA 1: Login API Key -->
         <section id="login-screen" class="screen active">
-            <div class="glass-panel">
+            <div class="glass-panel" style="text-align: center;">
                 <h1 class="logo-title">QG<span class="neon-text">HERO</span></h1>
+                <div style="margin: 15px auto;">
+                    <img src="img/superhero.png" alt="Superhero Guitarist" class="rocking-superhero" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-pink); border: 2px solid var(--neon-cyan);">
+                </div>
                 <p>Bienvenido. Ingresa tu API Key de Groq para continuar.</p>
                 <div class="input-group">
                     <div style="position: relative; width: 100%;">
@@ -290,9 +293,12 @@
                     <button class="style-btn" data-style="custom" style="border-color: var(--neon-cyan); color: var(--neon-cyan);">🔍 A la Carta</button>
                 </aside>
                 <main class="style-content">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
                         <h3 id="style-title" style="margin-bottom: 0;">Rock</h3>
-                        <button id="level-selector-btn" class="level-badge" style="cursor: pointer; transition: all 0.2s; border-color: var(--neon-cyan); color: var(--neon-cyan); background: rgba(0,229,255,0.1);" title="Cambiar nivel de dificultad">Nivel <span id="current-level-display">1</span> 🔽</button>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button id="main-chords-btn" class="btn secondary-btn" style="padding: 5px 10px; font-size: 0.9rem; border-color: var(--neon-cyan); color: var(--neon-cyan);">🎸 Acordes Principales</button>
+                            <button id="level-selector-btn" class="level-badge" style="cursor: pointer; transition: all 0.2s; border-color: var(--neon-cyan); color: var(--neon-cyan); background: rgba(0,229,255,0.1);" title="Cambiar nivel de dificultad">Nivel <span id="current-level-display">1</span> 🔽</button>
+                        </div>
                     </div>
                     <p id="style-desc">Cargando...</p>
                     
