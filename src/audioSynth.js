@@ -14,25 +14,33 @@ export async function initAudio() {
   // Reverb para dar más realismo a ambas guitarras
   reverb = new Tone.Reverb({ decay: 2.5, preDelay: 0.1, wet: 0.3 }).toDestination();
   
-  // Sintetizador Acústico (Onda triangular pura + filtro pasa-bajos da un sonido cálido a madera/nylon, como arpa o guitarra clásica suave, eliminando todo el ruido "eléctrico")
-  acousticSynth = new Tone.PolySynth(Tone.Synth, {
+  // Sintetizador Acústico: Tone.AMSynth simula muy bien la riqueza armónica de la madera (guitarra clásica) sin el "ruido blanco" eléctrico de Karplus-Strong ni el zumbido sordo de un Synth puro.
+  acousticSynth = new Tone.PolySynth(Tone.AMSynth, {
+    harmonicity: 3.0,
     oscillator: { type: "triangle" },
     envelope: {
-      attack: 0.005,
-      decay: 1.5,
+      attack: 0.01,
+      decay: 3.5, // Mayor tiempo de vibración antes de apagarse
+      sustain: 0.05,
+      release: 3.5 // Resonancia larga al soltar
+    },
+    modulation: { type: "sine" },
+    modulationEnvelope: {
+      attack: 0.05,
+      decay: 0.4,
       sustain: 0,
-      release: 1.5
+      release: 0.5
     }
   });
 
   const acousticFilter = new Tone.Filter({
     type: "lowpass",
-    frequency: 1500, // Cortar cualquier agudo residual para máxima calidez
+    frequency: 2500, // Deja pasar suficientes armónicos para distinguir los acordes claramente
     rolloff: -12
   }).connect(reverb);
 
   acousticSynth.connect(acousticFilter);
-  acousticSynth.volume.value = 4; // Subimos el volumen para compensar el filtro cálido
+  acousticSynth.volume.value = 2;
   
   // Efecto de Distorsión para Rock/Metal
   distortion = new Tone.Distortion(0.8).connect(reverb);
