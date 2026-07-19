@@ -23,7 +23,10 @@
     <div id="app">
         <!-- PANTALLA 1: Login API Key -->
         <section id="login-screen" class="screen active" style="position: relative; overflow: hidden; justify-content: flex-end; padding-bottom: 50px;">
-            <img src="img/superhero.png" alt="Superhero Guitarist" class="rocking-superhero" style="position: absolute; top: 0; left: 0; width: 100%; height: 50vh; object-fit: cover; z-index: 0; mask-image: linear-gradient(to bottom, black 40%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%); opacity: 0.9;">
+            <div id="intro-animation-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 50vh; z-index: 0; mask-image: linear-gradient(to bottom, black 40%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%); opacity: 0.9;">
+                <img src="img/guitar_classical.png" id="img-classical" alt="Classical Guitar" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1; transition: opacity 2s ease-in-out, transform 4s ease-in-out; transform: scale(1);">
+                <img src="img/guitar_electric.png" id="img-electric" alt="Electric Guitar" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 2s ease-in-out, transform 4s ease-in-out; transform: scale(1.05);">
+            </div>
             <div class="glass-panel" style="text-align: center; position: relative; z-index: 1; margin-top: 30vh;">
                 <h1 class="logo-title">QG<span class="neon-text">HERO</span></h1>
                 <p>Bienvenido. Ingresa tu API Key de Groq para continuar.</p>

@@ -21,7 +21,7 @@ export async function initAudio() {
     resonance: 0.98
   }).connect(reverb);
   
-  acousticSynth.volume.value = -5; // Ajustar volumen
+  acousticSynth.volume.value = -2; // Ajustar volumen
   
   // Efecto de Distorsión para Rock/Metal
   distortion = new Tone.Distortion(0.8).connect(reverb);
@@ -36,7 +36,7 @@ export async function initAudio() {
     modulationEnvelope: { attack: 0.01, decay: 0.5, sustain: 1, release: 0.1 }
   }).connect(distortion);
   
-  electricSynth.volume.value = -12; // La distorsión sube el volumen, lo compensamos
+  electricSynth.volume.value = -8; // La distorsión sube el volumen, lo compensamos
   
   isLoaded = true;
 }
