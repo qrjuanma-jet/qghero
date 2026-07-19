@@ -639,6 +639,12 @@ function renderChronologicalViñetas(notes, container) {
 
   const shownChords = new Set();
   let lastChordKey = null;
+  
+  // Para que se vean como en Teoría, los ponemos en columna con un ancho máximo
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.alignItems = 'center';
+  container.style.gap = '2rem';
 
   for (const note of notes) {
     const chordName = (note.latin && note.anglo) ? `${note.latin} (${note.anglo})` : (note.latin || note.anglo || '?');
@@ -649,29 +655,45 @@ function renderChronologicalViñetas(notes, container) {
     const chordDbInfo = lookupChord(dbKey);
 
     const card = document.createElement('div');
-    card.className = 'chord-card theory-chord-card';
-    card.style.margin = '0';
-    card.style.padding = '1rem';
-    card.style.display = 'flex';
-    card.style.flexDirection = 'column';
-    card.style.alignItems = 'center';
-    card.style.background = 'rgba(255, 255, 255, 0.05)';
-    card.style.borderRadius = '8px';
+    card.className = 'theory-chord-card';
+    card.style.width = '100%';
+    card.style.maxWidth = '500px'; // Tamaño similar al de Teoría
+    card.style.background = 'rgba(255, 255, 255, 0.03)';
+    card.style.border = '1px solid rgba(0, 229, 255, 0.2)';
+    card.style.borderRadius = '12px';
+    card.style.padding = '1.5rem';
+    card.style.textAlign = 'center';
 
     if (shownChords.has(chordName)) {
-      card.innerHTML = `<h5 style="margin:0; color:var(--text-secondary); font-size:1rem;">↩️ ${chordName}</h5>`;
-      card.style.padding = '0.5rem 1rem';
-      card.style.justifyContent = 'center';
+      card.innerHTML = `<h5 style="margin:0; color:var(--text-secondary); font-size:1.2rem;">↩️ ${chordName} (Repetición)</h5>`;
+      card.style.padding = '1rem';
     } else {
       shownChords.add(chordName);
-      card.innerHTML = `<h4 style="margin-top:0; margin-bottom:10px; color:var(--neon-cyan); text-align:center;">${chordName}</h4>`;
+      card.innerHTML = `<h3 style="margin-top:0; margin-bottom:1rem; color:var(--neon-cyan);">${chordName}</h3>`;
       if (chordDbInfo) {
-        const fbContainer = document.createElement('div');
-        fbContainer.style.transform = 'scale(0.85)';
-        fbContainer.appendChild(buildMiniFretboard(chordDbInfo));
-        card.appendChild(fbContainer);
+        // Exactamente como en Theory Mode
+        const fb = buildMiniFretboard(chordDbInfo);
+        card.appendChild(fb);
+        
+        // Botón de audio como en el modo teoría
+        const btn = document.createElement('button');
+        btn.className = 'btn primary-btn play-chord-btn';
+        btn.innerHTML = '🔊 Escuchar';
+        btn.style.marginTop = '15px';
+        btn.style.display = 'inline-block';
+        
+        btn.addEventListener('click', async () => {
+          try {
+            await initAudio();
+            strumChord(chordDbInfo.notes, 0.05);
+          } catch(err) {
+            console.error("Error reproduciendo acorde:", err);
+          }
+        });
+        
+        card.appendChild(btn);
       } else {
-        card.innerHTML += `<p style="color:var(--text-secondary); font-size:0.8rem;">(Esquema no disponible)</p>`;
+        card.innerHTML += `<p style="color:#ff4444; font-size:1rem;">(Esquema no disponible para este acorde)</p>`;
       }
     }
     container.appendChild(card);
