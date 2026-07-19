@@ -22,10 +22,8 @@
 <body>
     <div id="app">
         <!-- PANTALLA 1: Login API Key -->
-        <section id="login-screen" class="screen active" style="position: relative; overflow: hidden; justify-content: center; padding-bottom: 50px;">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <img src="img/half_guitar.png" alt="Half Classical Half Electric Guitar" style="width: 250px; height: 250px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 30px var(--neon-cyan), 0 0 50px var(--neon-pink); border: 2px solid var(--neon-cyan); margin-top: 5vh;">
-            </div>
+        <section id="login-screen" class="screen active" style="position: relative; overflow: hidden; justify-content: flex-end; padding-bottom: 50px;">
+            <img src="img/half_guitar.png" alt="Half Classical Half Electric Guitar" style="position: absolute; top: 0; left: 0; width: 100%; height: 50vh; object-fit: cover; z-index: 0; mask-image: linear-gradient(to bottom, black 40%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%); opacity: 0.9;">
             <div class="glass-panel" style="text-align: center; position: relative; z-index: 1; margin-top: 30vh;">
                 <h1 class="logo-title">QG<span class="neon-text">HERO</span></h1>
                 <p>Bienvenido. Ingresa tu API Key de Groq para continuar.</p>
