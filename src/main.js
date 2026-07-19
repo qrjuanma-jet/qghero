@@ -27,6 +27,8 @@ window.addEventListener('unhandledrejection', function(event) {
 let groqApiKey = localStorage.getItem('qghero_groq_key') || '';
 let currentSongData = null;
 let ytPlayer = null;
+let isYoutubeReady = false;
+let pendingYoutubePlay = false;
 let gameEngine = null;
 
 const screens = {
@@ -522,8 +524,14 @@ function setupEventListeners() {
     modals.technique.classList.add('hidden');
     await initAudio(); // Start audio context on user gesture
     showScreen('game');
-    if (ytPlayer && ytPlayer.playVideo && currentSongData.originalVideoId) {
-      ytPlayer.playVideo();
+    if (ytPlayer && currentSongData.originalVideoId) {
+      if (isYoutubeReady && ytPlayer.playVideo) {
+        ytPlayer.playVideo();
+      } else {
+        pendingYoutubePlay = true;
+      }
+    } else {
+      gameEngine.play();
     }
   });
   
@@ -1410,12 +1418,19 @@ function initYouTubePlayer(videoId) {
 }
 
 function createPlayer(videoId) {
+  isYoutubeReady = false;
+  pendingYoutubePlay = false;
   ytPlayer = new window.YT.Player('youtube-player', {
     height: '100', width: '100', videoId: videoId,
     playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
     events: {
       'onReady': (e) => {
+        isYoutubeReady = true;
         e.target.setPlaybackRate(0.7);
+        if (pendingYoutubePlay) {
+          e.target.playVideo();
+          pendingYoutubePlay = false;
+        }
       },
       'onStateChange': (e) => {
         if (e.data == window.YT.PlayerState.PLAYING) gameEngine.start();
