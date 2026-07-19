@@ -6,7 +6,7 @@ import { initShareButtons } from './share.js';
 import { initPracticeMode } from './practiceMode.js';
 import { initTheoryMode } from './theoryMode.js';
 import { initDictionaryMode } from './dictionaryMode.js';
-import { initAudio, strumChord, playNote, playPreviewSequence, stopPreviewSequence } from './audioSynth.js';
+import { initAudio, strumChord, playNote, playPreviewSequence, stopPreviewSequence, startRhythm, stopRhythm } from './audioSynth.js';
 import { buildMiniFretboard } from './chordUI.js';
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -183,6 +183,7 @@ function setupEventListeners() {
           <h3>Modo Teoría</h3>
           <p>Aquí la IA actúa como tu profesor particular.</p>
           <p>Usa los botones de nivel para generar una clase magistral desde cero. Si quieres profundizar en el mismo tema sin repetir conceptos, usa el botón "Avanzar Temario".</p>
+          <p><strong>Novedad - Ritmos y Orquesta:</strong> Ahora la IA te enseñará <strong>patrones de rasgueo</strong> detallados para cada progresión y te dará consejos clave sobre cómo tocar en <strong>Orquesta o Banda</strong> (seguir el tempo, escuchar a la batería/bajo, o leer al director).</p>
           <p><strong>Las Viñetas Gráficas:</strong><br>La IA dibujará tanto <strong>Acordes Completos</strong> como <strong>Punteos (Notas Sueltas)</strong>. Las líneas horizontales son las cuerdas (arriba la más fina, abajo la más gruesa) y las verticales son los trastes. El número romano te indica dónde colocar la mano. El punto brillante indica el número del dedo a utilizar.</p>
           <p>Si la IA menciona un acorde complejo o un traste específico para un punteo, nuestro nuevo <strong>Motor Algorítmico Universal</strong> calculará en tiempo real la postura más cómoda basándose puramente en matemáticas e intervalos musicales.</p>`,
       practice: `
@@ -195,6 +196,7 @@ function setupEventListeners() {
           <ul>
               <li><strong>Búsqueda por Voz (🎤):</strong> Haz clic en el micrófono, dale permiso en tu navegador y di algo como <em>"Enséñame el Do Mayor séptima"</em> o <em>"Cómo se toca el Hendrix Chord"</em>.</li>
               <li><strong>Búsqueda por Texto:</strong> Puedes escribir en lenguaje natural, como <em>"acorde triste de Mi"</em> o <em>"F#m7"</em>.</li>
+              <li><strong>Orquesta/Ritmos:</strong> Ahora puedes preguntar cómo tocar un acorde en un contexto de orquesta o banda, y la IA te dará consejos sobre qué inversiones usar para no chocar con el bajo o el piano.</li>
           </ul>
           <p>La IA extraerá el acorde y el <strong>Motor Geométrico</strong> lo construirá matemáticamente desde cero, encontrando la postura más ergonómica en el mástil y generando el audio sintetizado al vuelo.</p>`,
       setup: `
@@ -213,9 +215,13 @@ function setupEventListeners() {
               <li><strong>¿Cuándo tocar?:</strong> Tienes que pisar el traste y rasguear la cuerda en tu guitarra <em>exactamente en el momento en que la nota que cae cruza la línea blanca inferior</em> de la pantalla.</li>
               <li><strong>¡Juega en la Pantalla!:</strong> Si no tienes guitarra a mano, puedes <strong>tocar (o hacer clic) directamente en el carril de la cuerda</strong> en la pantalla justo cuando la nota cruce la meta para que suene el sintetizador.</li>
           </ul>
-          <h4>Controles</h4>
+          <h4>Nuevos Controles (Diapasón/Ritmo)</h4>
           <ul>
-              <li><strong>▶️ / ⏸️:</strong> Pausa o reanuda la canción/juego.</li>
+              <li><strong>🎵 Ritmo/Diapasón:</strong> Selecciona un patrón rítmico (Balada, Vals, Rock) o un simple clic de metrónomo. Empezará a sonar sincronizado con el tempo de la canción para ayudarte a "tocar al ritmo real" en lugar de hacer rasgueos al aire.</li>
+          </ul>
+          <h4>Controles Básicos</h4>
+          <ul>
+              <li><strong>▶️ / ⏸:</strong> Pausa o reanuda la canción/juego.</li>
               <li><strong>Deslizador:</strong> Muévelo para rebobinar o adelantar a una parte específica de la canción.</li>
               <li><strong>Velocidad:</strong> Reduce la velocidad a 0.5x si la canción va demasiado rápido para ti.</li>
           </ul>`,
@@ -588,11 +594,43 @@ function setupEventListeners() {
   });
 
   const speedSlider = document.getElementById('speed-slider');
+  const rhythmSelect = document.getElementById('rhythm-select');
+  const ytAudioToggle = document.getElementById('yt-audio-toggle');
+
+  if (ytAudioToggle) {
+      ytAudioToggle.addEventListener('change', (e) => {
+          if (ytPlayer && ytPlayer.mute && ytPlayer.unMute) {
+              if (e.target.checked) ytPlayer.unMute();
+              else ytPlayer.mute();
+          }
+      });
+  }
+
+  function syncRhythm() {
+      if (!gameEngine.isPlaying) return;
+      const bpm = 100 * gameEngine.playbackRate;
+      const pattern = rhythmSelect ? rhythmSelect.value : 'none';
+      if (pattern !== 'none') {
+          startRhythm(pattern, bpm);
+      } else {
+          stopRhythm();
+      }
+  }
+
+  if (rhythmSelect) {
+      rhythmSelect.addEventListener('change', () => {
+          syncRhythm();
+      });
+  }
+
   speedSlider.addEventListener('input', (e) => {
     const rate = parseFloat(e.target.value);
     document.getElementById('speed-value').textContent = rate.toFixed(2) + 'x';
     if (ytPlayer && ytPlayer.setPlaybackRate) ytPlayer.setPlaybackRate(rate);
     gameEngine.playbackRate = rate;
+    if (gameEngine.isPlaying && rhythmSelect && rhythmSelect.value !== 'none') {
+        syncRhythm();
+    }
   });
 
   const timeSlider = document.getElementById('time-slider');
@@ -609,8 +647,13 @@ function setupEventListeners() {
           if (state === window.YT.PlayerState.PLAYING) ytPlayer.pauseVideo();
           else ytPlayer.playVideo();
       } else {
-          if (gameEngine.isPlaying) gameEngine.stop();
-          else gameEngine.start();
+          if (gameEngine.isPlaying) {
+              gameEngine.stop();
+              stopRhythm();
+          } else {
+              gameEngine.start();
+              syncRhythm();
+          }
       }
   });
 }
@@ -1420,6 +1463,9 @@ function initYouTubePlayer(videoId) {
     ytPlayer.loadVideoById(videoId);
     ytPlayer.pauseVideo();
     ytPlayer.setPlaybackRate(0.7);
+    const ytAudioToggle = document.getElementById('yt-audio-toggle');
+    if (ytAudioToggle && !ytAudioToggle.checked && ytPlayer.mute) ytPlayer.mute();
+    else if (ytPlayer.unMute) ytPlayer.unMute();
     return;
   }
   if (window.YT && window.YT.Player) {
@@ -1436,20 +1482,31 @@ function createPlayer(videoId) {
     height: '100', width: '100', videoId: videoId,
     playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
     events: {
-      'onReady': (e) => {
-        isYoutubeReady = true;
-        e.target.setPlaybackRate(0.7);
-        if (pendingYoutubePlay) {
-          e.target.playVideo();
-          pendingYoutubePlay = false;
-        }
-      },
+        'onReady': () => {
+          isYoutubeReady = true;
+          if (pendingYoutubePlay) {
+            ytPlayer.playVideo();
+            pendingYoutubePlay = false;
+          }
+          if (speedSlider) ytPlayer.setPlaybackRate(parseFloat(speedSlider.value) || 0.7);
+          const ytAudioToggle = document.getElementById('yt-audio-toggle');
+          if (ytAudioToggle && !ytAudioToggle.checked && ytPlayer.mute) ytPlayer.mute();
+        },
       'onStateChange': (e) => {
-        if (e.data == window.YT.PlayerState.PLAYING) gameEngine.start();
-        else if (e.data == window.YT.PlayerState.PAUSED || e.data == window.YT.PlayerState.ENDED) gameEngine.stop();
+          if (e.data == window.YT.PlayerState.PLAYING) {
+              gameEngine.start();
+              const rhythmSelect = document.getElementById('rhythm-select');
+              if (rhythmSelect && rhythmSelect.value !== 'none') {
+                  const bpm = 100 * gameEngine.playbackRate;
+                  startRhythm(rhythmSelect.value, bpm);
+              }
+          } else if (e.data == window.YT.PlayerState.PAUSED || e.data == window.YT.PlayerState.ENDED) {
+              gameEngine.stop();
+              stopRhythm();
+          }
+        }
       }
-    }
-  });
+    });
   
   setInterval(() => {
     if (ytPlayer && ytPlayer.getCurrentTime && gameEngine.isPlaying) {

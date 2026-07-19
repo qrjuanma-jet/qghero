@@ -2,6 +2,9 @@ import * as Tone from 'https://esm.sh/tone';
 
 let acousticSynth = null;
 let electricSynth = null;
+let kickSynth = null;
+let hihatSynth = null;
+let rhythmPart = null;
 let isLoaded = false;
 let distortion = null;
 let reverb = null;
@@ -62,6 +65,20 @@ export async function initAudio() {
   
   electricSynth.volume.value = -10; // Reducido drásticamente para no saturar al sumar 6 cuerdas
   
+  // Sintetizadores Percusivos para el Diapasón (Metrónomo/Ritmos)
+  kickSynth = new Tone.MembraneSynth().connect(masterLimiter);
+  hihatSynth = new Tone.MetalSynth({
+    frequency: 200,
+    envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
+    harmonicity: 5.1,
+    modulationIndex: 32,
+    resonance: 4000,
+    octaves: 1.5
+  }).connect(masterLimiter);
+  
+  kickSynth.volume.value = -5;
+  hihatSynth.volume.value = -15;
+
   isLoaded = true;
 }
 
@@ -181,4 +198,97 @@ export function stopPreviewSequence() {
   Tone.Transport.cancel();
   if (acousticSynth) acousticSynth.releaseAll();
   if (electricSynth) electricSynth.releaseAll();
+}
+
+// -------------------------------------------------------------------------------------
+// MOTOR DE RITMOS (DIAPASÓN)
+// -------------------------------------------------------------------------------------
+
+export function startRhythm(patternName, bpm) {
+  if (!isLoaded || !kickSynth || !hihatSynth || patternName === "none") return;
+  
+  Tone.Transport.bpm.value = bpm || 100;
+  
+  if (rhythmPart) {
+    rhythmPart.dispose();
+    rhythmPart = null;
+  }
+  
+  let events = [];
+  Tone.Transport.timeSignature = 4; // Default to 4/4
+  
+  switch (patternName) {
+    case "metronome44":
+      events = [
+        { time: "0:0:0", instr: "kick" },
+        { time: "0:1:0", instr: "hihat" },
+        { time: "0:2:0", instr: "hihat" },
+        { time: "0:3:0", instr: "hihat" }
+      ];
+      break;
+    case "metronome34":
+      Tone.Transport.timeSignature = 3;
+      events = [
+        { time: "0:0:0", instr: "kick" },
+        { time: "0:1:0", instr: "hihat" },
+        { time: "0:2:0", instr: "hihat" }
+      ];
+      break;
+    case "pop":
+      // Balada Pop (D-D-U-U-D style)
+      events = [
+        { time: "0:0:0", instr: "kick" },
+        { time: "0:1:0", instr: "kick" },
+        { time: "0:1:2", instr: "hihat" },
+        { time: "0:2:2", instr: "hihat" },
+        { time: "0:3:0", instr: "kick" }
+      ];
+      break;
+    case "rock":
+      // Rock Fuerte
+      events = [
+        { time: "0:0:0", instr: "kick" },
+        { time: "0:0:2", instr: "hihat" },
+        { time: "0:1:0", instr: "hihat" },
+        { time: "0:1:2", instr: "hihat" },
+        { time: "0:2:0", instr: "kick" },
+        { time: "0:2:2", instr: "hihat" },
+        { time: "0:3:0", instr: "hihat" },
+        { time: "0:3:2", instr: "hihat" },
+      ];
+      break;
+    case "vals":
+      // Vals 3/4
+      Tone.Transport.timeSignature = 3;
+      events = [
+        { time: "0:0:0", instr: "kick" },
+        { time: "0:1:0", instr: "hihat" },
+        { time: "0:1:2", instr: "hihat" },
+        { time: "0:2:0", instr: "hihat" },
+        { time: "0:2:2", instr: "hihat" }
+      ];
+      break;
+  }
+  
+  if (events.length > 0) {
+    rhythmPart = new Tone.Part((time, event) => {
+      if (event.instr === "kick") {
+        kickSynth.triggerAttackRelease("C1", "8n", time);
+      } else {
+        hihatSynth.triggerAttackRelease("32n", time);
+      }
+    }, events).start(0);
+    rhythmPart.loop = true;
+    rhythmPart.loopEnd = "1m";
+  }
+  
+  Tone.Transport.start();
+}
+
+export function stopRhythm() {
+  Tone.Transport.stop();
+  if (rhythmPart) {
+    rhythmPart.dispose();
+    rhythmPart = null;
+  }
 }
