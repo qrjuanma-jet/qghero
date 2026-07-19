@@ -901,7 +901,8 @@ async function autoExpandSong() {
         // Rebuild chronological display
         const schemaEl = document.getElementById('tech-schema');
         if (schemaEl) {
-          schemaEl.textContent = buildChronologicalSchema(currentSongData.notes, currentSongData.technique.schema);
+          schemaEl.innerHTML = '';
+          renderChronologicalViñetas(currentSongData.notes, schemaEl);
         }
         gameEngine.loadSong(currentSongData);
         saveCurrentSong(); // Guardamos paso a paso por si recarga
