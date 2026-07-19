@@ -11,8 +11,8 @@ export async function initAudio() {
   
   await Tone.start();
   
-  // Reverb para dar más realismo a ambas guitarras
-  reverb = new Tone.Reverb({ decay: 2.5, preDelay: 0.1, wet: 0.3 }).toDestination();
+  // Reverb general más sutil
+  reverb = new Tone.Reverb({ decay: 2.0, preDelay: 0.1, wet: 0.15 }).toDestination();
   
   // Sintetizador Acústico: Tone.AMSynth simula muy bien la riqueza armónica de la madera (guitarra clásica) sin el "ruido blanco" eléctrico de Karplus-Strong ni el zumbido sordo de un Synth puro.
   acousticSynth = new Tone.PolySynth(Tone.AMSynth, {
@@ -42,20 +42,22 @@ export async function initAudio() {
   acousticSynth.connect(acousticFilter);
   acousticSynth.volume.value = 2;
   
-  // Efecto de Distorsión para Rock/Metal
-  distortion = new Tone.Distortion(0.8).connect(reverb);
+  // Cadena de efectos para la guitarra eléctrica (Estilo "Entre dos tierras")
+  const chorus = new Tone.Chorus(4, 2.5, 0.5).connect(reverb).start();
+  const delay = new Tone.FeedbackDelay("8n", 0.25).connect(chorus);
   
-  // Sintetizador Eléctrico (Tone.FMSynth para un sonido más agresivo)
-  electricSynth = new Tone.PolySynth(Tone.FMSynth, {
-    harmonicity: 3,
-    modulationIndex: 10,
-    oscillator: { type: "square" },
-    envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 1.2 },
-    modulation: { type: "square" },
-    modulationEnvelope: { attack: 0.01, decay: 0.5, sustain: 1, release: 0.1 }
-  }).connect(distortion);
+  // Sintetizador Eléctrico (limpio y dulce)
+  electricSynth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: "triangle8" }, // Enriquecido pero sin estridencias
+    envelope: {
+      attack: 0.005,
+      decay: 2.5,
+      sustain: 0.2,
+      release: 2.0
+    }
+  }).connect(delay);
   
-  electricSynth.volume.value = -8; // La distorsión sube el volumen, lo compensamos
+  electricSynth.volume.value = 0; // Volumen natural sin distorsión
   
   isLoaded = true;
 }
