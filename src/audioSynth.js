@@ -11,8 +11,11 @@ export async function initAudio() {
   
   await Tone.start();
   
+  // Limitador maestro para evitar saturación/clipping en altavoces móviles
+  const masterLimiter = new Tone.Limiter(-1).toDestination();
+
   // Reverb general más sutil
-  reverb = new Tone.Reverb({ decay: 2.0, preDelay: 0.1, wet: 0.15 }).toDestination();
+  reverb = new Tone.Reverb({ decay: 2.0, preDelay: 0.1, wet: 0.15 }).connect(masterLimiter);
   
   // Sintetizador Acústico: Tone.AMSynth simula muy bien la riqueza armónica de la madera (guitarra clásica) sin el "ruido blanco" eléctrico de Karplus-Strong ni el zumbido sordo de un Synth puro.
   acousticSynth = new Tone.PolySynth(Tone.AMSynth, {
@@ -40,7 +43,7 @@ export async function initAudio() {
   }).connect(reverb);
 
   acousticSynth.connect(acousticFilter);
-  acousticSynth.volume.value = 2;
+  acousticSynth.volume.value = 0; // Ajuste para evitar picos
   
   // Cadena de efectos para la guitarra eléctrica (Estilo "Entre dos tierras")
   const chorus = new Tone.Chorus(4, 2.5, 0.5).connect(reverb).start();
@@ -57,7 +60,7 @@ export async function initAudio() {
     }
   }).connect(delay);
   
-  electricSynth.volume.value = 0; // Volumen natural sin distorsión
+  electricSynth.volume.value = -10; // Reducido drásticamente para no saturar al sumar 6 cuerdas
   
   isLoaded = true;
 }
