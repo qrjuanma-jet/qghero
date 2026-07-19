@@ -106,7 +106,10 @@ export function initDictionaryMode(getApiKeyFn) {
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
+        let isRecognizing = false;
+
         recognition.onstart = () => {
+            isRecognizing = true;
             voiceBtn.style.color = 'var(--neon-cyan)';
             voiceBtn.style.textShadow = '0 0 10px var(--neon-cyan)';
             inputField.placeholder = "Escuchando...";
@@ -120,21 +123,29 @@ export function initDictionaryMode(getApiKeyFn) {
         };
 
         recognition.onerror = (event) => {
+            isRecognizing = false;
             console.error('Speech recognition error', event.error);
             inputField.placeholder = 'Ej: "Enséñame el Fa sostenido menor"';
             voiceBtn.style.color = '';
             voiceBtn.style.textShadow = '';
-            alert('Error al capturar el audio. Asegúrate de dar permisos de micrófono.');
+            if (event.error !== 'aborted') {
+                alert('Error al capturar el audio. Asegúrate de dar permisos de micrófono.');
+            }
         };
 
         recognition.onend = () => {
+            isRecognizing = false;
             inputField.placeholder = 'Ej: "Enséñame el Fa sostenido menor"';
             voiceBtn.style.color = '';
             voiceBtn.style.textShadow = '';
         };
 
         voiceBtn.addEventListener('click', () => {
-            recognition.start();
+            if (isRecognizing) {
+                try { recognition.stop(); } catch(e){}
+            } else {
+                try { recognition.start(); } catch(e){}
+            }
         });
     } else {
         voiceBtn.style.display = 'none'; // Navegador no soporta API de voz
