@@ -33,7 +33,7 @@ INSTRUCCIONES:
 8. Tiempos ascendentes, representando la canción REAL.
 9. Devuelve SÓLO JSON puro, sin markdown.`;
 
-  return callGroq(apiKey, prompt, 0.1, 2000, systemMsg);
+  return callGroq(apiKey, prompt, 0.1, 2000, systemMsg, true);
 }
 
 export async function expandGameSong(apiKey, songName, lastTime) {
@@ -61,7 +61,7 @@ REGLAS ESTRICTAS:
 6. "lyric" la letra real en ese segundo, o vacío si no hay voz.
 7. Devuelve SÓLO JSON puro, sin markdown.`;
 
-  return callGroq(apiKey, prompt, 0.1, 2000, systemMsg);
+  return callGroq(apiKey, prompt, 0.1, 2000, systemMsg, true);
 }
 
 export async function fetchTheoryCourse(apiKey, level) {
@@ -94,7 +94,7 @@ CONTENIDO:
 - Un ejercicio práctico
 - Solo HTML crudo, sin markdown ni backticks`;
 
-  const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg);
+  const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg, false);
   let cleanContent = content;
   if (cleanContent.startsWith('```html')) cleanContent = cleanContent.substring(7);
   if (cleanContent.startsWith('```')) cleanContent = cleanContent.substring(3);
@@ -135,7 +135,7 @@ REGLAS:
 - ¡Prohibido poner botones de Escuchar! El sistema los crea solos.
 - Solo HTML crudo. Sin markdown. Sin repetir conceptos del historial.`;
 
-  const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg);
+  const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg, false);
   let cleanContent = content;
   if (cleanContent.startsWith('```html')) cleanContent = cleanContent.substring(7);
   if (cleanContent.startsWith('```')) cleanContent = cleanContent.substring(3);
@@ -187,7 +187,7 @@ REGLAS:
 2. examples = 1-2 canciones famosas REALES que usen exactamente estos acordes.
 3. Sin saltos de línea reales en strings de texto. Sin markdown. Solo JSON puro.`;
 
-  return callGroq(apiKey, prompt, 0.4, 2500, systemMsg);
+  return callGroq(apiKey, prompt, 0.4, 2500, systemMsg, true);
 }
 
 export async function fetchPracticeSong(apiKey, songName) {
@@ -237,10 +237,10 @@ REGLAS:
 5. DEDOS LÓGICOS: Un dedo (2, 3, 4) no puede pisar dos cuerdas a la vez. Solo el dedo 1 hace cejilla.
 6. Sin saltos de línea reales en strings. Sin markdown. Solo JSON puro.`;
 
-  return callGroq(apiKey, prompt, 0.4, 2500, systemMsg);
+  return callGroq(apiKey, prompt, 0.4, 2500, systemMsg, true);
 }
 
-async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, systemMsg = '') {
+async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, systemMsg = '', expectJson = true) {
   let attempt = 0;
   const maxRetries = 3;
 
@@ -258,7 +258,7 @@ async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, sys
           temperature: temperature,
           max_tokens: maxTokens
       };
-      if (temperature !== 0.5) {
+      if (expectJson) {
           body.response_format = { type: "json_object" };
       }
 
@@ -305,7 +305,7 @@ async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, sys
         window.dispatchEvent(new CustomEvent('ai-resumed'));
       }
 
-      if (temperature !== 0.5) { // 0.5 is HTML for Theory Course
+      if (expectJson) {
           return JSON.parse(content);
       }
       return content;
@@ -341,6 +341,6 @@ Si pide algo que no es un acorde en absoluto, devuelve: UNKNOWN
 
 Devuelve SOLO la cadena corta (ej: "Am7"). Ni una palabra más.`;
 
-  const response = await callGroq(apiKey, prompt, 0.1, 10, systemMsg);
+  const response = await callGroq(apiKey, prompt, 0.1, 10, systemMsg, false);
   return response.trim();
 }
