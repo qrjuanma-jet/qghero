@@ -22,12 +22,10 @@
 <body>
     <div id="app">
         <!-- PANTALLA 1: Login API Key -->
-        <section id="login-screen" class="screen active">
-            <div class="glass-panel" style="text-align: center;">
+        <section id="login-screen" class="screen active" style="position: relative; overflow: hidden; justify-content: flex-end; padding-bottom: 50px;">
+            <img src="img/superhero.png" alt="Superhero Guitarist" class="rocking-superhero" style="position: absolute; top: 0; left: 0; width: 100%; height: 50vh; object-fit: cover; z-index: 0; mask-image: linear-gradient(to bottom, black 40%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%); opacity: 0.9;">
+            <div class="glass-panel" style="text-align: center; position: relative; z-index: 1; margin-top: 30vh;">
                 <h1 class="logo-title">QG<span class="neon-text">HERO</span></h1>
-                <div style="margin: 15px auto;">
-                    <img src="img/superhero.png" alt="Superhero Guitarist" class="rocking-superhero" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-pink); border: 2px solid var(--neon-cyan);">
-                </div>
                 <p>Bienvenido. Ingresa tu API Key de Groq para continuar.</p>
                 <div class="input-group">
                     <div style="position: relative; width: 100%;">

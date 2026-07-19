@@ -109,6 +109,26 @@ function initApp() {
     checkSharedUrl();
     renderSavedSongs();
   } else {
+    // Si estamos en la pantalla de login, preparar la intro musical en el primer clic
+    document.body.addEventListener('click', async function playIntro() {
+      // Remover listener para que solo suene una vez
+      document.body.removeEventListener('click', playIntro);
+      
+      // Solo reproducir si seguimos en la pantalla de login (por si ya metieron la key rápido)
+      if (document.getElementById('login-screen').classList.contains('active')) {
+        try {
+          await initAudio();
+          // Tocar un acorde rockero de bienvenida
+          strumChord(["E3", "B3", "E4"], 0.02, "rock");
+          // Medio segundo después, un acorde clásico suave
+          setTimeout(() => {
+            strumChord(["C3", "E3", "G3", "C4", "E4"], 0.08, "clásico");
+          }, 800);
+        } catch (err) {
+          console.error("Intro audio blocked", err);
+        }
+      }
+    });
   }
   
   // Event listeners para la tasa de límite de Groq (Rate Limit)
