@@ -1488,6 +1488,7 @@ function createPlayer(videoId) {
             ytPlayer.playVideo();
             pendingYoutubePlay = false;
           }
+          const speedSlider = document.getElementById('speed-slider');
           if (speedSlider) ytPlayer.setPlaybackRate(parseFloat(speedSlider.value) || 0.7);
           const ytAudioToggle = document.getElementById('yt-audio-toggle');
           if (ytAudioToggle && !ytAudioToggle.checked && ytPlayer.mute) ytPlayer.mute();
