@@ -1,7 +1,7 @@
 import { lookupChord } from './chordDb.js';
 import { buildMiniFretboard } from './chordUI.js';
 import { parseNaturalChordQuery, fetchChordAdvice } from './groqApi.js';
-import { strumChord } from './audioSynth.js';
+import { strumChord, initAudio } from './audioSynth.js';
 
 export function initDictionaryMode(getApiKeyFn) {
     const dictScreen = document.getElementById('dictionary-screen');
@@ -57,9 +57,14 @@ export function initDictionaryMode(getApiKeyFn) {
             uiContainer.appendChild(fb);
 
             const playBtn = card.querySelector('.play-chord-btn');
-            playBtn.addEventListener('click', () => {
-                if (dbInfo.notes && dbInfo.notes.length > 0) {
-                    strumChord(dbInfo.notes);
+            playBtn.addEventListener('click', async () => {
+                try {
+                    await initAudio();
+                    if (dbInfo.notes && dbInfo.notes.length > 0) {
+                        strumChord(dbInfo.notes);
+                    }
+                } catch(e) {
+                    console.error("Error al iniciar audio:", e);
                 }
             });
 

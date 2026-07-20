@@ -356,18 +356,22 @@ function setupEventListeners() {
   }
 
   // Main Menu Routing
-  document.getElementById('btn-theory-mode').addEventListener('click', () => {
+  document.getElementById('btn-theory-mode').addEventListener('click', async () => {
+    await initAudio();
     showScreen('theory');
   });
-  document.getElementById('btn-practice-mode').addEventListener('click', () => {
+  document.getElementById('btn-practice-mode').addEventListener('click', async () => {
+    await initAudio();
     showScreen('practice');
   });
-  document.getElementById('btn-game-mode').addEventListener('click', () => {
+  document.getElementById('btn-game-mode').addEventListener('click', async () => {
+    await initAudio();
     showScreen('setup');
   });
   const dictBtn = document.getElementById('btn-dictionary-mode');
   if (dictBtn) {
-    dictBtn.addEventListener('click', () => {
+    dictBtn.addEventListener('click', async () => {
+      await initAudio();
       showScreen('dictionary');
     });
   }
