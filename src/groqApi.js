@@ -92,9 +92,6 @@ CONTENIDO:
 - Explicaciones claras de cómo pisar los trastes
 - Mínimo 2 acordes o punteos explicados, insertando su respectivo <div class="theory-chord-card"...></div>
 - Un ejercicio práctico
-- AL FINAL: OBLIGATORIAMENTE incluye un "Resumen y Plan de Estudio". Debe ser un bloque HTML (ej. <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">) que contenga:
-  1. Un resumen rápido de lo aprendido (bullet points).
-  2. Tiempos recomendados de práctica diarios para dominar esta lección.
 - Solo HTML crudo, sin markdown ni backticks`;
 
   const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg, false);
@@ -136,11 +133,6 @@ REGLAS:
   - Acordes: <div class="theory-chord-card" data-chord="C"></div> (cambiando "C").
   - Punteos: <div class="theory-chord-card" data-note="6-3"></div> (cuerda-traste).
 - ¡Prohibido poner botones de Escuchar! El sistema los crea solos.
-- AL FINAL: OBLIGATORIAMENTE incluye un "Resumen y Plan de Estudio". Debe ser un bloque HTML (ej. <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">) que contenga:
-  1. Un resumen rápido de lo aprendido (bullet points).
-  2. Tiempos recomendados de práctica diarios para dominar esta lección.
-  3. Patrón Rítmico Sugerido (rasgueos abajo/arriba).
-  4. Consejos de Orquesta/Banda: Cómo tocar estos acordes en un contexto grupal (seguir tempo, escuchar batería/bajo, observar al director).
 - Solo HTML crudo. Sin markdown. Sin repetir conceptos del historial.`;
 
   const content = await callGroq(apiKey, prompt, 0.5, 2500, systemMsg, false);
