@@ -240,85 +240,323 @@ REGLAS:
   return callGroq(apiKey, prompt, 0.4, 2500, systemMsg, true);
 }
 
-async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, systemMsg = '', expectJson = true) {
-  let attempt = 0;
-  const maxRetries = 3;
-
-  while (attempt < maxRetries) {
+// Registro de modelos dados de baja o inaccesibles durante la sesión actual
+const decommissionedModels = new Set(
+  (() => {
     try {
-      const messages = [];
-      if (systemMsg) {
-        messages.push({ role: 'system', content: systemMsg });
-      }
-      messages.push({ role: 'user', content: prompt });
+      return JSON.parse(sessionStorage.getItem('qghero_decommissioned_models') || '[]');
+    } catch (e) {
+      return [];
+    }
+  })()
+);
 
-      const body = {
-          model: 'llama-3.1-8b-instant',
+function markModelDecommissioned(modelId) {
+  if (!modelId) return;
+  decommissionedModels.add(modelId);
+  try {
+    sessionStorage.setItem('qghero_decommissioned_models', JSON.stringify([...decommissionedModels]));
+  } catch (e) {}
+}
+
+let activeModelsCache = null;
+let lastModelsFetchTime = 0;
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutos de caché
+
+// Modelos de respaldo ordenados por preferencia (producción y soporte de texto general)
+const DEFAULT_FALLBACK_MODELS = [
+  'llama-3.3-70b-versatile',
+  'openai/gpt-oss-120b',
+  'qwen/qwen3-32b',
+  'meta-llama/llama-4-scout-17b-16e-instruct',
+  'llama3-70b-8192',
+  'llama3-8b-8192',
+  'mixtral-8x7b-32768',
+  'gemma2-9b-it'
+];
+
+/**
+ * Consulta la lista de modelos activos en Groq para la API Key dada.
+ * Filtra los modelos no aptos (audio, guardrails, embeddings, etc.)
+ * y prioriza los modelos de texto/chat más idóneos.
+ */
+export async function fetchActiveGroqModels(apiKey, forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && activeModelsCache && (now - lastModelsFetchTime < CACHE_TTL_MS)) {
+    const valid = activeModelsCache.filter(m => !decommissionedModels.has(m.id));
+    if (valid.length > 0) return valid;
+  }
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/models', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data && Array.isArray(data.data)) {
+        // Patrones que NO son modelos de chat/texto de propósito general
+        const excludedPatterns = [
+          /whisper/i,
+          /tts/i,
+          /orpheus/i,
+          /guard/i,
+          /safeguard/i,
+          /moderation/i,
+          /embed/i
+        ];
+
+        // Preferencia de modelos LLM ordenados de más capaz a menor
+        const priorityPatterns = [
+          /llama-3\.3-70b/i,
+          /llama-4/i,
+          /gpt-oss-120b/i,
+          /gpt-oss-20b/i,
+          /gpt-oss/i,
+          /qwen3/i,
+          /qwen/i,
+          /llama-3\.1-70b/i,
+          /llama3-70b/i,
+          /llama-3\.1-8b/i,
+          /llama3-8b/i,
+          /llama-3\.2/i,
+          /mixtral/i,
+          /gemma2/i
+        ];
+
+        const eligible = data.data.filter(m => {
+          if (!m || !m.id) return false;
+          if (m.active === false) return false;
+          const id = m.id.toLowerCase();
+          if (excludedPatterns.some(pat => pat.test(id))) return false;
+          if (decommissionedModels.has(m.id)) return false;
+          return true;
+        });
+
+        eligible.sort((a, b) => {
+          const getPrio = (id) => {
+            const idx = priorityPatterns.findIndex(pat => pat.test(id));
+            return idx !== -1 ? idx : 999;
+          };
+          const prioA = getPrio(a.id);
+          const prioB = getPrio(b.id);
+          if (prioA !== prioB) return prioA - prioB;
+          return (b.context_window || 0) - (a.context_window || 0);
+        });
+
+        if (eligible.length > 0) {
+          activeModelsCache = eligible;
+          lastModelsFetchTime = now;
+          console.log(`[Groq API] Modelos activos detectados (${eligible.length}):`, eligible.map(m => m.id));
+          return eligible;
+        }
+      }
+    } else {
+      console.warn(`[Groq API] Consulta a /models retornó status ${response.status}`);
+    }
+  } catch (err) {
+    console.warn("[Groq API] Error conectando con /models:", err);
+  }
+
+  // Si falló la consulta o no hubo resultados, usar lista de respaldo excluyendo los no válidos
+  return DEFAULT_FALLBACK_MODELS
+    .filter(id => !decommissionedModels.has(id))
+    .map(id => ({ id }));
+}
+
+/**
+ * Retorna el mejor modelo activo disponible en este momento.
+ */
+export async function getBestActiveModel(apiKey, forceRefresh = false) {
+  const models = await fetchActiveGroqModels(apiKey, forceRefresh);
+  if (models && models.length > 0) {
+    return models[0].id;
+  }
+  return DEFAULT_FALLBACK_MODELS[0];
+}
+
+/**
+ * Extracción y parseo seguro de respuestas JSON de la IA.
+ */
+function safeJsonParse(content) {
+  let cleaned = (content || '').trim();
+  if (cleaned.startsWith('```json')) cleaned = cleaned.substring(7);
+  else if (cleaned.startsWith('```')) cleaned = cleaned.substring(3);
+  if (cleaned.endsWith('```')) cleaned = cleaned.substring(0, cleaned.length - 3);
+  cleaned = cleaned.trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (err) {
+    // Intenta extraer el bloque JSON externo {...}
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      try {
+        return JSON.parse(cleaned.substring(firstBrace, lastBrace + 1));
+      } catch (innerErr) {}
+    }
+
+    // Intenta extraer array JSON [...]
+    const firstBracket = cleaned.indexOf('[');
+    const lastBracket = cleaned.lastIndexOf(']');
+    if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+      try {
+        return JSON.parse(cleaned.substring(firstBracket, lastBracket + 1));
+      } catch (innerErr) {}
+    }
+
+    throw new Error(`Error procesando respuesta JSON de la IA: ${err.message}`);
+  }
+}
+
+async function callGroq(apiKey, prompt, temperature = 0.1, maxTokens = 3500, systemMsg = '', expectJson = true) {
+  const maxRetries = 3;
+  let modelAttempt = 0;
+  const maxModelChanges = 3;
+
+  // Seleccionar automáticamente el mejor modelo activo actual
+  let currentModel = await getBestActiveModel(apiKey);
+  let useJsonFormat = expectJson;
+
+  while (modelAttempt < maxModelChanges) {
+    let attempt = 0;
+    let switchedModel = false;
+
+    while (attempt < maxRetries) {
+      try {
+        const messages = [];
+        if (systemMsg) {
+          messages.push({ role: 'system', content: systemMsg });
+        }
+        messages.push({ role: 'user', content: prompt });
+
+        const body = {
+          model: currentModel,
           messages: messages,
           temperature: temperature,
           max_tokens: maxTokens
-      };
-      if (expectJson) {
+        };
+
+        if (useJsonFormat) {
           body.response_format = { type: "json_object" };
-      }
+        }
 
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
 
-      if (response.status === 429) {
-        const errText = await response.text();
-        const match = errText.match(/try again in ([\d\.]+)s/);
-        const waitMs = match ? Math.ceil(parseFloat(match[1])) * 1000 + 1000 : 15000;
-        console.warn(`[Groq API] Límite alcanzado (429). Esperando ${waitMs}ms antes de reintentar... (Intento ${attempt + 1}/${maxRetries})`);
-        
-        // Disparar evento para que la UI pueda mostrar que estamos esperando
-        const event = new CustomEvent('ai-waiting', { detail: { waitMs } });
-        window.dispatchEvent(event);
+        // 1. Manejo de Rate Limit (429)
+        if (response.status === 429) {
+          const errText = await response.text();
+          const match = errText.match(/try again in ([\d\.]+)s/);
+          const waitMs = match ? Math.ceil(parseFloat(match[1])) * 1000 + 1000 : 15000;
+          console.warn(`[Groq API] Límite alcanzado (429). Esperando ${waitMs}ms antes de reintentar... (Intento ${attempt + 1}/${maxRetries})`);
+          
+          window.dispatchEvent(new CustomEvent('ai-waiting', { detail: { waitMs } }));
+          await new Promise(r => setTimeout(r, waitMs));
+          attempt++;
+          continue;
+        }
 
-        await new Promise(r => setTimeout(r, waitMs));
+        // 2. Errores HTTP
+        if (!response.ok) {
+          const errText = await response.text();
+          console.error(`[Groq API] Error ${response.status} en modelo "${currentModel}":`, errText);
+
+          let isModelError = false;
+          let isJsonFormatError = false;
+
+          try {
+            const errObj = JSON.parse(errText);
+            const errCode = errObj?.error?.code;
+            const errMsg = (errObj?.error?.message || '').toLowerCase();
+
+            if (
+              response.status === 404 ||
+              errCode === 'model_not_found' ||
+              errCode === 'model_decommissioned' ||
+              errMsg.includes('does not exist') ||
+              errMsg.includes('not have access') ||
+              errMsg.includes('decommissioned') ||
+              errMsg.includes('model not found')
+            ) {
+              isModelError = true;
+            }
+
+            if (errMsg.includes('response_format') || errMsg.includes('json_object') || errCode === 'json_validate_failed') {
+              isJsonFormatError = true;
+            }
+          } catch (e) {
+            if (response.status === 404 || errText.includes('model_not_found') || errText.includes('does not exist')) {
+              isModelError = true;
+            }
+          }
+
+          // Si el modelo está obsoleto o no existe en la cuenta, cambiarlo de inmediato a uno activo
+          if (isModelError) {
+            markModelDecommissioned(currentModel);
+            console.warn(`[Groq API] El modelo "${currentModel}" no está activo o fue descontinuado. Buscando otro modelo activo en Groq...`);
+            currentModel = await getBestActiveModel(apiKey, true);
+            console.log(`[Groq API] Cambiando automáticamente al modelo: ${currentModel}`);
+            switchedModel = true;
+            break; // Romper bucle de intentos y probar el nuevo modelo
+          }
+
+          // Si el modelo no soporta response_format json_object, reintentar con extracción de JSON limpia
+          if (isJsonFormatError && useJsonFormat) {
+            console.warn(`[Groq API] El modelo "${currentModel}" no soporta response_format json_object. Reintentando con extracción directa...`);
+            useJsonFormat = false;
+            continue;
+          }
+
+          throw new Error(`API Error ${response.status}: ${errText}`);
+        }
+
+        const data = await response.json();
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+          throw new Error("Respuesta incompleta de Groq API: sin choices.");
+        }
+
+        let content = data.choices[0].message.content.trim();
+
+        // Avisar a la UI que ya hemos reanudado si veníamos de una pausa por rate limit
+        if (attempt > 0) {
+          window.dispatchEvent(new CustomEvent('ai-resumed'));
+        }
+
+        if (expectJson) {
+          return safeJsonParse(content);
+        }
+        return content;
+
+      } catch (error) {
+        if (attempt >= maxRetries - 1) {
+          console.error(`[Groq API] Error persistente tras reintentos con modelo "${currentModel}":`, error);
+          throw error;
+        }
+        await new Promise(r => setTimeout(r, 2000));
         attempt++;
-        continue;
       }
-
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error("Groq Error Response:", errText);
-        throw new Error(`API Error ${response.status}: ${errText}`);
-      }
-
-      const data = await response.json();
-      let content = data.choices[0].message.content.trim();
-      
-      // Clean JSON markdown if model outputs it
-      if (content.startsWith('```json')) content = content.substring(7);
-      if (content.startsWith('```')) content = content.substring(3);
-      if (content.endsWith('```')) content = content.substring(0, content.length - 3);
-      
-      // Avisar a la UI que ya hemos reanudado
-      if (attempt > 0) {
-        window.dispatchEvent(new CustomEvent('ai-resumed'));
-      }
-
-      if (expectJson) {
-          return JSON.parse(content);
-      }
-      return content;
-    } catch (error) {
-      if (attempt >= maxRetries - 1) {
-        console.error("Groq API Error after retries:", error);
-        throw error;
-      }
-      // Si es un error de red u otro, esperar un poco y reintentar
-      await new Promise(r => setTimeout(r, 2000));
-      attempt++;
     }
+
+    if (switchedModel) {
+      modelAttempt++;
+      continue;
+    }
+
+    break;
   }
+
   throw new Error("Límite de reintentos superado al contactar con la IA.");
 }
 
